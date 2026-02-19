@@ -62,9 +62,12 @@ export default function Navbar() {
             <button
               key={item}
               onClick={() => handleScrollTo(item)}
-              className="capitalize hover:text-white transition"
+              className="relative capitalize transition-colors duration-300 hover:text-[#3B82F6] group"
             >
               {item}
+
+              {/* UNDERLINE */}
+              <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-[#3B82F6] transition-all duration-300 group-hover:w-full" />
             </button>
           ))}
         </div>
@@ -85,8 +88,21 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* MOBILE MENU BUTTON */}
-        <div className="md:hidden flex items-center gap-4">
+        {/* MOBILE RIGHT SIDE */}
+        <div className="md:hidden flex items-center gap-3">
+          {/* THEME ICON MOBILE */}
+          <button
+            onClick={toggleTheme}
+            className="w-10 h-10 flex items-center justify-center rounded-full border border-[#334155] hover:border-[#3B82F6] transition"
+          >
+            {darkMode ? (
+              <Sun size={18} className="text-yellow-400" />
+            ) : (
+              <Moon size={18} className="text-blue-400" />
+            )}
+          </button>
+
+          {/* MENU BUTTON */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="w-10 h-10 flex items-center justify-center rounded-md border border-[#334155]"
@@ -103,6 +119,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
             className="md:hidden bg-[#0B1120] border-t border-[#1E293B]"
           >
             <div className="flex flex-col items-center gap-6 py-6 text-[#94A3B8]">
@@ -110,20 +127,12 @@ export default function Navbar() {
                 <button
                   key={item}
                   onClick={() => handleScrollTo(item)}
-                  className="capitalize hover:text-white transition text-lg"
+                  className="relative capitalize transition-colors duration-300 hover:text-[#3B82F6] text-lg group"
                 >
                   {item}
+                  <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-[#3B82F6] transition-all duration-300 group-hover:w-full" />
                 </button>
               ))}
-
-              {/* THEME BUTTON MOBILE */}
-              <button
-                onClick={toggleTheme}
-                className="mt-4 flex items-center gap-2 border border-[#334155] px-4 py-2 rounded-md"
-              >
-                {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-                Toggle Theme
-              </button>
             </div>
           </motion.div>
         )}

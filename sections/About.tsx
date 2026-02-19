@@ -18,13 +18,12 @@ export default function About() {
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-bold">
-            About <span className="text-[#3B82F6]">Me</span>
+            Who <span className="text-[#3B82F6]">I Am</span>
           </h2>
 
           <p className="text-[#94A3B8] mt-4 max-w-3xl mx-auto">
-            Currently pursuing a Master’s degree in Data Science and Intelligent
-            Systems at the Faculty of Sciences and Techniques of Fez, with a
-            strong foundation in Computer Science.
+            A Data Science Master's student with a strong foundation in Computer
+            Science, passionate about building intelligent and scalable systems.
           </p>
         </motion.div>
 
@@ -39,20 +38,31 @@ export default function About() {
             className="space-y-6 text-[#CBD5E1] leading-relaxed"
           >
             <p>
-              As a Master’s student in Data Science, I combine my academic
-              background with a strong passion for Software Engineering and
-              Artificial Intelligence.
+              I specialize in{" "}
+              <span className="text-[#3B82F6] font-medium">
+                Machine Learning
+              </span>
+              ,{" "}
+              <span className="text-[#3B82F6] font-medium">
+                Artificial Intelligence
+              </span>
+              , and modern{" "}
+              <span className="text-[#3B82F6] font-medium">
+                Software Engineering
+              </span>
+              .
             </p>
 
             <p>
-              My interest lies in designing intelligent systems capable of
-              solving real-world problems through Machine Learning, data-driven
-              strategies, and scalable software architectures.
+              My focus is on designing intelligent systems capable of solving
+              real-world challenges through data-driven strategies and scalable
+              architectures.
             </p>
 
             <p>
-              I continuously strive to improve my technical skills while
-              building modern, efficient, and impactful digital solutions.
+              Driven by curiosity and continuous learning, I aim to build
+              impactful digital solutions that combine performance, innovation,
+              and real-world value.
             </p>
           </motion.div>
 
@@ -71,7 +81,7 @@ export default function About() {
               },
               {
                 title: "Data Science",
-                desc: "Transforming raw data into meaningful insights and data-driven solutions.",
+                desc: "Transforming raw data into meaningful insights and actionable solutions.",
               },
               {
                 title: "Software Engineering",
@@ -80,12 +90,16 @@ export default function About() {
             ].map((item, index) => (
               <div
                 key={index}
-                className="bg-[#1E293B]/40 backdrop-blur-md border border-[#334155] p-6 rounded-xl hover:border-[#3B82F6] transition"
+                className="bg-[#1E293B]/40 backdrop-blur-md border border-[#334155] p-6 rounded-xl 
+                           hover:border-[#3B82F6] hover:shadow-lg hover:shadow-blue-500/10
+                           transition-all duration-300"
               >
                 <h3 className="text-lg font-semibold text-[#3B82F6] mb-2">
                   {item.title}
                 </h3>
-                <p className="text-sm text-[#94A3B8]">{item.desc}</p>
+                <p className="text-sm text-[#94A3B8] leading-relaxed">
+                  {item.desc}
+                </p>
               </div>
             ))}
           </motion.div>
