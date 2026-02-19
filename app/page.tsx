@@ -12,28 +12,28 @@ import Contact from "../sections/Contact";
 import AnimatedBackground from "../components/AnimatedBackground";
 
 export default function Home() {
-  const [loadingDone, setLoadingDone] = useState(false);
+  const [loadingFinished, setLoadingFinished] = useState(false);
 
   return (
     <>
-      {!loadingDone && (
-        <LoadingScreen onComplete={() => setLoadingDone(true)} />
-      )}
+      {/* MAIN CONTENU (toujours monté) */}
+      <main className="relative overflow-hidden">
+        <AnimatedBackground />
+        <Navbar visible={loadingFinished} />
 
-      {loadingDone && (
-        <main className="relative">
-          <Navbar />
-          <AnimatedBackground />
+        <div className="pt-24">
+          <Hero />
+          <About />
+          <Projects />
+          <Skills />
+          <Experience />
+          <Contact />
+        </div>
+      </main>
 
-          <div className="pt-24">
-            <Hero />
-            <About />
-            <Projects />
-            <Skills />
-            <Experience />
-            <Contact />
-          </div>
-        </main>
+      {/* LOADER AU DESSUS */}
+      {!loadingFinished && (
+        <LoadingScreen onComplete={() => setLoadingFinished(true)} />
       )}
     </>
   );

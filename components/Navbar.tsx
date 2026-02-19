@@ -4,7 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Sun, Moon, Menu, X } from "lucide-react";
 
-export default function Navbar() {
+interface NavbarProps {
+  visible: boolean;
+}
+
+export default function Navbar({ visible }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -38,9 +42,9 @@ export default function Navbar() {
 
   return (
     <motion.nav
-      initial={{ y: -120 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.8 }}
+      initial={{ opacity: 0 }}
+      animate={visible ? { opacity: 1 } : { opacity: 0 }}
+      transition={{ duration: 0.6 }}
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
         scrolled
           ? "bg-[#0B1120]/80 backdrop-blur-xl border-b border-[#1E293B]"
@@ -48,16 +52,24 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-10 py-5 text-white">
-        {/* LOGO */}
-        <div
+        {/* LOGO (Apparaît en premier) */}
+        <motion.div
+          initial={{ x: -40, opacity: 0 }}
+          animate={visible ? { x: 0, opacity: 1 } : {}}
+          transition={{ duration: 0.6 }}
           onClick={() => handleScrollTo("home")}
           className="text-2xl font-bold tracking-wide cursor-pointer"
         >
           Port<span className="text-[#3B82F6]">folio</span>
-        </div>
+        </motion.div>
 
-        {/* DESKTOP LINKS */}
-        <div className="hidden md:flex gap-8 text-sm text-[#94A3B8]">
+        {/* DESKTOP LINKS (delay après logo) */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={visible ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.4, duration: 0.6 }}
+          className="hidden md:flex gap-8 text-sm text-[#94A3B8]"
+        >
           {links.map((item) => (
             <button
               key={item}
@@ -65,15 +77,18 @@ export default function Navbar() {
               className="relative capitalize transition-colors duration-300 hover:text-[#3B82F6] group"
             >
               {item}
-
-              {/* UNDERLINE */}
               <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-[#3B82F6] transition-all duration-300 group-hover:w-full" />
             </button>
           ))}
-        </div>
+        </motion.div>
 
-        {/* RIGHT SIDE DESKTOP */}
-        <div className="hidden md:flex items-center gap-5">
+        {/* RIGHT SIDE DESKTOP (dernier élément) */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={visible ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.6, duration: 0.6 }}
+          className="hidden md:flex items-center gap-5"
+        >
           <span className="text-[#334155] text-lg">|</span>
 
           <button
@@ -86,11 +101,10 @@ export default function Navbar() {
               <Moon size={16} className="text-blue-400" />
             )}
           </button>
-        </div>
+        </motion.div>
 
         {/* MOBILE RIGHT SIDE */}
         <div className="md:hidden flex items-center gap-3">
-          {/* THEME ICON MOBILE */}
           <button
             onClick={toggleTheme}
             className="w-10 h-10 flex items-center justify-center rounded-full border border-[#334155] hover:border-[#3B82F6] transition"
@@ -102,7 +116,6 @@ export default function Navbar() {
             )}
           </button>
 
-          {/* MENU BUTTON */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="w-10 h-10 flex items-center justify-center rounded-md border border-[#334155]"
