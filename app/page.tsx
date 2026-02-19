@@ -10,6 +10,7 @@ import Skills from "../sections/Skills";
 import Experience from "../sections/Experience";
 import Contact from "../sections/Contact";
 import AnimatedBackground from "../components/AnimatedBackground";
+import Footer from "../components/Footer";
 
 export default function Home() {
   const [loadingFinished, setLoadingFinished] = useState(false);
@@ -28,6 +29,7 @@ export default function Home() {
           <Skills />
           <Experience />
           <Contact />
+          <Footer />
         </div>
       </main>
 
