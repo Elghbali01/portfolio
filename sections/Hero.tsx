@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import RotatingText from "../components/RotatingText";
-import { Github, Linkedin } from "lucide-react";
+import { Github, Linkedin, Download } from "lucide-react";
 
 export default function Hero() {
   return (
@@ -20,7 +20,6 @@ export default function Hero() {
       <div className="grid md:grid-cols-2 gap-14 md:gap-20 items-center max-w-6xl w-full">
         {/* PHOTO SIDE */}
         <div className="relative flex justify-center items-center">
-          {/* MOBILE SIZE */}
           <div className="absolute w-[350px] h-[350px] md:w-[600px] md:h-[600px] bg-[#3B82F6] rounded-full blur-[150px] md:blur-[220px] opacity-20" />
 
           <div
@@ -53,7 +52,7 @@ export default function Hero() {
         <div className="space-y-6 text-center md:text-left">
           <p className="text-[#94A3B8] tracking-wide text-lg">Hi, I'm</p>
 
-          <h1 className="text-3xl md:text-6xl font-bold leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold leading-tight">
             Issam <span className="text-[#3B82F6]">Elghbali</span>
           </h1>
 
@@ -80,27 +79,53 @@ export default function Hero() {
 
           {/* BUTTONS */}
           <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 mt-8">
+            {/* PRIMARY BUTTON */}
             <button
               onClick={() =>
                 document
                   .getElementById("projects")
                   ?.scrollIntoView({ behavior: "smooth" })
               }
-              className="px-7 py-3 bg-[#3B82F6] hover:bg-[#2563EB] transition rounded-lg font-medium shadow-lg shadow-blue-500/20"
+              className="w-full sm:w-auto px-7 py-3 rounded-lg font-medium 
+               bg-[#3B82F6] text-white
+               hover:bg-[#2563EB] 
+               transition-all duration-300
+               shadow-lg shadow-blue-500/20"
             >
               View Projects
             </button>
 
+            {/* SECONDARY OUTLINE */}
             <button
               onClick={() =>
                 document
                   .getElementById("contact")
                   ?.scrollIntoView({ behavior: "smooth" })
               }
-              className="px-7 py-3 border border-[#334155] hover:border-white transition rounded-lg"
+              className="w-full sm:w-auto px-7 py-3 rounded-lg font-medium
+               border border-[#334155] text-gray-300
+               hover:border-[#3B82F6] hover:text-white
+               transition-all duration-300"
             >
               Contact Me
             </button>
+
+            {/* DOWNLOAD CV - GLASS STYLE */}
+            <a
+              href="/cv-issam-elghbali.pdf"
+              download
+              className="w-full sm:w-auto px-7 py-3 rounded-lg font-medium
+               bg-white/5 text-gray-300
+               border border-white/10
+               backdrop-blur-md
+               hover:bg-white/10
+               hover:border-white/20
+               transition-all duration-300
+               flex items-center justify-center gap-2"
+            >
+              <Download size={18} />
+              Download CV
+            </a>
           </div>
         </div>
       </div>
