@@ -110,7 +110,7 @@ This project demonstrates a complete architecture integrating:
       "REST API",
       "React.js",
     ],
-    github: "https://github.com/Elghbali01",
+    github: "https://github.com/Elghbali01/nosql-ml-project",
     image: "/redis-ml.png",
   },
   {
@@ -146,7 +146,7 @@ The architecture follows a component-based structure with centralized project da
       "EmailJS",
     ],
 
-    github: "https://github.com/Elghbali01", // remplace par le repo exact plus tard
+    github: "https://github.com/Elghbali01/portfolio.git",
     image: "/portfolio.png",
   },
 ];
