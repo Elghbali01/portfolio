@@ -50,18 +50,25 @@ export default function Projects() {
                   {project.shortDescription}
                 </p>
 
-                {/* TECH */}
+                {/* TECH BADGES */}
                 <div className="flex flex-wrap gap-2">
                   {project.technologies.map((tech) => (
                     <span
                       key={tech}
-                      className="text-xs bg-[#0F172A] px-3 py-1 rounded-full border border-[#334155]"
+                      className="group relative overflow-hidden text-xs px-3 py-1 rounded-full border border-[#334155] bg-[#0F172A]"
                     >
-                      {tech}
+                      {/* Animated background fill */}
+                      <span className="absolute inset-0 bg-[#94A3B8]/25 scale-x-0 origin-left transition-transform duration-300 ease-out group-hover:scale-x-100" />
+
+                      {/* Text */}
+                      <span className="relative z-10 text-gray-300 group-hover:text-white transition-colors duration-300">
+                        {tech}
+                      </span>
                     </span>
                   ))}
                 </div>
 
+                {/* LINKS */}
                 <div className="flex justify-between items-center pt-4">
                   <a
                     href={project.github}

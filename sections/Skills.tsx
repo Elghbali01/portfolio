@@ -1,11 +1,32 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { motion, useAnimation } from "framer-motion";
+import { useEffect, useState } from "react";
 import { skills } from "../data/skills";
 
 export default function Skills() {
+  const controls = useAnimation();
   const [isPaused, setIsPaused] = useState(false);
+
+  // Fonction qui lance l’animation en boucle
+  const startAnimation = async () => {
+    await controls.start({
+      y: ["0%", "-50%"],
+      transition: {
+        duration: 20,
+        ease: "linear",
+        repeat: Infinity,
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (!isPaused) {
+      startAnimation();
+    } else {
+      controls.stop(); // stop sans reset la position
+    }
+  }, [isPaused, controls]);
 
   return (
     <section
@@ -33,12 +54,8 @@ export default function Skills() {
 
         {/* Animated List */}
         <motion.div
-          animate={!isPaused ? { y: ["0%", "-50%"] } : {}}
-          transition={{
-            repeat: Infinity,
-            duration: 20,
-            ease: "linear",
-          }}
+          animate={controls}
+          initial={{ y: "0%" }}
           className="flex flex-col gap-6"
         >
           {[...skills, ...skills].map((skill, index) => {
@@ -53,7 +70,6 @@ export default function Skills() {
                 className="group flex items-center justify-center gap-4 text-lg md:text-xl font-medium cursor-pointer transition-all duration-300"
               >
                 <Icon size={28} />
-
                 <span className="text-gray-400 transition-colors duration-300 group-hover:text-white">
                   {skill.name}
                 </span>
