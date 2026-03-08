@@ -15,7 +15,12 @@ export default function Hero() {
       className="relative min-h-screen flex items-center justify-center text-white px-6 md:px-10 overflow-hidden"
     >
       {/* BACKGROUND */}
-      <div className="absolute inset-0 -z-20 bg-gradient-to-br from-[#0B1120] via-[#111827] to-[#1E1B4B]" />
+      <div className="absolute inset-0 -z-30 bg-gradient-to-br from-[#020617] via-[#0B1120] to-[#0F172A]" />
+
+      {/* BLUE LIGHT EFFECT */}
+      <div className="absolute -z-20 top-[-200px] left-[-200px] w-[600px] h-[600px] bg-blue-600 opacity-20 blur-[220px] rounded-full" />
+
+      <div className="absolute -z-20 bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-indigo-500 opacity-20 blur-[200px] rounded-full" />
 
       <div className="grid md:grid-cols-2 gap-14 md:gap-20 items-center max-w-6xl w-full">
         {/* PHOTO SIDE */}
@@ -95,7 +100,7 @@ export default function Hero() {
               View Projects
             </button>
 
-            {/* SECONDARY OUTLINE */}
+            {/* SECONDARY BUTTON */}
             <button
               onClick={() =>
                 document
@@ -110,7 +115,7 @@ export default function Hero() {
               Contact Me
             </button>
 
-            {/* DOWNLOAD CV - GLASS STYLE */}
+            {/* DOWNLOAD CV */}
             <a
               href="/cv-issam-elghbali.pdf"
               download
