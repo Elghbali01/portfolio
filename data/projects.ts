@@ -149,4 +149,49 @@ The architecture follows a component-based structure with centralized project da
     github: "https://github.com/Elghbali01/portfolio.git",
     image: "/portfolio.png",
   },
+  {
+    title: "Advanced Ticket Management System",
+    slug: "ticket-management-system",
+    category: "Backend / Enterprise Application",
+
+    shortDescription:
+      "A backend REST API for managing support tickets, users, and workflows using Spring Boot and a clean layered architecture. (In Development)",
+
+    fullDescription: `
+This project is a backend REST API developed with Spring Boot to simulate a real-world ticket management system used in companies to handle incidents, support requests, and internal tasks.
+
+The system allows different types of users (User, Agent, Admin) to interact with tickets through a structured workflow.
+
+Key features include:
+- User management and authentication preparation
+- Ticket creation and lifecycle workflow (OPEN, IN_PROGRESS, RESOLVED, CLOSED)
+- Clean layered architecture (Controller, Service, Repository)
+- DTO pattern to protect internal entities
+- Mapper layer for object transformation
+- RESTful API design
+- Validation using Jakarta Validation
+- Database persistence with Spring Data JPA
+
+This project focuses on building a professional backend architecture similar to what is used in enterprise environments.
+
+It demonstrates:
+- REST API development
+- Clean architecture principles
+- DTO & Mapper patterns
+- Spring Boot backend design
+  `,
+
+    technologies: [
+      "Java",
+      "Spring Boot",
+      "Spring Web",
+      "Spring Data JPA",
+      "PostgreSQL",
+      "REST API",
+    ],
+
+    github: "https://github.com/Elghbali01/ticket-system",
+
+    image: "/ticket-system.png",
+  },
 ];
