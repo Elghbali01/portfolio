@@ -9,13 +9,12 @@ import {
   SiDocker,
   SiGit,
   SiHtml5,
-  SiCss3,
+  SiCss,
   SiJavascript,
   SiBootstrap,
   SiTailwindcss,
   SiSpringboot,
   SiMongodb,
-  // New icons
   SiPostgresql,
   SiRedis,
   SiScikitlearn,
@@ -36,11 +35,16 @@ import {
   SiPostman,
   SiNginx,
   SiOpencv,
-  SiTableau,
   SiApachespark,
   SiCplusplus,
 } from "react-icons/si";
-import { FaAws, FaNetworkWired, FaBrain, FaJava } from "react-icons/fa";
+import {
+  FaAws,
+  FaNetworkWired,
+  FaBrain,
+  FaJava,
+  FaChartBar,
+} from "react-icons/fa";
 
 export const skills = [
   // ─── Frontend ───────────────────────────────────────
@@ -49,7 +53,7 @@ export const skills = [
   { name: "TypeScript", icon: SiTypescript },
   { name: "JavaScript", icon: SiJavascript },
   { name: "HTML", icon: SiHtml5 },
-  { name: "CSS", icon: SiCss3 },
+  { name: "CSS", icon: SiCss },
   { name: "Tailwind CSS", icon: SiTailwindcss },
   { name: "Bootstrap", icon: SiBootstrap },
 
@@ -76,7 +80,7 @@ export const skills = [
   { name: "Streamlit", icon: SiStreamlit },
   { name: "Jupyter", icon: SiJupyter },
   { name: "OpenCV", icon: SiOpencv },
-  { name: "Tableau", icon: SiTableau },
+  { name: "Tableau", icon: FaChartBar }, // ✅ SiTableau n'existe pas → FaChartBar
   { name: "Apache Spark", icon: SiApachespark },
   { name: "AI / Deep Learning", icon: FaBrain },
 
