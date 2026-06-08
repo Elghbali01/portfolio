@@ -117,7 +117,7 @@ export default function Hero() {
 
             {/* DOWNLOAD CV */}
             <a
-              href="/cv-issam-elghbali.pdf"
+              href="/cv-issam_elghbali.pdf"
               download
               className="w-full sm:w-auto px-7 py-3 rounded-lg font-medium
                bg-white/5 text-gray-300
