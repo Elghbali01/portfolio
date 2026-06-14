@@ -1,108 +1,67 @@
 import {
-  SiPython,
-  SiTensorflow,
-  SiPytorch,
   SiReact,
   SiNextdotjs,
   SiTypescript,
-  SiMysql,
-  SiDocker,
-  SiGit,
+  SiJavascript,
   SiHtml5,
   SiCss,
-  SiJavascript,
-  SiBootstrap,
   SiTailwindcss,
   SiSpringboot,
-  SiMongodb,
+  SiPython,
+  SiMysql,
   SiPostgresql,
+  SiMongodb,
   SiRedis,
+  SiDocker,
+  SiGit,
+  SiPostman,
+  SiLinux,
   SiScikitlearn,
   SiPandas,
   SiNumpy,
-  SiStreamlit,
-  SiLinux,
-  SiApachehadoop,
-  SiKubernetes,
-  SiFlask,
   SiJupyter,
-  SiApachekafka,
-  SiElasticsearch,
-  SiGraphql,
-  SiFirebase,
-  SiPhp,
-  SiFigma,
-  SiPostman,
-  SiNginx,
-  SiOpencv,
   SiApachespark,
-  SiCplusplus,
+  SiC,
+  SiApachehadoop,
 } from "react-icons/si";
-import {
-  FaAws,
-  FaNetworkWired,
-  FaBrain,
-  FaJava,
-  FaChartBar,
-} from "react-icons/fa";
+
+import { FaJava } from "react-icons/fa";
 
 export const skills = [
+  // ─── Languages ──────────────────────────────────────
+  { name: "Java", icon: FaJava },
+  { name: "JavaScript", icon: SiJavascript },
+  { name: "Python", icon: SiPython },
+  { name: "C", icon: SiC },
+
   // ─── Frontend ───────────────────────────────────────
   { name: "React", icon: SiReact },
   { name: "Next.js", icon: SiNextdotjs },
   { name: "TypeScript", icon: SiTypescript },
-  { name: "JavaScript", icon: SiJavascript },
-  { name: "HTML", icon: SiHtml5 },
-  { name: "CSS", icon: SiCss },
+  { name: "HTML5", icon: SiHtml5 },
+  { name: "CSS3", icon: SiCss },
   { name: "Tailwind CSS", icon: SiTailwindcss },
-  { name: "Bootstrap", icon: SiBootstrap },
 
-  // ─── Backend & Languages ────────────────────────────
-  { name: "Java", icon: FaJava },
+  // ─── Backend ────────────────────────────────────────
   { name: "Spring Boot", icon: SiSpringboot },
-  { name: "Python", icon: SiPython },
-  { name: "Flask", icon: SiFlask },
-  { name: "PHP", icon: SiPhp },
-  { name: "C++", icon: SiCplusplus },
 
   // ─── Databases ──────────────────────────────────────
-  { name: "SQL", icon: SiMysql },
   { name: "PostgreSQL", icon: SiPostgresql },
-  { name: "MongoDB (NoSQL)", icon: SiMongodb },
+  { name: "MySQL", icon: SiMysql },
+  { name: "MongoDB", icon: SiMongodb },
   { name: "Redis", icon: SiRedis },
 
-  // ─── Machine Learning / Data Science ────────────────
-  { name: "TensorFlow", icon: SiTensorflow },
-  { name: "PyTorch", icon: SiPytorch },
-  { name: "Scikit-learn", icon: SiScikitlearn },
+  // ─── Tools ──────────────────────────────────────────
+  { name: "Git", icon: SiGit },
+  { name: "Docker", icon: SiDocker },
+  { name: "Postman", icon: SiPostman },
+  { name: "Linux", icon: SiLinux },
+
+  // ─── Machine Learning / Data ───────────────────────
   { name: "Pandas", icon: SiPandas },
   { name: "NumPy", icon: SiNumpy },
-  { name: "Streamlit", icon: SiStreamlit },
+  { name: "Scikit-learn", icon: SiScikitlearn },
   { name: "Jupyter", icon: SiJupyter },
-  { name: "OpenCV", icon: SiOpencv },
-  { name: "Tableau", icon: FaChartBar }, // ✅ SiTableau n'existe pas → FaChartBar
   { name: "Apache Spark", icon: SiApachespark },
-  { name: "AI / Deep Learning", icon: FaBrain },
-
-  // ─── DevOps / Cloud / Infra ─────────────────────────
-  { name: "Docker", icon: SiDocker },
-  { name: "Kubernetes", icon: SiKubernetes },
-  { name: "Linux", icon: SiLinux },
-  { name: "AWS", icon: FaAws },
-  { name: "Nginx", icon: SiNginx },
-  { name: "Firebase", icon: SiFirebase },
-  { name: "Git", icon: SiGit },
-
-  // ─── Big Data / Distributed Systems ─────────────────
   { name: "Hadoop", icon: SiApachehadoop },
-  { name: "Kafka", icon: SiApachekafka },
-  { name: "Elasticsearch", icon: SiElasticsearch },
-
-  // ─── Tools & Design ──────────────────────────────────
-  { name: "GraphQL", icon: SiGraphql },
-  { name: "Postman", icon: SiPostman },
-  { name: "Figma", icon: SiFigma },
-
-  // ─── Networks & Security ─────────────────────────────
-  { name: "Networks", icon: FaNetworkWired },
 ];
