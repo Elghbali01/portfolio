@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useAnimation } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState } from "react";
 import Image from "next/image";
 import { devSkills, testSkills, aiSkills } from "../data/skills";
 import type { Skill } from "../data/skills";
@@ -93,24 +93,12 @@ function InfiniteRow({
   delay?: number;
 }) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const controls = useAnimation();
+  const [paused, setPaused] = useState(false);
   const looped   = [...skills, ...skills, ...skills];
   const duration = skills.length * 4;
 
-  // Start scroll on mount
-  useEffect(() => {
-    controls.start({
-      x: direction === 1 ? ["0%", "-33.33%"] : ["-33.33%", "0%"],
-      transition: { duration, repeat: Infinity, ease: "linear", repeatType: "loop" },
-    });
-  }, []);
-
-  const pauseScroll  = () => controls.stop();
-  const resumeScroll = () =>
-    controls.start({
-      x: direction === 1 ? ["0%", "-33.33%"] : ["-33.33%", "0%"],
-      transition: { duration, repeat: Infinity, ease: "linear", repeatType: "loop" },
-    });
+  // Unique animation name per row direction
+  const animName = direction === 1 ? "ticker-ltr" : "ticker-rtl";
 
   return (
     <motion.div
@@ -120,6 +108,18 @@ function InfiniteRow({
       viewport={{ once: true }}
       className="w-full"
     >
+      {/* CSS keyframes injected inline – one rule per direction */}
+      <style>{`
+        @keyframes ticker-ltr {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-33.3333%); }
+        }
+        @keyframes ticker-rtl {
+          from { transform: translateX(-33.3333%); }
+          to   { transform: translateX(0); }
+        }
+      `}</style>
+
       {/* Label */}
       <p
         className="text-xs uppercase tracking-[0.25em] mb-4 pl-1 font-semibold"
@@ -133,21 +133,24 @@ function InfiniteRow({
         className="relative overflow-hidden"
         style={{ maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)" }}
       >
-        <motion.div
+        <div
           className="flex"
-          animate={controls}
-          style={{ width: "max-content" }}
+          style={{
+            width: "max-content",
+            animation: `${animName} ${duration}s linear infinite`,
+            animationPlayState: paused ? "paused" : "running",
+          }}
         >
           {looped.map((skill: Skill, i: number) => (
             <TechLogo
               key={`${skill.name}-${i}`}
               skill={skill}
               hoveredId={hoveredId}
-              onHover={(id) => { setHoveredId(id); pauseScroll(); }}
-              onLeave={() => { setHoveredId(null); resumeScroll(); }}
+              onHover={(id) => { setHoveredId(id); setPaused(true); }}
+              onLeave={() => { setHoveredId(null); setPaused(false); }}
             />
           ))}
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   );
