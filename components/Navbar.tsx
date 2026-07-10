@@ -30,6 +30,7 @@ export default function Navbar({ visible }: NavbarProps) {
     "about",
     "projects",
     "skills",
+    "certifications",
     "experience",
     "contact",
   ];

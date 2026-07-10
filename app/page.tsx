@@ -7,6 +7,7 @@ import Hero from "../sections/Hero";
 import About from "../sections/About";
 import Projects from "../sections/Projects";
 import Skills from "../sections/Skills";
+import Certifications from "../sections/Certifications";
 import Experience from "../sections/Experience";
 import Contact from "../sections/Contact";
 import AnimatedBackground from "../components/AnimatedBackground";
@@ -27,6 +28,7 @@ export default function Home() {
           <About />
           <Projects />
           <Skills />
+          <Certifications />
           <Experience />
           <Contact />
           <Footer />
