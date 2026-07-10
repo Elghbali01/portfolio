@@ -13,6 +13,15 @@ export type Certification = {
 
 export const certifications: Certification[] = [
   {
+    name: "Spring - Ecosystem and Core",
+    issuer: "LearnQuest (via Coursera)",
+    date: "July 10, 2026",
+    duration: "~11 hours",
+    score: "94.95%",
+    pdfPath: "/certificates/Spring_Ecosystem_and_Core.pdf",
+    actionLabel: "Download",
+  },
+  {
     name: "Introduction to Software Engineering",
     issuer: "IBM (via Coursera)",
     date: "July 8, 2026",
