@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Image from "next/image";
-import { devSkills, testSkills, aiSkills } from "../data/skills";
+import { devSkills, dataSkills, aiSkills } from "../data/skills";
 import type { Skill } from "../data/skills";
 
 // ─── Particle Stars ───────────────────────────────────────────────────────────
@@ -278,7 +278,7 @@ export default function Skills() {
           </p>
         </motion.div>
 
-        {/* ── DEVELOPER / BRAIN / TESTEUR ── */}
+        {/* ── DEVELOPER / BRAIN / DATA SCIENTIST ── */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -318,18 +318,35 @@ export default function Skills() {
             <GlowBrain />
           </div>
 
-          {/* RIGHT — Testeur */}
+          {/* RIGHT — Data Scientist */}
           <div className="flex flex-col items-center md:items-end text-center md:text-right gap-4">
             <div className="flex items-center gap-3">
-              <span className="text-2xl text-[#06B6D4]">✓</span>
               <span className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#06B6D4] to-[#7C3AED]">
-                Testeur
+                Data Scientist
+              </span>
+              <span className="text-[#06B6D4] flex items-center justify-center">
+                <svg
+                  className="w-7 h-7"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 19h16M4 14l4-4 4 4 8-8"
+                  />
+                  <circle cx={8} cy={10} r={1.5} fill="currentColor" />
+                  <circle cx={12} cy={14} r={1.5} fill="currentColor" />
+                  <circle cx={20} cy={6} r={1.5} fill="currentColor" />
+                </svg>
               </span>
             </div>
             <p className="text-sm md:text-base text-[#94A3B8] leading-relaxed max-w-xs">
-              I ensure quality through rigorous testing strategies — unit, integration,
-              and end-to-end tests — using industry-standard tools to deliver
-              reliable and bug-free software.
+              I transform raw data into actionable insights using statistical
+              analysis, machine learning algorithms, and data visualization
+              to drive data-informed decisions.
             </p>
             {/* Decorative dots */}
             <div className="flex gap-2 mt-1">
@@ -356,7 +373,7 @@ export default function Skills() {
         {/* ── TECH LOGOS — infinite scroll ── */}
         <div className="flex flex-col gap-12">
           <InfiniteRow skills={devSkills}  label="Development"            direction={1}  delay={0.1} />
-          <InfiniteRow skills={testSkills} label="Testing & QA"           direction={-1} delay={0.2} />
+          <InfiniteRow skills={dataSkills} label="Data Science"            direction={-1} delay={0.2} />
           <InfiniteRow skills={aiSkills}   label="AI / Machine Learning"   direction={1}  delay={0.3} />
         </div>
       </div>

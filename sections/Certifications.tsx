@@ -23,8 +23,8 @@ export default function Certifications() {
             My <span className="text-[#3B82F6]">Certifications</span>
           </h2>
           <p className="text-[#94A3B8] mt-4 max-w-2xl mx-auto">
-            Industry-recognized credentials validating my expertise in software
-            engineering, machine learning, and programming.
+            Industry-recognized credentials validating my expertise in
+            full-stack development, data science, and machine learning.
           </p>
         </motion.div>
 
@@ -40,7 +40,7 @@ export default function Certifications() {
               whileHover={{ scale: 1.03, y: -4 }}
               className="bg-[#1E293B]/40 backdrop-blur-md border border-[#334155] rounded-xl p-6 flex flex-col items-center text-center
                          hover:border-[#3B82F6] hover:shadow-lg hover:shadow-blue-500/10
-                         transition-all duration-300"
+                         transition-all duration-300 min-h-[420px]"
             >
               {/* Certificate Icon Badge */}
               <div className="w-16 h-16 rounded-2xl bg-[#3B82F6]/15 border border-[#3B82F6]/30 flex items-center justify-center mb-5">
@@ -59,36 +59,58 @@ export default function Certifications() {
                 </svg>
               </div>
 
-              {/* Certificate Name */}
-              <h3 className="text-lg font-semibold text-white mb-2 leading-tight">
-                {cert.name}
+              {/* Certificate Name with Inline Verified Badge */}
+              <h3 className="text-lg font-semibold text-white mb-2 leading-tight flex items-center justify-center gap-1.5 min-h-[3rem]">
+                <span>{cert.name}</span>
+                {cert.verified && (
+                  <span className="flex-shrink-0" title="Verified Certification">
+                    <svg
+                      className="w-5 h-5 text-emerald-400"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                )}
               </h3>
 
               {/* Issuer + Date */}
-              <p className="text-sm text-[#3B82F6] font-medium mb-1">
+              <p className="text-sm text-[#3B82F6] font-medium mb-1 min-h-[1.25rem]">
                 {cert.issuer}
               </p>
               {cert.date && (
-                <p className="text-xs text-[#94A3B8] mb-1">{cert.date}</p>
+                <p className="text-xs text-[#94A3B8] mb-0.5">{cert.date}</p>
               )}
               {cert.duration && (
-                <p className="text-xs text-[#94A3B8] mb-3">{cert.duration}</p>
+                <p className="text-xs text-[#94A3B8] mb-2">{cert.duration}</p>
               )}
 
-              {/* Score */}
+              {/* Skills tags listed inline elegantly */}
+              {cert.skills && cert.skills.length > 0 && (
+                <p className="text-[11px] text-[#60A5FA] px-2 mt-2 leading-relaxed font-medium">
+                  {cert.skills.join(" • ")}
+                </p>
+              )}
+
+              {/* Spacer to push bottom section to the bottom */}
+              <div className="flex-1" />
+
+              {/* Score Box */}
               {cert.score && (
-                <div className="bg-[#0F172A] border border-[#334155] rounded-lg px-4 py-2 mb-5">
-                  <span className="text-xs text-[#94A3B8] uppercase tracking-wider">
+                <div className="bg-[#0F172A] border border-[#334155] rounded-lg px-4 py-2 mt-4 mb-4 w-32">
+                  <span className="text-[10px] text-[#94A3B8] uppercase tracking-wider">
                     Score
                   </span>
-                  <p className="text-xl font-bold text-[#3B82F6]">
+                  <p className="text-lg font-bold text-[#3B82F6]">
                     {cert.score}
                   </p>
                 </div>
               )}
-
-              {/* Spacer to push button to bottom */}
-              <div className="flex-1" />
 
               {/* Action Button */}
               {cert.pdfPath ? (
@@ -112,7 +134,7 @@ export default function Certifications() {
                       window.open(cert.pdfPath!, "_blank");
                     }
                   }}
-                  className="inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors duration-300 cursor-pointer"
+                  className="inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors duration-300 cursor-pointer mt-1"
                 >
                   <svg
                     className="w-4 h-4"
@@ -134,7 +156,7 @@ export default function Certifications() {
                   href={cert.externalLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors duration-300"
+                  className="inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors duration-300 mt-1"
                 >
                   <svg
                     className="w-4 h-4"

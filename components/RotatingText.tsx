@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const phrases = [
-  "Software Engineering Student",
-  "Data Science Enthusiast",
+  "Full-Stack Developer",
+  "Data Scientist",
   "Machine Learning Explorer",
-  "Future AI Engineer",
   "Building Intelligent Systems",
+  "Data-Driven Problem Solver",
 ];
 
 export default function RotatingText() {
