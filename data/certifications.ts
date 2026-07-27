@@ -15,6 +15,29 @@ export type Certification = {
 
 export const certifications: Certification[] = [
   {
+    name: "Supervised Machine Learning: Regression and Classification",
+    issuer: "DeepLearning.AI (via Coursera)",
+    date: "July 27, 2026",
+    duration: "~33 hours",
+    score: "93.03%",
+    skills: [
+      "Python Programming",
+      "Feature Engineering",
+      "Applied Machine Learning",
+      "Algorithms",
+      "Classification Algorithms",
+      "Model Optimization",
+      "Supervised Learning",
+      "Regression Analysis",
+      "Machine Learning",
+      "Predictive Modeling",
+      "Data Preprocessing",
+      "Artificial Intelligence",
+    ],
+    pdfPath: "/certificates/Supervised_ML_Regression_Classification.pdf",
+    actionLabel: "Download",
+  },
+  {
     name: "Python for Data Science, AI & Development",
     issuer: "IBM (via Coursera)",
     date: "July 15, 2026",
