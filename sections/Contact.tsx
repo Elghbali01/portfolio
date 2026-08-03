@@ -25,9 +25,9 @@ export default function Contact() {
         process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
       );
 
-      setSuccess("Message sent successfully 🚀");
+      setSuccess("Message sent successfully.");
       formRef.current.reset();
-    } catch (error) {
+    } catch {
       setSuccess("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
