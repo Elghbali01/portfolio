@@ -106,7 +106,7 @@ export default function Contact() {
 
           <div>
             <input
-              type="e "
+              type="email"
               name="user_email"
               required
               placeholder="Your Email"
