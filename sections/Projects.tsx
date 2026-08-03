@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { projects } from "../data/projects";
+import { projects, featuredProjects } from "../data/projects";
+import ProjectCard from "../components/ProjectCard";
 
 export default function Projects() {
   return (
@@ -11,7 +13,13 @@ export default function Projects() {
     >
       <div className="max-w-7xl mx-auto">
         {/* TITLE */}
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
           <h2 className="text-3xl md:text-5xl font-bold">
             Featured <span className="text-[#3B82F6]">Projects</span>
           </h2>
@@ -19,86 +27,49 @@ export default function Projects() {
             A selection of projects showcasing full-stack development,
             data-driven systems, and scalable architectures.
           </p>
-        </div>
+        </motion.div>
 
-        {/* GRID */}
+        {/* FEATURED GRID — 2 projects only */}
         <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-10">
-          {projects.map((project, index) => (
-            <motion.div
+          {featuredProjects.map((project, index) => (
+            <ProjectCard
               key={project.slug}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.03 }}
-              className="bg-[#1E293B]/50 backdrop-blur-md border border-[#334155] rounded-xl overflow-hidden shadow-xl hover:border-[#3B82F6] transition"
-            >
-              {/* IMAGE */}
-              <div className="h-52 overflow-hidden">
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-full object-cover hover:scale-110 transition duration-500"
-                />
-              </div>
-
-              {/* CONTENT */}
-              <div className="p-6 space-y-4">
-                <h3 className="text-xl font-semibold">{project.title}</h3>
-
-                <p className="text-sm text-[#94A3B8]">
-                  {project.shortDescription}
-                </p>
-
-                {/* TECH BADGES */}
-                <div className="flex flex-wrap gap-2">
-                  {project.technologies.map((tech) => (
-                    <span
-                      key={tech}
-                      className="group relative overflow-hidden text-xs px-3 py-1 rounded-full border border-[#334155] bg-[#0F172A]"
-                    >
-                      {/* Animated background fill */}
-                      <span className="absolute inset-0 bg-[#94A3B8]/25 scale-x-0 origin-left transition-transform duration-300 ease-out group-hover:scale-x-100" />
-
-                      {/* Text */}
-                      <span className="relative z-10 text-gray-300 group-hover:text-white transition-colors duration-300">
-                        {tech}
-                      </span>
-                    </span>
-                  ))}
-                </div>
-
-                {/* LINKS */}
-                <div className="flex justify-between items-center pt-4">
-                  <a
-                    href={project.github}
-                    target="_blank"
-                    className="text-sm text-[#3B82F6] hover:underline"
-                  >
-                    GitHub →
-                  </a>
-
-                  {project.demo ? (
-                    <a
-                      href={project.demo}
-                      target="_blank"
-                      className="text-sm bg-[#3B82F6] px-4 py-2 rounded-lg hover:bg-[#2563EB] transition"
-                    >
-                      Demo
-                    </a>
-                  ) : (
-                    <button
-                      disabled
-                      className="text-sm bg-[#3B82F6] px-4 py-2 rounded-lg opacity-50 cursor-not-allowed"
-                    >
-                      Demo
-                    </button>
-                  )}
-                </div>
-              </div>
-            </motion.div>
+              project={project}
+              index={index}
+            />
           ))}
         </div>
+
+        {/* VIEW ALL BUTTON */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+          className="flex justify-center mt-12"
+        >
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-2 bg-transparent border border-[#3B82F6] text-[#3B82F6]
+                       hover:bg-[#3B82F6] hover:text-white text-sm font-medium
+                       px-7 py-3 rounded-lg transition-all duration-300"
+          >
+            View All Projects ({projects.length})
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+              />
+            </svg>
+          </Link>
+        </motion.div>
       </div>
     </section>
   );

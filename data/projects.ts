@@ -8,6 +8,8 @@ export interface Project {
   github: string;
   demo?: string; // optionnel
   image: string;
+  /** If true the project appears in the homepage preview */
+  featured: boolean;
 }
 
 export const projects: Project[] = [
@@ -34,6 +36,7 @@ The project focuses on front-end structure, responsive design, and dynamic inter
     technologies: ["HTML", "CSS", "JavaScript", "PHP"],
     github: "https://github.com/Elghbali01",
     image: "/indonesia.png",
+    featured: false,
   },
 
   {
@@ -62,6 +65,7 @@ This project demonstrates:
     technologies: ["React.js", "Spring Boot", "REST API"],
     github: "https://github.com/Elghbali01",
     image: "/platform.png",
+    featured: false,
   },
 
   {
@@ -87,6 +91,7 @@ The system follows a layered architecture:
     technologies: ["Spring Boot", "Thymeleaf", "JDBC", "MySQL"],
     github: "https://github.com/Elghbali01",
     image: "/employee.png",
+    featured: false,
   },
 
   {
@@ -111,6 +116,7 @@ This project demonstrates a complete architecture integrating:
     ],
     github: "https://github.com/Elghbali01/nosql-ml-project",
     image: "/redis-ml.png",
+    featured: false,
   },
 
   {
@@ -144,6 +150,7 @@ The architecture follows a component-based structure with centralized project da
     ],
     github: "https://github.com/Elghbali01/portfolio.git",
     image: "/portfolio.png",
+    featured: false,
   },
 
   {
@@ -185,6 +192,7 @@ It demonstrates:
     ],
     github: "https://github.com/Elghbali01/ticket-system",
     image: "/ticket-system.png",
+    featured: false,
   },
 
   {
@@ -240,6 +248,7 @@ It demonstrates:
     ],
     github: "https://github.com/Elghbali01/resource-management-backend.git",
     image: "/gestion_resource.png",
+    featured: true,
   },
 
   {
@@ -306,5 +315,11 @@ This project demonstrates:
     ],
     github: "https://github.com/Elghbali01",
     image: "/portabilite_eau.png",
+    featured: true,
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Derived lists (used by components — avoids filtering in render)
+// ---------------------------------------------------------------------------
+export const featuredProjects = projects.filter((p) => p.featured);

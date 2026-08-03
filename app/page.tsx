@@ -15,26 +15,29 @@ import Footer from "../components/Footer";
 
 const LOADING_SEEN_KEY = "portfolio-loading-seen";
 
+/**
+ * Synchronous check — runs during the very first render so the LoadingScreen
+ * component is never mounted when navigating back from /projects or /certifications.
+ */
+function shouldSkipLoading(): boolean {
+  if (typeof window === "undefined") return false;
+  if (window.location.hash.length > 0) return true;
+  if (sessionStorage.getItem(LOADING_SEEN_KEY) === "true") return true;
+  return false;
+}
+
 export default function Home() {
-  // Start with loading NOT finished (safe for SSR)
-  const [loadingFinished, setLoadingFinished] = useState(false);
+  const [loadingFinished, setLoadingFinished] = useState(shouldSkipLoading);
 
-  // On mount (client only): check if we should skip the loading screen
+  // Scroll to the hash target after mount (loading is already skipped)
   useEffect(() => {
-    const alreadySeen = sessionStorage.getItem(LOADING_SEEN_KEY) === "true";
     const hash = window.location.hash;
-
-    if (alreadySeen || hash.length > 0) {
-      // Skip loading screen immediately
-      setLoadingFinished(true);
-
-      // If there's a hash, scroll to the target section
-      if (hash.length > 0) {
-        const id = hash.slice(1);
-        setTimeout(() => {
-          document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }
+    if (hash.length > 0) {
+      const id = hash.slice(1);
+      // Small delay so the DOM is fully painted before scrolling
+      requestAnimationFrame(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      });
     }
   }, []);
 
@@ -70,3 +73,4 @@ export default function Home() {
     </>
   );
 }
+
