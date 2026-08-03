@@ -15,6 +15,31 @@ export type Certification = {
 
 export const certifications: Certification[] = [
   {
+    name: "CS250: Python for Data Scientists",
+    issuer: "Saylor Academy",
+    duration: "~51 hours",
+    skills: [
+      "Data Science",
+      "Python Programming",
+      "NumPy",
+      "pandas",
+      "SciPy",
+      "Matplotlib",
+      "Seaborn",
+      "Data Visualization",
+      "Applied Statistics",
+      "Supervised Learning",
+      "Unsupervised Learning",
+      "Scikit-Learn",
+      "Data Mining",
+      "Time Series Analysis",
+      "Linear Regression",
+      "Data Cleaning",
+    ],
+    pdfPath: "/certificates/CS250_Python_for_dataScientist.pdf",
+    actionLabel: "Download",
+  },
+  {
     name: "Supervised Machine Learning: Regression and Classification",
     issuer: "DeepLearning.AI (via Coursera)",
     date: "July 27, 2026",
