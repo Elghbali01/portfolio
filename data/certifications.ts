@@ -1,212 +1,139 @@
-// Certifications data for the Certifications section
+// Certifications data — single source of truth for the homepage and /certifications page.
+//
+// Convention:
+//   image  → /certificate-images/<baseName>.png
+//   pdf    → /certificates/<baseName>.pdf
+//
+// The helper `makePaths` builds both paths from one base name so you never
+// duplicate strings.  For edge-cases (Oracle) the paths are set manually.
 
 export type Certification = {
-  name: string;
-  issuer: string; // e.g. "IBM (via Coursera)"
-  date?: string; // e.g. "July 8, 2026"
-  duration?: string; // e.g. "~14 hours"
-  score?: string; // e.g. "91.30%"
-  verified?: boolean; // whether verified
-  skills?: string[]; // skill tags
-  pdfPath?: string; // local PDF path in /certificates/
-  externalLink?: string; // external URL (LinkedIn, etc.)
-  actionLabel: string; // button text: "Download" or "View"
+  id: string;
+  title: string;
+  issuer: string;
+  date?: string;
+  /** Path to the PNG thumbnail in /public/certificate-images/ */
+  image: string;
+  /** Path to the downloadable PDF in /public/certificates/ — null when no local PDF exists */
+  pdf: string | null;
+  /** External URL (e.g. LinkedIn) — null for normal downloadable certs */
+  externalUrl: string | null;
+  /** "download" → has local PDF  |  "external" → opens external link */
+  actionType: "download" | "external";
+  /** If true the cert appears in the homepage preview (max 3) */
+  featured: boolean;
 };
 
+// ---------------------------------------------------------------------------
+// Helper — avoids repeating /certificate-images/ and /certificates/ manually
+// ---------------------------------------------------------------------------
+function makePaths(baseName: string) {
+  return {
+    image: `/certificate-images/${baseName}.png`,
+    pdf: `/certificates/${baseName}.pdf`,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Data
+// ---------------------------------------------------------------------------
 export const certifications: Certification[] = [
+  // ── Featured certifications (shown on homepage) ──────────────────────
   {
-    name: "CS250: Python for Data Scientists",
-    issuer: "Saylor Academy",
-    duration: "~51 hours",
-    skills: [
-      "Data Science",
-      "Python Programming",
-      "NumPy",
-      "pandas",
-      "SciPy",
-      "Matplotlib",
-      "Seaborn",
-      "Data Visualization",
-      "Applied Statistics",
-      "Supervised Learning",
-      "Unsupervised Learning",
-      "Scikit-Learn",
-      "Data Mining",
-      "Time Series Analysis",
-      "Linear Regression",
-      "Data Cleaning",
-    ],
-    pdfPath: "/certificates/CS250_Python_for_dataScientist.pdf",
-    actionLabel: "Download",
-  },
-  {
-    name: "Supervised Machine Learning: Regression and Classification",
-    issuer: "DeepLearning.AI (via Coursera)",
-    date: "July 27, 2026",
-    duration: "~33 hours",
-    score: "93.03%",
-    skills: [
-      "Python Programming",
-      "Feature Engineering",
-      "Applied Machine Learning",
-      "Algorithms",
-      "Classification Algorithms",
-      "Model Optimization",
-      "Supervised Learning",
-      "Regression Analysis",
-      "Machine Learning",
-      "Predictive Modeling",
-      "Data Preprocessing",
-      "Artificial Intelligence",
-    ],
-    pdfPath: "/certificates/Supervised_ML_Regression_Classification.pdf",
-    actionLabel: "Download",
-  },
-  {
-    name: "Python for Data Science, AI & Development",
+    id: "python-data-science-ai",
+    title: "Python for Data Science, AI & Development",
     issuer: "IBM (via Coursera)",
     date: "July 15, 2026",
-    duration: "~24 hours",
-    score: "86.25%",
-    skills: [
-      "Data Collection",
-      "Data Analysis",
-      "Python Programming",
-      "Scripting",
-      "NumPy",
-      "Data Import/Export",
-    ],
-    pdfPath: "/certificates/Python_for_Data_Science_AI.pdf",
-    actionLabel: "Download",
+    ...makePaths("Python_for_Data_Science_AI"),
+    externalUrl: null,
+    actionType: "download",
+    featured: true,
   },
   {
-    name: "The Data Science Profession",
-    issuer: "University of London (via Coursera)",
-    date: "July 14, 2026",
-    duration: "~4 hours",
-    score: "100%",
-    skills: [
-      "Data Science",
-      "Data Literacy",
-      "Machine Learning",
-      "Applied Machine Learning",
-      "Machine Learning Algorithms",
-      "Unsupervised Learning",
-    ],
-    pdfPath: "/certificates/The_Data_Science_Profession.pdf",
-    actionLabel: "Download",
+    id: "supervised-ml-regression-classification",
+    title: "Supervised Machine Learning: Regression and Classification",
+    issuer: "DeepLearning.AI (via Coursera)",
+    date: "July 27, 2026",
+    ...makePaths("Supervised_ML_Regression_Classification"),
+    externalUrl: null,
+    actionType: "download",
+    featured: true,
   },
   {
-    name: "Spring - Ecosystem and Core",
-    issuer: "LearnQuest (via Coursera)",
-    date: "July 10, 2026",
-    duration: "~11 hours",
-    score: "94.95%",
-    skills: [
-      "Integration Testing",
-      "Configuration Management",
-      "Unit Testing",
-      "Application Frameworks",
-      "Context Management",
-      "JUnit",
-      "Java Programming",
-      "XML",
-      "Development Environment",
-      "Enterprise Application Management",
-      "Spring Framework",
-    ],
-    pdfPath: "/certificates/Spring_Ecosystem_and_Core.pdf",
-    actionLabel: "Download",
-  },
-  {
-    name: "Introduction to Software Engineering",
+    id: "introduction-to-software-engineering",
+    title: "Introduction to Software Engineering",
     issuer: "IBM (via Coursera)",
     date: "July 8, 2026",
-    duration: "~14 hours",
-    score: "91.30%",
-    skills: [
-      "Development Environment",
-      "Software Design",
-      "Software Development",
-      "Software Development Tools",
-      "Full-Stack Web Development",
-      "Web Applications",
-      "Python Programming",
-      "UML",
-      "Web Development",
-      "Software Design Patterns",
-      "Back-End Web Development",
-    ],
-    pdfPath: "/certificates/Introduction_to_Software_Engineering.pdf",
-    actionLabel: "Download",
+    ...makePaths("Introduction_to_Software_Engineering"),
+    externalUrl: null,
+    actionType: "download",
+    featured: true,
+  },
+
+  // ── Other certifications ─────────────────────────────────────────────
+  {
+    id: "cs250-python-for-data-scientists",
+    title: "CS250: Python for Data Scientists",
+    issuer: "Saylor Academy",
+    ...makePaths("CS250_Python_for_dataScientist"),
+    externalUrl: null,
+    actionType: "download",
+    featured: false,
   },
   {
-    name: "Introduction to Machine Learning",
+    id: "the-data-science-profession",
+    title: "The Data Science Profession",
+    issuer: "University of London (via Coursera)",
+    date: "July 14, 2026",
+    ...makePaths("The_Data_Science_Profession"),
+    externalUrl: null,
+    actionType: "download",
+    featured: false,
+  },
+  {
+    id: "spring-ecosystem-and-core",
+    title: "Spring — Ecosystem and Core",
+    issuer: "LearnQuest (via Coursera)",
+    date: "July 10, 2026",
+    ...makePaths("Spring_Ecosystem_and_Core"),
+    externalUrl: null,
+    actionType: "download",
+    featured: false,
+  },
+  {
+    id: "introduction-to-machine-learning",
+    title: "Introduction to Machine Learning",
     issuer: "Duke University (via Coursera)",
     date: "July 8, 2026",
-    duration: "~25 hours",
-    score: "89%",
-    skills: [
-      "Applied Machine Learning",
-      "Python Programming",
-      "Unsupervised Learning",
-      "Supervised Learning",
-      "Reinforcement Learning",
-      "Image Analysis",
-      "Model Training",
-      "Transfer Learning",
-      "Artificial Neural Networks",
-      "Natural Language Processing",
-      "Model Optimization",
-      "Convolutional Neural Networks",
-    ],
-    pdfPath: "/certificates/Introduction_to_Machine_Learning.pdf",
-    actionLabel: "Download",
+    ...makePaths("Introduction_to_Machine_Learning"),
+    externalUrl: null,
+    actionType: "download",
+    featured: false,
   },
   {
-    name: "Java Explorer",
+    // Special case — no local PDF, external LinkedIn link only
+    id: "java-explorer",
+    title: "Java Explorer",
     issuer: "Oracle",
-    score: "95%",
-    skills: [
-      "Java Programming",
-      "Object-Oriented Programming (OOP)",
-      "Code Design",
-      "Error Handling",
-      "Clean Code",
-      "Cloud Environments",
-    ],
-    externalLink:
+    image: "/certificate-images/Oracle.png",
+    pdf: null,
+    externalUrl:
       "https://www.linkedin.com/posts/issam-elghbali-2937b6258_oracle-java-foundations-activity-7415090851426562048-TlQ-",
-    actionLabel: "View",
+    actionType: "external",
+    featured: false,
   },
   {
-    name: "Python for Machine Learning",
+    id: "python-for-machine-learning",
+    title: "Python for Machine Learning",
     issuer: "SimpliLearn",
-    duration: "~7 hours",
-    skills: [
-      "Python Programming",
-      "Machine Learning",
-      "Supervised Learning",
-      "Unsupervised Learning",
-      "Linear Regression",
-      "Logistic Regression",
-      "Classification Algorithms",
-      "Naive Bayes",
-      "K-Nearest Neighbors",
-      "Decision Trees",
-      "Random Forest",
-      "Support Vector Machines",
-      "Ensemble Learning",
-      "K-Means Clustering",
-      "Principal Component Analysis",
-      "Recommender Systems",
-      "TensorFlow",
-      "Keras",
-      "PyTorch",
-      "Scikit-Learn",
-      "MLOps",
-    ],
-    pdfPath: "/certificates/SimpliLearn_python_for_ML.pdf",
-    actionLabel: "Download",
+    ...makePaths("SimpliLearn_python_for_ML"),
+    externalUrl: null,
+    actionType: "download",
+    featured: false,
   },
 ];
+
+// ---------------------------------------------------------------------------
+// Derived lists (used by components — avoids filtering in render)
+// ---------------------------------------------------------------------------
+export const featuredCertifications = certifications.filter((c) => c.featured);

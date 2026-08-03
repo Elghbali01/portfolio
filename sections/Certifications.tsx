@@ -1,8 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { certifications } from "../data/certifications";
-import type { Certification } from "../data/certifications";
+import {
+  certifications,
+  featuredCertifications,
+} from "../data/certifications";
+import CertificationCard from "../components/CertificationCard";
 
 export default function Certifications() {
   return (
@@ -28,155 +32,48 @@ export default function Certifications() {
           </p>
         </motion.div>
 
-        {/* GRID */}
+        {/* FEATURED GRID — preview cards only */}
         <div className="grid md:grid-cols-3 gap-8">
-          {certifications.map((cert: Certification, index: number) => (
-            <motion.div
-              key={cert.name}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.15 }}
-              viewport={{ once: true }}
-              whileHover={{ scale: 1.03, y: -4 }}
-              className="bg-[#1E293B]/40 backdrop-blur-md border border-[#334155] rounded-xl p-6 flex flex-col items-center text-center
-                         hover:border-[#3B82F6] hover:shadow-lg hover:shadow-blue-500/10
-                         transition-all duration-300 min-h-[420px]"
-            >
-              {/* Certificate Icon Badge */}
-              <div className="w-16 h-16 rounded-2xl bg-[#3B82F6]/15 border border-[#3B82F6]/30 flex items-center justify-center mb-5">
-                <svg
-                  className="w-8 h-8 text-[#3B82F6]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5"
-                  />
-                </svg>
-              </div>
-
-              {/* Certificate Name with Inline Verified Badge */}
-              <h3 className="text-lg font-semibold text-white mb-2 leading-tight flex items-center justify-center gap-1.5 min-h-[3rem]">
-                <span>{cert.name}</span>
-                {cert.verified && (
-                  <span className="flex-shrink-0" title="Verified Certification">
-                    <svg
-                      className="w-5 h-5 text-emerald-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </span>
-                )}
-              </h3>
-
-              {/* Issuer + Date */}
-              <p className="text-sm text-[#3B82F6] font-medium mb-1 min-h-[1.25rem]">
-                {cert.issuer}
-              </p>
-              {cert.date && (
-                <p className="text-xs text-[#94A3B8] mb-0.5">{cert.date}</p>
-              )}
-              {cert.duration && (
-                <p className="text-xs text-[#94A3B8] mb-2">{cert.duration}</p>
-              )}
-
-              {/* Skills tags listed inline elegantly */}
-              {cert.skills && cert.skills.length > 0 && (
-                <p className="text-[11px] text-[#60A5FA] px-2 mt-2 leading-relaxed font-medium">
-                  {cert.skills.join(" • ")}
-                </p>
-              )}
-
-              {/* Spacer to push bottom section to the bottom */}
-              <div className="flex-1" />
-
-              {/* Score Box */}
-              {cert.score && (
-                <div className="bg-[#0F172A] border border-[#334155] rounded-lg px-4 py-2 mt-4 mb-4 w-32">
-                  <span className="text-[10px] text-[#94A3B8] uppercase tracking-wider">
-                    Score
-                  </span>
-                  <p className="text-lg font-bold text-[#3B82F6]">
-                    {cert.score}
-                  </p>
-                </div>
-              )}
-
-              {/* Action Button */}
-              {cert.pdfPath ? (
-                <button
-                  onClick={async () => {
-                    try {
-                      const res = await fetch(cert.pdfPath!);
-                      const blob = await res.blob();
-                      // Force download by creating a blob with octet-stream type
-                      const downloadBlob = new Blob([blob], { type: "application/octet-stream" });
-                      const url = window.URL.createObjectURL(downloadBlob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = cert.pdfPath!.split("/").pop() || "certificate.pdf";
-                      document.body.appendChild(a);
-                      a.click();
-                      a.remove();
-                      window.URL.revokeObjectURL(url);
-                    } catch (err) {
-                      // Fallback: open in new tab
-                      window.open(cert.pdfPath!, "_blank");
-                    }
-                  }}
-                  className="inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors duration-300 cursor-pointer mt-1"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
-                    />
-                  </svg>
-                  {cert.actionLabel}
-                </button>
-              ) : cert.externalLink ? (
-                <a
-                  href={cert.externalLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors duration-300 mt-1"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                    />
-                  </svg>
-                  {cert.actionLabel}
-                </a>
-              ) : null}
-            </motion.div>
+          {featuredCertifications.map((cert, index) => (
+            <CertificationCard
+              key={cert.id}
+              cert={cert}
+              index={index}
+              variant="preview"
+            />
           ))}
         </div>
+
+        {/* VIEW ALL BUTTON */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+          className="flex justify-center mt-12"
+        >
+          <Link
+            href="/certifications"
+            className="inline-flex items-center gap-2 bg-transparent border border-[#3B82F6] text-[#3B82F6]
+                       hover:bg-[#3B82F6] hover:text-white text-sm font-medium
+                       px-7 py-3 rounded-lg transition-all duration-300"
+          >
+            View All Certifications ({certifications.length})
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+              />
+            </svg>
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
