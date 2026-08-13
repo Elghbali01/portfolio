@@ -51,7 +51,7 @@ export default function ChatInput({ loading, onSend }: ChatInputProps) {
         </button>
       </div>
       <p className="mt-1.5 text-center text-[10px] text-[#64748B]">
-        AI answers from documented portfolio data only.
+        Answers use Issam&apos;s documented portfolio and CV only.
       </p>
     </div>
   );

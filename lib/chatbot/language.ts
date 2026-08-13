@@ -1,7 +1,7 @@
 import type { ChatLanguage } from "./types";
 
 const ARABIC_SCRIPT = /[\u0600-\u06ff]/;
-const ARABIC_DARIJA = /(?:شنو|واش|ديال|بغيت|عطيني|هضر|معايا|بالدارجة|كيف داير|كيعرف|خدام)/;
+const ARABIC_DARIJA = /(?:شنو|واش(?:\s|$)|ديال|بغيت|عطيني|هضر|معايا|بالدارجة|كيف داير|كيعرف|خدام)/;
 const ARABIZI_DARIJA = /\b(?:salam|slm|labas|kidayr|3lach|chno|wach|huma|aham|dyal|dyalo|3tini|hder|m3aya|darija|kay3ref|y9der|fin|9ra|had|ki dayr)\b/i;
 const FRENCH = /\b(?:bonjour|bonsoir|salut|pourquoi|comment|ann[eé]e|obtenu|profil|poste|serait|int[eé]ressant|projets?|comp[eé]tences?|certif(?:icat)?s?|voir|donne(?:r)?|quel(?:le)?s?|parle|fran[cç]ais)\b/i;
 const ENGLISH = /\b(?:hello|hi|hey|what|which|why|show|tell|does|between|skills?|projects?|certifications?|candidate|stronger|relevant|experience|education)\b/i;

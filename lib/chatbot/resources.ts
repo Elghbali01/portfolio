@@ -37,7 +37,7 @@ const projectResources: ChatResource[] = projects.flatMap((project) => {
 });
 
 const certificateResources: ChatResource[] = certifications.flatMap((cert) => {
-  const url = cert.pdf ?? cert.downloadImage ?? cert.externalUrl;
+  const url = cert.verificationUrl ?? cert.externalUrl ?? cert.pdf ?? cert.downloadImage;
   if (!url) return [];
 
   return [

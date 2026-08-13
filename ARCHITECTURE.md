@@ -180,3 +180,7 @@ Les requêtes réellement conversationnelles passent encore par Groq. `portfolio
 La V3 structure les faits vérifiés du CV public dans `data/profile.ts`, ajoute des métadonnées de domaine et de valeur recruteur dans `data/projects.ts`, et des métadonnées de domaine et pertinence dans `data/certifications.ts`. Le contexte dynamique distingue Backend, Data Science, éducation, projet précis, certification et comparaison.
 
 Les demandes complexes ne passent plus par le fast path de simple liste. Groq reçoit des exigences explicites de conclusion, comparaison, sélection et justification. `lib/chatbot/grounded-reasoning.ts` fournit une synthèse contrôlée pour les scénarios recruteur importants si le modèle 8B omet les preuves ou renvoie un JSON invalide.
+
+## 12. Routeur V4
+
+`query-analysis.ts` extrait les contraintes de sortie et les indices de suivi conversationnel. `entity-resolver.ts` valide les projets et certifications nommés avec des alias prudents. `v4-responses.ts` traite avant les listes génériques les scénarios sûrs : entité précise, fausse prémisse, fait non documenté, preuves croisées, contraintes exactes et langues arabe/Darija. Les synthèses recruteur déjà contrôlées sont maintenant retournées avant Groq afin d'éviter un appel inutile. Groq reste utilisé pour les questions portfolio valides non couvertes, avec un timeout de 15 secondes et aucun retry implicite du SDK ; un seul retry applicatif demeure réservé au JSON invalide.

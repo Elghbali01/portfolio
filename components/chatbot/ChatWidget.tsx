@@ -18,7 +18,7 @@ const welcomeMessage: ChatUiMessage = {
   id: "welcome",
   role: "assistant",
   content:
-    "Hi! I’m Issam’s AI Portfolio Assistant. Ask me about his experience, projects, skills, education, or certifications.",
+    "Hi! I’m Issam’s AI Portfolio Assistant. Ask me about his experience, projects, skills, education, or certifications. My answers are based only on information documented in his portfolio and CV.",
 };
 
 function createMessageId() {
@@ -191,7 +191,7 @@ export default function ChatWidget() {
         className="relative ml-auto flex h-14 items-center gap-2 rounded-2xl border border-[#60A5FA]/40 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] px-4 text-sm font-semibold text-white shadow-xl shadow-blue-500/25 focus:outline-none focus:ring-2 focus:ring-[#93C5FD] focus:ring-offset-2 focus:ring-offset-[#020617]"
       >
         {isOpen ? <X size={20} /> : <MessageCircle size={20} />}
-        {!isOpen && <span className="hidden sm:inline">Ask AI</span>}
+        {!isOpen && <span className="hidden sm:inline">Issam Assistant</span>}
         {!isOpen && <Sparkles size={14} className="text-blue-100" />}
         {!isOpen && unreadCount > 0 && (
           <span

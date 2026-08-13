@@ -79,3 +79,7 @@ An explicit request to continue in English, French, Arabic, or Moroccan Darija i
 The controlled knowledge base now includes verified facts from the public CV, domain metadata for projects, and relevance metadata for certifications. `portfolio-context.ts` selects the relevant domain and content for Backend, Data Science, education, project, certification, and comparison questions. Complex requests containing words such as projects or certifications bypass the simple-list fast path when they ask for a comparison, ranking, candidacy assessment, or explanation.
 
 `grounded-reasoning.ts` guarantees evidence-based answers for key recruiter comparisons and selections when the small Groq model omits requested reasoning or returns invalid JSON. It never introduces facts outside the structured portfolio data.
+
+### V4 intent safety
+
+V4 analyzes response constraints and resolves named projects/certifications before the legacy list fast paths. Trusted deterministic responses protect against false premises, preserve the distinction between “not documented” and “false,” and support recruiter comparisons and conversational follow-ups without unnecessary Groq calls. Run `npm run test:chatbot-v4` to build the application and exercise the 20 regression scenarios plus the conversational test through `/api/chat`.

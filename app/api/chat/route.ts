@@ -6,6 +6,7 @@ import { resolveResources } from "@/lib/chatbot/resources";
 import { resolveLocalIntent } from "@/lib/chatbot/intent-resolver";
 import { resolveResponseLanguage } from "@/lib/chatbot/language";
 import { buildGroundedReasoning } from "@/lib/chatbot/grounded-reasoning";
+import { buildTrustedResponse } from "@/lib/chatbot/v4-responses";
 import type { ChatLanguage, ChatResponse } from "@/lib/chatbot/types";
 import { validateChatRequest } from "@/lib/chatbot/validation";
 
@@ -131,12 +132,31 @@ export async function POST(request: NextRequest) {
     validation.data.message,
     validation.data.preferredLanguage,
   );
+  const trustedResponse = buildTrustedResponse(
+    validation.data.message,
+    language,
+    validation.data.history,
+  );
+  if (trustedResponse) {
+    return NextResponse.json({
+      answer: trustedResponse.answer,
+      language,
+      resources: resolveResources(trustedResponse.resourceIds),
+    } satisfies ChatResponse);
+  }
   const groundedReasoning = buildGroundedReasoning(validation.data.message, language);
   const localResponse = resolveLocalIntent(
     validation.data.message,
     validation.data.preferredLanguage,
   );
   if (localResponse) return NextResponse.json(localResponse);
+  if (groundedReasoning) {
+    return NextResponse.json({
+      answer: groundedReasoning.answer,
+      language,
+      resources: resolveResources(groundedReasoning.resourceIds),
+    } satisfies ChatResponse);
+  }
 
   if (isRateLimited(identifier)) {
     return errorResponse(localizedError("local-limit", language), 429);
@@ -147,7 +167,11 @@ export async function POST(request: NextRequest) {
     return errorResponse(localizedError("configuration", language), 503);
   }
 
-  const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  const client = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+    timeout: 15_000,
+    maxRetries: 0,
+  });
   const context = buildPortfolioContext(validation.data.message);
   const conversation = validation.data.history.map((message) => ({
     role: message.role,
@@ -186,19 +210,7 @@ export async function POST(request: NextRequest) {
       parsed = parseModelResponse(completion.choices[0]?.message.content ?? null, language);
     }
     if (!parsed) {
-      if (groundedReasoning) {
-        return NextResponse.json({
-          answer: groundedReasoning.answer,
-          language,
-          resources: resolveResources(groundedReasoning.resourceIds),
-        } satisfies ChatResponse);
-      }
       throw new Error("The model returned an invalid structured response.");
-    }
-
-    if (groundedReasoning) {
-      parsed.answer = groundedReasoning.answer;
-      parsed.resourceIds = groundedReasoning.resourceIds;
     }
 
     const result: ChatResponse = {

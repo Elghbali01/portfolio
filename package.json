@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:chatbot-v4": "npm run build && node scripts/chatbot-v4-regression.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

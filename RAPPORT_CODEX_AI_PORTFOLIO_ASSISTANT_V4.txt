@@ -1,0 +1,69 @@
+===== RAPPORT CODEX — AI PORTFOLIO ASSISTANT V4 =====
+
+1. Diagnostic précis des bugs V3
+Les fast paths de listes pouvaient intercepter une demande portant sur une entité précise. Les contraintes exactes dépendaient trop du prompt. Le texte utilisateur pouvait influencer le modèle comme s'il s'agissait d'un fait. L'arabe standard pouvait être classé Darija sur une sous-chaîne. Les réponses grounded étaient calculées localement mais un appel Groq était quand même effectué avant leur retour.
+
+2. Cause du problème des fast paths
+Le routeur cherchait project/certification/skill après un filtre de raisonnement lexical, sans étape préalable de résolution et validation d'entité. Il ne possédait pas de représentation typée des contraintes ni de protection déterministe contre les prémisses factuelles non vérifiées.
+
+3. Architecture V4 retenue
+Pipeline : langue -> analyse typée -> résolution d'entité -> réponse trusted déterministe si sûre -> fast path simple -> grounded reasoning recruteur -> Groq pour le reste -> validation JSON -> ressources whitelistées. La V3 est conservée et étendue.
+
+4. Fichiers analysés
+ARCHITECTURE.md, README.md, rapport V3, package.json, app/api/chat/route.ts, tous les fichiers lib/chatbot, components/chatbot, data, sections, pages projects/certifications et composants de certifications.
+
+5. Fichiers créés
+lib/chatbot/query-analysis.ts ; lib/chatbot/entity-resolver.ts ; lib/chatbot/v4-responses.ts ; scripts/chatbot-v4-regression.mjs ; RAPPORT_CODEX_AI_PORTFOLIO_ASSISTANT_V4.txt.
+
+6. Fichiers modifiés
+app/api/chat/route.ts ; lib/chatbot/language.ts ; lib/chatbot/resources.ts ; components/chatbot/ChatWidget.tsx ; components/chatbot/ChatInput.tsx ; package.json ; README.md ; ARCHITECTURE.md.
+
+7. Nouveau fonctionnement du routeur d'intentions
+Les demandes précises passent avant les listes. Les scénarios déterministes et grounded sont servis sans Groq. Les questions portfolio restantes utilisent toujours Groq llama-3.1-8b-instant. Le rate limiter reste appliqué aux appels fournisseur, pas aux réponses locales.
+
+8. Résolution des entités
+Les titres officiels de projects.ts et certifications.ts sont normalisés et comparés avec quelques alias à haute confiance. Une entité nommée inconnue produit « non documenté » sans liste de remplacement. Aucun fuzzy matching risqué n'a été ajouté.
+
+9. Gestion des contraintes de réponse
+ResponseConstraints représente exactCount, maxCount, answerMode, explication requise/interdite, éléments séparés, conclusion d'abord, sélection, comparaison et ordre multilingue. Les cas critiques OUI/NON, exactement trois, séparément et sans explication sont garantis par le code.
+
+10. Protection contre les fausses prémisses
+Une métrique affirmée par l'utilisateur n'entre jamais dans les faits fiables. Le test 94 % est refusé explicitement car cette valeur n'existe pas dans les sources structurées.
+
+11. Gestion "non documenté"
+AWS, Kubernetes, PFE précis, année du bac et entités inconnues utilisent une formulation d'absence de documentation. Le code évite de transformer l'absence de preuve en négation absolue.
+
+12. Gestion du contexte conversationnel
+L'historique validé reste limité à six messages. Il sert uniquement à résoudre le suivi « ces trois preuves ». La réponse est reconstruite depuis les faits officiels ; le contenu historique n'est pas promu comme source de vérité.
+
+13. Français / anglais / arabe / Darija
+Les réponses trusted existent dans les quatre langues. La détection arabe a été corrigée pour ne plus confondre « واش » avec le début du mot arabe « واشرح ». L'arabe standard est naturel ; la Darija conserve un mélange technique compréhensible et naturel.
+
+14. Optimisations Groq et latence
+Les réponses grounded importantes sont retournées avant Groq. Le client a un timeout de 15 s et maxRetries=0 pour éviter les retries implicites ; le retry applicatif unique pour JSON invalide est conservé. Le contexte filtré V3 reste en place. Les 21 régressions n'ont nécessité aucun appel Groq. Aucun test fournisseur générique n'a été forcé afin de ne pas dépendre du quota/réseau.
+
+15. Modifications UI ("Issam Assistant" + message d'accueil)
+Le bouton affiche « Issam Assistant » sur sm et plus, en conservant l'icône seule sur mobile. Le message d'accueil précise portfolio + CV uniquement. Le footer indique la même limite sous une forme courte. Design, animations et accessibilité sont conservés.
+
+16. Gestion des ressources
+Les IDs restent résolus par la whitelist locale, maximum quatre. Les réponses précises ne renvoient que les cartes pertinentes. Les certifications privilégient verificationUrl, puis externalUrl, avant les fichiers locaux.
+
+17. Résultats détaillés des 20 tests
+1 PASS Backend pertinent et justifié. 2 PASS projets Data uniquement. 3 PASS certifications Data/ML pertinentes. 4 PASS choix unique Data Science justifié. 5 PASS bac non documenté. 6 PASS DEUST -> Licence -> Master. 7 PASS stage deux mois, organisme, Fès, Spring Boot/React. 8 PASS Kubernetes professionnel non documenté sans négation absolue. 9 PASS exactement trois preuves séparées. 10 PASS arabe standard et exactement trois. 11 PASS Darija naturelle. 12 PASS réponse exacte NON. 13 PASS refus de confirmer 94 %. 14 PASS AWS stage non documenté, aucun service inventé. 15 PASS certification AWS inconnue sans liste. 16 PASS projet e-commerce inconnu sans liste. 17 PASS preuve Spring Security ciblée. 18 PASS croisement stage/projets Backend. 19 PASS PFE précis non documenté et concis. 20 PASS refus hors scope.
+
+18. Résultat du test conversationnel
+PASS. Après les trois preuves Data Scientist, « laquelle » sélectionne Water Potability et explique son workflow ML documenté.
+
+19. Résultat ESLint
+Succès : 0 erreur. Trois warnings next/no-img-element préexistants dans CertificatePreviewModal.tsx, CertificationCard.tsx et ProjectCard.tsx.
+
+20. Résultat build
+Succès réel avec Next.js 16.1.6 : compilation, TypeScript strict, génération des pages et route dynamique /api/chat. La commande npm run test:chatbot-v4 exécute d'abord ce build puis les 21 tests HTTP ; résultat final 21/21 PASS.
+
+21. Limitations restantes
+Le classifieur déterministe couvre les scénarios critiques mais pas toute formulation imaginable. Les contraintes multilingues sont extraites mais les ordres complexes restent confiés au modèle hors scénarios trusted. Le rate limiter reste en mémoire et non distribué. Aucun test visuel automatisé par navigateur n'a été ajouté ; le layout responsive conserve toutefois exactement les classes existantes et masque toujours le texte sous sm.
+
+22. Recommandations éventuelles pour V5
+Ajouter des tests unitaires directs avec un runner TypeScript, stocker des références structurées aux preuves dans l'historique au lieu de les inférer du texte, généraliser le post-validateur de contraintes aux réponses Groq, et remplacer le rate limiter mémoire par un store partagé lors d'un déploiement multi-instance.
+
+===== FIN RAPPORT =====
