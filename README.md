@@ -73,3 +73,9 @@ The model uses Groq JSON Object Mode. The server validates the returned shape, r
 `lib/chatbot/intent-resolver.ts` handles greetings, CV, projects, certifications, skills, GitHub, LinkedIn, contact, and explicit language switches locally. These requests do not call Groq or consume the local LLM-request quota. Other questions receive a topic-filtered portfolio context before the Groq call.
 
 An explicit request to continue in English, French, Arabic, or Moroccan Darija is kept in the widget state for the current page session. Darija detection supports Arabic script, Latin Arabizi, and common mixed French/Darija phrasing.
+
+### V3 knowledge and reasoning
+
+The controlled knowledge base now includes verified facts from the public CV, domain metadata for projects, and relevance metadata for certifications. `portfolio-context.ts` selects the relevant domain and content for Backend, Data Science, education, project, certification, and comparison questions. Complex requests containing words such as projects or certifications bypass the simple-list fast path when they ask for a comparison, ranking, candidacy assessment, or explanation.
+
+`grounded-reasoning.ts` guarantees evidence-based answers for key recruiter comparisons and selections when the small Groq model omits requested reasoning or returns invalid JSON. It never introduces facts outside the structured portfolio data.

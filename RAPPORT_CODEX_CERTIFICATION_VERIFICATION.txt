@@ -1,0 +1,80 @@
+===== RAPPORT CODEX — CERTIFICATION VERIFICATION =====
+
+1. Fichiers analysés
+
+- data/certifications.ts
+- components/CertificationCard.tsx
+- components/CertificatePreviewModal.tsx
+- app/certifications/page.tsx
+- sections/Certifications.tsx
+- public/certificates/
+- public/certificate-images/
+
+2. Fichiers modifiés
+
+- data/certifications.ts : ajout du champ verificationUrl et mapping des neuf liens fournis.
+- components/CertificationCard.tsx : remplacement des actions Download PDF/PNG par Verify Credential.
+- components/CertificatePreviewModal.tsx : remplacement des téléchargements du footer par Verify Credential.
+
+3. Structure finale de certification
+
+- verificationUrl : URL externe officielle utilisée par la page Certifications.
+- pdf : fichier PDF local conservé.
+- downloadImage : fichier PNG local conservé pour le cas Kaggle.
+- image : aperçu local conservé.
+- externalUrl : lien externe existant conservé pour Java Explorer/LinkedIn.
+- actionType : conservé pour compatibilité avec le code et les usages existants.
+
+4. Mapping : Certification → verificationUrl
+
+- CS250: Python for Data Scientists
+  → https://learn.saylor.org/admin/tool/certificate/index.php?code=6370028377IE
+- Introduction to Machine Learning
+  → https://www.coursera.org/account/accomplishments/verify/DIR3KBKUA04I
+- Introduction to Software Engineering
+  → https://www.coursera.org/account/accomplishments/verify/8PZB8OR69SKL
+- Data Visualization — Kaggle
+  → https://www.kaggle.com/learn/certification/issamelghbali/data-visualization
+- Python for Data Science, AI & Development
+  → https://www.coursera.org/account/accomplishments/verify/5PD92AQ5G8AB
+- Python for Machine Learning — Simplilearn
+  → https://simpli-web.app.link/e/tKHj0iYsz5b
+- Spring — Ecosystem and Core
+  → https://www.coursera.org/account/accomplishments/verify/RJS8ZM9CM5OH
+- Supervised Machine Learning: Regression and Classification
+  → https://www.coursera.org/account/accomplishments/verify/VPFDGE72YVO3
+- The Data Science Profession
+  → http://coursera.org/account/accomplishments/verify/TSI91CN3RIBW
+
+Contrôle réseau représentatif : Saylor HTTP 200, Coursera HTTP 200, Simplilearn HTTP 200 avec redirection valide, LinkedIn HTTP 200. Le lien Kaggle fourni répond actuellement HTTP 404 et doit être confirmé/corrigé par le propriétaire. Il a été conservé exactement comme fourni afin de ne pas inventer une URL.
+
+5. Comportement des PDF/PNG locaux
+
+Aucun fichier n'a été supprimé. Les 9 fichiers de public/certificates/ et les 10 aperçus de public/certificate-images/ sont conservés. Ils restent disponibles pour l'aperçu interne, le chatbot et la sauvegarde du portfolio. La page Certifications ne propose plus leur téléchargement.
+
+6. Comportement Java Explorer
+
+Java Explorer conserve verificationUrl=null et son externalUrl LinkedIn documenté. Son bouton reste View on LinkedIn, ouvert dans un nouvel onglet avec rel="noopener noreferrer". Aucun faux lien Oracle n'a été créé.
+
+7. Ancien comportement — Download PDF / PNG
+
+Les cartes et la modal utilisaient les fichiers locaux et l'attribut download pour afficher Download PDF ou Download PNG.
+
+8. Nouveau comportement — Verify Credential
+
+Toutes les certifications possédant verificationUrl affichent Verify Credential avec une icône de lien externe. Les liens utilisent target="_blank", rel="noopener noreferrer" et un aria-label indiquant l'ouverture dans un nouvel onglet. Aucun attribut download ne subsiste dans la carte ou la modal.
+
+9. Résultat npm run lint
+
+Succès : 0 erreur. Trois warnings préexistants next/no-img-element restent présents dans CertificatePreviewModal.tsx, CertificationCard.tsx et ProjectCard.tsx.
+
+10. Résultat npm run build
+
+Succès : compilation Next.js et TypeScript terminée, /certifications générée correctement.
+
+11. Certification(s) pour lesquelles aucun vrai lien officiel n'est disponible
+
+- Java Explorer / Oracle : aucun lien officiel Oracle fourni. Le lien LinkedIn existant est conservé.
+- Data Visualization / Kaggle : une URL de vérification a été fournie et intégrée, mais elle répond actuellement HTTP 404. Une URL Kaggle valide doit être fournie ou confirmée par le propriétaire.
+
+===== FIN RAPPORT =====

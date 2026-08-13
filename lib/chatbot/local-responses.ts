@@ -7,7 +7,7 @@ import type { ChatLanguage, ChatResponse } from "./types";
 
 export type LocalIntent =
   | "GREETING" | "CV" | "CERTIFICATIONS" | "PROJECTS" | "SKILLS"
-  | "GITHUB" | "LINKEDIN" | "CONTACT" | "LANGUAGE_SWITCH";
+  | "GITHUB" | "LINKEDIN" | "CONTACT" | "LANGUAGE_SWITCH" | "BACCALAUREATE";
 
 const phrase = (language: ChatLanguage, values: Record<ChatLanguage, string>) => values[language];
 
@@ -35,6 +35,13 @@ export function createLocalResponse(
     fr: "Bonjour 👋 Je suis l’assistant IA du portfolio d’Issam. Vous pouvez me poser des questions sur ses projets, compétences, expériences, études ou certifications.",
     ar: "مرحباً 👋 أنا المساعد الذكي لملف عصام المهني. يمكنك سؤالي عن مشاريعه ومهاراته وخبراته ودراسته وشهاداته.",
     darija: "سلام 👋 أنا الـ assistant ديال portfolio ديال Issam. سولني على المشاريع، skills، التجارب، القراية ولا الشهادات ديالو.",
+  }), language);
+
+  if (intent === "BACCALAUREATE") return base(phrase(language, {
+    en: "Issam’s baccalaureate year is not currently documented in the portfolio or his public CV.",
+    fr: "L’année d’obtention du baccalauréat d’Issam n’est actuellement documentée ni dans le portfolio ni dans son CV public.",
+    ar: "سنة حصول عصام على شهادة البكالوريا غير موثقة حالياً في ملفه المهني أو سيرته الذاتية العامة.",
+    darija: "العام اللي خدا فيه Issam الباك ما موثقش دابا لا فالـ portfolio لا فالـ CV العمومي ديالو.",
   }), language);
 
   if (intent === "CV") return base(phrase(language, {

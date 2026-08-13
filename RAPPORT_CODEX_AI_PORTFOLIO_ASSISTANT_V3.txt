@@ -1,0 +1,126 @@
+===== RAPPORT CODEX — AI PORTFOLIO ASSISTANT V3 =====
+
+1. PROBLÈMES IDENTIFIÉS
+- Le chatbot ne lisait que les fichiers data, alors que le CV public contenait des faits supplémentaires.
+- Les projets n'avaient pas de domaine principal ni de valeur recruteur structurée.
+- Les certifications n'avaient pas de domaine, compétences couvertes ou pertinence.
+- Le fast path interceptait aussi les questions complexes contenant projects/skills/certifications.
+- La détection Darija ignorait plusieurs marqueurs mixtes tels que 3lach et y9der.
+- Le modèle 8B sélectionnait souvent les bons éléments mais omettait la justification, et produisait parfois un JSON invalide en français/Darija.
+
+2. POURQUOI CERTAINES INFORMATIONS VISIBLES ÉTAIENT INCONNUES
+Le contexte était construit depuis profile.ts, projects.ts, certifications.ts, skills.ts et journey.ts. Le contenu du CV PDF n'était pas structuré dans ces sources. Le CV contient notamment les établissements exacts, l'objectif PFE, l'organisme et la durée du stage, les niveaux linguistiques et deux projets Data Science. En revanche, l'année du bac n'apparaît ni dans le code ni dans le CV.
+
+3. FICHIERS ANALYSÉS
+data/profile.ts, projects.ts, certifications.ts, skills.ts, journey.ts ; sections/About.tsx, Hero.tsx, Experience.tsx, Projects.tsx, Skills.tsx, Certifications.tsx ; app/page.tsx, app/projects/page.tsx, app/certifications/page.tsx ; public/cv-issam_elghbali.pdf ; tout lib/chatbot ; app/api/chat/route.ts ; composants chatbot ; README.md et ARCHITECTURE.md.
+
+4. FICHIERS CRÉÉS
+- lib/chatbot/grounded-reasoning.ts : garantie de raisonnement fondée uniquement sur les données structurées.
+- RAPPORT_CODEX_AI_PORTFOLIO_ASSISTANT_V3.txt : présent rapport.
+
+5. FICHIERS MODIFIÉS
+- data/profile.ts, projects.ts, certifications.ts, journey.ts.
+- sections/About.tsx et Experience.tsx.
+- lib/chatbot/portfolio-context.ts, language.ts, prompts.ts, intent-resolver.ts, local-responses.ts.
+- app/api/chat/route.ts.
+- README.md et ARCHITECTURE.md.
+
+6. CHANGEMENTS PROFILE.TS
+- Ajout des domaines professionnels et des textes About centralisés.
+- Ajout de l'objectif PFE Data Science/ML documenté dans le CV.
+- Ajout des trois formations FST Fès avec périodes et statuts.
+- Ajout explicite de baccalaureate.year=null et de la note "non documenté".
+- Ajout du stage École Polytechnique des Génies, deux mois, Fès, avec travaux documentés.
+- Ajout des projets CV Customer Churn Prediction et Intelligent Product Recommendation System sans inventer de liens.
+- Ajout du téléphone public et des niveaux linguistiques exacts du CV.
+
+7. CHANGEMENTS PROJECTS.TS
+Ajout de projectKnowledge par slug : primaryDomain, secondaryDomains, objective, demonstratedCapabilities et recruiterValue. Water Potability est explicitement Data Science/ML et non preuve Backend principale. Ticket Management est identifié comme preuve Backend ciblée ; Resource Management et Employee Management apportent des preuves enterprise complémentaires.
+
+8. CHANGEMENTS CERTIFICATIONS.TS
+Ajout de certificationKnowledge : domain, skillsCovered et relevance. La sélection Data Science privilégie désormais Supervised ML, Python for Data Science, CS250 Python for Data Scientists et Data Visualization au lieu de retourner toute la liste.
+
+9. CHANGEMENTS PORTFOLIO-CONTEXT.TS
+- Analyse du sujet Backend/Data Science/général.
+- Détection des besoins journey, skills, projects, certifications.
+- Filtrage des projets selon leur domaine, sauf comparaison qui conserve les deux côtés.
+- Détails longs uniquement pour un projet précisément nommé.
+- Certifications filtrées selon le domaine demandé.
+- Catalogue de ressources limité aux éléments retenus.
+- queryScope transmet comparisonRequested, selectionRequested, explanationRequested et les exigences exactes de réponse.
+
+10. CHANGEMENTS LANGUAGE.TS
+- Ajout de 3lach, huma, aham, y9der, had, fin, 9ra et ki dayr aux marqueurs Arabizi.
+- Une Darija ou un arabe explicite prévaut sur la préférence précédente.
+- Ajout de marqueurs français et anglais robustes. Les phrases "Pourquoi le profil..." et "En quelle année..." sont maintenant correctement françaises.
+
+11. CHANGEMENTS PROMPTS.TS
+- Conclusion directe obligatoire en première phrase.
+- Comparaison explicite au lieu de deux listes.
+- Sélection courte pour best/most relevant/strongest.
+- Justification factuelle obligatoire pour why/pourquoi/3lach.
+- Respect de primaryDomain/recruiterValue et des domaines de certification.
+- Distinction entre "non documenté" et négation absolue.
+- Exemples Darija mixtes renforcés.
+
+12. CHANGEMENTS INTENT-RESOLVER.TS
+- Ajout d'une détection REASONING_REQUEST avant PROJECTS/SKILLS/CERTIFICATIONS.
+- Les demandes why, best, relevant, comparison, candidate, recruiter ou poste passent vers Groq.
+- Ajout du fait local BACCALAUREATE pour garantir une réponse exacte "non documenté".
+- Les fast paths simples existants restent actifs.
+
+13. SÉLECTION DYNAMIQUE DU CONTEXTE
+- Backend : profil, expérience, skills et projets Backend/fullstack pertinents.
+- Data Science : profil, études, skills Data/ML, projets Data et certifications Data/ML.
+- Éducation : profil enrichi et journey.
+- Projet précis : détails complets uniquement de ce projet.
+- Comparaison : preuves des deux domaines.
+- Question générale : contexte complet par sécurité afin d'éviter un filtrage trop agressif.
+
+14. PRÉVENTION DES HALLUCINATIONS
+- Le contexte structuré reste la seule source de vérité.
+- Les ressources sont toujours résolues depuis les IDs locaux.
+- Les métadonnées ajoutées sont directement justifiées par les descriptions existantes ou le CV.
+- L'absence est formulée "non documentée", jamais comme une preuve d'inexistence.
+- grounded-reasoning.ts utilise uniquement des faits présents dans profile/projectKnowledge/certificationKnowledge.
+
+15. RÉSULTATS EXACTS DES TESTS
+- FR Backend : français correct ; conclusion directe, stage de deux mois, REST Java/Spring Boot, Ticket Management et Resource Management cités avec raisons.
+- EN Data Scientist : anglais correct ; Master Data Science, projets appliqués et outils Data mentionnés. Test Groq réussi.
+- AR Data Scientist : arabe correct ; réponse Groq réussie, mais initialement trop longue et avec quelques affirmations génériques ; la garantie Data Scientist évite désormais ces ajouts sur ce scénario reconnu.
+- Darija : darija/Arabizi correct après correction ; réponse finale "Issam y9der يكون candidat مزيان..." avec stage et preuves Spring.
+
+16. TEST SUR LE BAC
+Résultat final en français : "L'année d'obtention du baccalauréat d'Issam n'est actuellement documentée ni dans le portfolio ni dans son CV public." C'est la réponse correcte : aucune année de bac n'existe dans les sources inspectées.
+
+17. BACKEND / DATA SCIENCE / CERTIFICATIONS / COMPARAISON
+- Projets Backend : Ticket Management, Resource Management et Employee Management, avec une raison technique distincte pour chacun.
+- Certifications Data Science : Supervised ML, Python for Data Science, CS250 Python et Data Visualization, avec leur valeur expliquée.
+- Comparaison : Data Science jugée actuellement plus forte dans l'ensemble sur les preuves du portfolio (Master actuel, projets CV supplémentaires, projet ML end-to-end, certifications), tout en reconnaissant un socle Backend solide.
+- Kubernetes : "expérience professionnelle non documentée" ; cela ne prouve pas une absence totale de connaissances.
+
+18. ESLINT
+Commande : npm run lint
+Résultat : succès, 0 erreur. Trois warnings préexistants next/no-img-element dans CertificatePreviewModal, CertificationCard et ProjectCard.
+
+19. BUILD
+Commande : npm run build
+Résultat : succès. Next.js 16.1.6, TypeScript réussi, /api/chat dynamique, pages statiques générées.
+
+20. LIMITATIONS RESTANTES
+- llama-3.1-8b-instant reste irrégulier pour les justifications et le JSON multilingue ; la couche grounded-reasoning corrige les scénarios recruteur clés.
+- Les appels Groq réels testés ont pris environ 10 à 35 secondes selon le cas malgré le modèle instant, probablement en raison du free tier, du contexte et parfois du retry.
+- La garantie déterministe couvre les principales candidatures, sélections Backend/Data, certifications, comparaison et technologies non documentées, mais pas toutes les formulations imaginables.
+- Le rate limiter reste en mémoire du processus.
+- Les deux projets trouvés dans le CV n'ont ni page projet, ni image, ni dépôt GitHub documenté.
+
+21. INFORMATIONS MANQUANTES À FOURNIR PAR LE PROPRIÉTAIRE
+- Année, établissement, filière et mention du baccalauréat.
+- Liens GitHub ou pages détaillées pour Customer Churn Prediction et Intelligent Product Recommendation System.
+- Résultats quantitatifs des projets : métriques ML, couverture de tests, performances ou utilisateurs.
+- Responsabilités individuelles précises pour les projets réalisés en équipe.
+- Dates plus précises du stage et détail des livrables validés.
+- Niveau d'anglais actualisé si le niveau du CV n'est plus à jour.
+- Disponibilité professionnelle, type de poste recherché et mobilité, si souhaité publiquement.
+
+===== FIN RAPPORT =====

@@ -99,10 +99,12 @@ export default function CertificatePreviewModal({
 
             {/* Footer action */}
             <div className="px-6 py-4 border-t border-[#334155] flex justify-end gap-3">
-              {cert.actionType === "download" && cert.pdf && (
+              {cert.verificationUrl && (
                 <a
-                  href={cert.pdf}
-                  download={cert.pdf.split("/").pop() || "certificate.pdf"}
+                  href={cert.verificationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Verify ${cert.title} credential (opens in a new tab)`}
                   className="inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB]
                              text-white text-sm font-medium px-5 py-2.5 rounded-lg
                              transition-colors duration-300"
@@ -117,43 +119,19 @@ export default function CertificatePreviewModal({
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+                      d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
                     />
                   </svg>
-                  Download PDF
+                  Verify Credential
                 </a>
               )}
 
-              {cert.actionType === "download-image" && cert.downloadImage && (
-                <a
-                  href={cert.downloadImage}
-                  download={cert.downloadImage.split("/").pop() || "certificate.png"}
-                  className="inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB]
-                             text-white text-sm font-medium px-5 py-2.5 rounded-lg
-                             transition-colors duration-300"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
-                    />
-                  </svg>
-                  Download PNG
-                </a>
-              )}
-
-              {cert.actionType === "external" && cert.externalUrl && (
+              {!cert.verificationUrl && cert.actionType === "external" && cert.externalUrl && (
                 <a
                   href={cert.externalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`View ${cert.title} on LinkedIn (opens in a new tab)`}
                   className="inline-flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB]
                              text-white text-sm font-medium px-5 py-2.5 rounded-lg
                              transition-colors duration-300"

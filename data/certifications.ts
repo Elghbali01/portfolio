@@ -20,10 +20,31 @@ export type Certification = {
   downloadImage: string | null;
   /** External URL (e.g. LinkedIn) — null for normal downloadable certs */
   externalUrl: string | null;
+  /** Official credential page used by the Certifications UI; local files remain separate. */
+  verificationUrl: string | null;
   /** "download" → has local PDF  |  "download-image" → download PNG  |  "external" → opens external link */
   actionType: "download" | "download-image" | "external";
   /** If true the cert appears in the homepage preview (max 3) */
   featured: boolean;
+};
+
+export interface CertificationKnowledge {
+  domain: "data-science" | "machine-learning" | "software-engineering" | "backend-java";
+  skillsCovered: string[];
+  relevance: string;
+}
+
+export const certificationKnowledge: Record<string, CertificationKnowledge> = {
+  "python-data-science-ai": { domain: "data-science", skillsCovered: ["Python", "Data Science", "AI development"], relevance: "Directly relevant to Python-based Data Science work." },
+  "supervised-ml-regression-classification": { domain: "machine-learning", skillsCovered: ["Supervised learning", "Regression", "Classification"], relevance: "Strong evidence of core supervised Machine Learning foundations." },
+  "introduction-to-software-engineering": { domain: "software-engineering", skillsCovered: ["Software Engineering fundamentals"], relevance: "Supports general software engineering foundations." },
+  "cs250-python-for-data-scientists": { domain: "data-science", skillsCovered: ["Python", "Data Science programming"], relevance: "Relevant evidence of Python usage for Data Science." },
+  "the-data-science-profession": { domain: "data-science", skillsCovered: ["Data Science profession"], relevance: "Demonstrates familiarity with the professional Data Science field." },
+  "spring-ecosystem-and-core": { domain: "backend-java", skillsCovered: ["Spring Framework", "Spring Core"], relevance: "Directly relevant to Java and Spring backend roles." },
+  "introduction-to-machine-learning": { domain: "machine-learning", skillsCovered: ["Machine Learning fundamentals"], relevance: "Relevant foundation for Machine Learning roles." },
+  "java-explorer": { domain: "backend-java", skillsCovered: ["Java foundations"], relevance: "Supports documented Java knowledge for backend development." },
+  "python-for-machine-learning": { domain: "machine-learning", skillsCovered: ["Python", "Machine Learning"], relevance: "Directly relevant to Python-based Machine Learning workflows." },
+  "kaggle-data-visualization": { domain: "data-science", skillsCovered: ["Data Visualization"], relevance: "Relevant to communicating and exploring Data Science results." },
 };
 
 // ---------------------------------------------------------------------------
@@ -49,6 +70,7 @@ export const certifications: Certification[] = [
     ...makePaths("Python_for_Data_Science_AI"),
     downloadImage: null,
     externalUrl: null,
+    verificationUrl: "https://www.coursera.org/account/accomplishments/verify/5PD92AQ5G8AB",
     actionType: "download",
     featured: true,
   },
@@ -60,6 +82,7 @@ export const certifications: Certification[] = [
     ...makePaths("Supervised_ML_Regression_Classification"),
     downloadImage: null,
     externalUrl: null,
+    verificationUrl: "https://www.coursera.org/account/accomplishments/verify/VPFDGE72YVO3",
     actionType: "download",
     featured: true,
   },
@@ -71,6 +94,7 @@ export const certifications: Certification[] = [
     ...makePaths("Introduction_to_Software_Engineering"),
     downloadImage: null,
     externalUrl: null,
+    verificationUrl: "https://www.coursera.org/account/accomplishments/verify/8PZB8OR69SKL",
     actionType: "download",
     featured: true,
   },
@@ -83,6 +107,7 @@ export const certifications: Certification[] = [
     ...makePaths("CS250_Python_for_dataScientist"),
     downloadImage: null,
     externalUrl: null,
+    verificationUrl: "https://learn.saylor.org/admin/tool/certificate/index.php?code=6370028377IE",
     actionType: "download",
     featured: false,
   },
@@ -94,6 +119,7 @@ export const certifications: Certification[] = [
     ...makePaths("The_Data_Science_Profession"),
     downloadImage: null,
     externalUrl: null,
+    verificationUrl: "http://coursera.org/account/accomplishments/verify/TSI91CN3RIBW",
     actionType: "download",
     featured: false,
   },
@@ -105,6 +131,7 @@ export const certifications: Certification[] = [
     ...makePaths("Spring_Ecosystem_and_Core"),
     downloadImage: null,
     externalUrl: null,
+    verificationUrl: "https://www.coursera.org/account/accomplishments/verify/RJS8ZM9CM5OH",
     actionType: "download",
     featured: false,
   },
@@ -116,6 +143,7 @@ export const certifications: Certification[] = [
     ...makePaths("Introduction_to_Machine_Learning"),
     downloadImage: null,
     externalUrl: null,
+    verificationUrl: "https://www.coursera.org/account/accomplishments/verify/DIR3KBKUA04I",
     actionType: "download",
     featured: false,
   },
@@ -129,6 +157,7 @@ export const certifications: Certification[] = [
     downloadImage: null,
     externalUrl:
       "https://www.linkedin.com/posts/issam-elghbali-2937b6258_oracle-java-foundations-activity-7415090851426562048-TlQ-",
+    verificationUrl: null,
     actionType: "external",
     featured: false,
   },
@@ -139,6 +168,7 @@ export const certifications: Certification[] = [
     ...makePaths("SimpliLearn_python_for_ML"),
     downloadImage: null,
     externalUrl: null,
+    verificationUrl: "https://simpli-web.app.link/e/tKHj0iYsz5b",
     actionType: "download",
     featured: false,
   },
@@ -151,6 +181,7 @@ export const certifications: Certification[] = [
     pdf: null,
     downloadImage: "/certificates/Kaglle_data_vis.png",
     externalUrl: null,
+    verificationUrl: "https://www.kaggle.com/learn/certification/issamelghbali/data-visualization",
     actionType: "download-image",
     featured: false,
   },

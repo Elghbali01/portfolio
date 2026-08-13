@@ -174,3 +174,9 @@ Le modèle utilise JSON Object Mode. La route valide strictement `answer`, `lang
 Avant le rate limiter et l'appel Groq, `lib/chatbot/intent-resolver.ts` normalise le message et reconnaît les salutations, CV, certifications, projets, compétences, GitHub, LinkedIn, contact et changements explicites de langue. `local-responses.ts` construit alors une réponse structurée directement depuis `data/` et le catalogue de ressources. Ces réponses sont instantanées et ne consomment aucun quota Groq.
 
 Les requêtes réellement conversationnelles passent encore par Groq. `portfolio-context.ts` sélectionne les sections utiles selon la question afin de ne pas envoyer systématiquement tous les projets, certifications et compétences. Le frontend conserve une préférence linguistique explicite pendant la conversation et affiche un badge animé lorsqu'une réponse arrive pendant que le widget est fermé, avec respect de `prefers-reduced-motion`.
+
+## 11. Knowledge Base V3
+
+La V3 structure les faits vérifiés du CV public dans `data/profile.ts`, ajoute des métadonnées de domaine et de valeur recruteur dans `data/projects.ts`, et des métadonnées de domaine et pertinence dans `data/certifications.ts`. Le contexte dynamique distingue Backend, Data Science, éducation, projet précis, certification et comparaison.
+
+Les demandes complexes ne passent plus par le fast path de simple liste. Groq reçoit des exigences explicites de conclusion, comparaison, sélection et justification. `lib/chatbot/grounded-reasoning.ts` fournit une synthèse contrôlée pour les scénarios recruteur importants si le modèle 8B omet les preuves ou renvoie un JSON invalide.

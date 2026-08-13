@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { profile } from "../data/profile";
 
 export default function About() {
   return (
@@ -22,8 +23,7 @@ export default function About() {
           </h2>
 
           <p className="text-[#94A3B8] mt-4 max-w-3xl mx-auto">
-            A Data Science Master&apos;s student with a strong foundation in Computer
-            Science, passionate about building intelligent and scalable systems.
+            {profile.summary}
           </p>
         </motion.div>
 
@@ -37,33 +37,7 @@ export default function About() {
             viewport={{ once: true }}
             className="space-y-6 text-[#CBD5E1] leading-relaxed"
           >
-            <p>
-              I specialize in{" "}
-              <span className="text-[#3B82F6] font-medium">
-                Machine Learning
-              </span>
-              ,{" "}
-              <span className="text-[#3B82F6] font-medium">
-                Artificial Intelligence
-              </span>
-              , and modern{" "}
-              <span className="text-[#3B82F6] font-medium">
-                Software Engineering
-              </span>
-              .
-            </p>
-
-            <p>
-              My focus is on designing intelligent systems capable of solving
-              real-world challenges through data-driven strategies and scalable
-              architectures.
-            </p>
-
-            <p>
-              Driven by curiosity and continuous learning, I aim to build
-              impactful digital solutions that combine performance, innovation,
-              and real-world value.
-            </p>
+            {profile.about.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
           </motion.div>
 
           {/* RIGHT CARDS */}

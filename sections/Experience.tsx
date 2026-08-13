@@ -54,6 +54,11 @@ export default function Experience() {
                   {item.title}
                 </h3>
 
+                <p className="text-[#CBD5E1] text-xs mb-2">
+                  {item.institution} · {item.location}
+                  {"duration" in item ? ` · ${item.duration}` : ""}
+                </p>
+
                 <p className="text-[#94A3B8] text-sm leading-relaxed">
                   {item.description}
                 </p>

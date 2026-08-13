@@ -12,6 +12,65 @@ export interface Project {
   featured: boolean;
 }
 
+export interface ProjectKnowledge {
+  primaryDomain: "backend" | "data-science" | "frontend" | "fullstack";
+  secondaryDomains: Array<"backend" | "data-science" | "ai-ml" | "frontend" | "data-engineering">;
+  objective: string;
+  demonstratedCapabilities: string[];
+  recruiterValue: string;
+}
+
+export const projectKnowledge: Record<string, ProjectKnowledge> = {
+  "indonesia-tourism": {
+    primaryDomain: "frontend", secondaryDomains: ["frontend"],
+    objective: "Present Indonesia's culture, destinations, and attractions in a responsive tourism website.",
+    demonstratedCapabilities: ["Responsive page structure", "Frontend interaction", "Visual content presentation"],
+    recruiterValue: "Evidence of foundational frontend development and responsive design.",
+  },
+  "resource-platform": {
+    primaryDomain: "fullstack", secondaryDomains: ["backend", "frontend"],
+    objective: "Let professors manage course materials and students access organized academic resources securely.",
+    demonstratedCapabilities: ["Spring Boot REST API", "Authentication", "React state management", "Full-stack integration"],
+    recruiterValue: "Evidence of integrating a Spring Boot backend with a React application.",
+  },
+  "employee-management": {
+    primaryDomain: "backend", secondaryDomains: ["backend", "frontend"],
+    objective: "Manage employees, supervisors, salaries, and role-based access in a three-tier MVC application.",
+    demonstratedCapabilities: ["Layered MVC architecture", "CRUD operations", "Role-based authentication", "JDBC persistence"],
+    recruiterValue: "Direct evidence of enterprise Java/Spring architecture and relational data management.",
+  },
+  "nosql-ml-redis": {
+    primaryDomain: "data-science", secondaryDomains: ["ai-ml", "data-engineering", "backend", "frontend"],
+    objective: "Combine Redis, model training, prediction through a REST API, and a React interface.",
+    demonstratedCapabilities: ["Machine Learning pipeline", "Redis integration", "Prediction API", "React integration"],
+    recruiterValue: "Evidence of connecting an ML model to a broader application architecture.",
+  },
+  "personal-portfolio": {
+    primaryDomain: "frontend", secondaryDomains: ["frontend"],
+    objective: "Present projects, skills, and experience through a responsive and maintainable portfolio.",
+    demonstratedCapabilities: ["Next.js architecture", "TypeScript", "Responsive UI", "Animations", "EmailJS integration"],
+    recruiterValue: "Evidence of modern frontend engineering and component-based organization.",
+  },
+  "ticket-management-system": {
+    primaryDomain: "backend", secondaryDomains: ["backend"],
+    objective: "Provide an enterprise-style REST API for support tickets, users, and ticket workflows.",
+    demonstratedCapabilities: ["Spring Boot REST API", "Controller-Service-Repository layers", "DTO and Mapper patterns", "JPA persistence", "Validation"],
+    recruiterValue: "One of the clearest demonstrations of focused Java backend architecture in the portfolio.",
+  },
+  "resource-management-system": {
+    primaryDomain: "fullstack", secondaryDomains: ["backend", "frontend"],
+    objective: "Manage the complete lifecycle of university hardware resources across multiple actors and workflows.",
+    demonstratedCapabilities: ["Complex multi-actor workflows", "Role-based access control", "Spring Boot REST API", "Spring Security", "Enterprise layered architecture"],
+    recruiterValue: "Strong evidence of handling complex enterprise requirements, security, and backend workflows.",
+  },
+  "water-potability-ml": {
+    primaryDomain: "data-science", secondaryDomains: ["ai-ml"],
+    objective: "Predict water potability while prioritizing the safety risk of classifying unsafe water as potable.",
+    demonstratedCapabilities: ["Data preprocessing", "Model comparison", "Safety-oriented evaluation", "Cross-validation", "Streamlit deployment"],
+    recruiterValue: "Strong evidence of an end-to-end applied Machine Learning workflow, not primarily a backend project.",
+  },
+};
+
 export const projects: Project[] = [
   {
     title: "Indonesia Tourism Website",

@@ -5,6 +5,7 @@ import { CHATBOT_SYSTEM_PROMPT } from "@/lib/chatbot/prompts";
 import { resolveResources } from "@/lib/chatbot/resources";
 import { resolveLocalIntent } from "@/lib/chatbot/intent-resolver";
 import { resolveResponseLanguage } from "@/lib/chatbot/language";
+import { buildGroundedReasoning } from "@/lib/chatbot/grounded-reasoning";
 import type { ChatLanguage, ChatResponse } from "@/lib/chatbot/types";
 import { validateChatRequest } from "@/lib/chatbot/validation";
 
@@ -73,7 +74,11 @@ function localizedError(kind: ErrorKind, language: ChatLanguage): string {
   return messages[kind][language];
 }
 
-function parseModelResponse(content: string | null): {
+function looksLikeDarija(answer: string): boolean {
+  return /[\u0600-\u06ff]/.test(answer) || /\b(?:khoya|chef|khddam|khdam|dyal|3la|7it|wach|kay|f had|mzyan|ghadi)\b/i.test(answer);
+}
+
+function parseModelResponse(content: string | null, expectedLanguage: ChatLanguage): {
   answer: string;
   language: ChatLanguage;
   resourceIds: string[];
@@ -87,7 +92,9 @@ function parseModelResponse(content: string | null): {
       !supportedLanguages.includes(parsed.language as ChatLanguage) ||
       !Array.isArray(parsed.resourceIds) ||
       parsed.resourceIds.length > 4 ||
-      !parsed.resourceIds.every((id) => typeof id === "string")
+      !parsed.resourceIds.every((id) => typeof id === "string") ||
+      parsed.language !== expectedLanguage ||
+      (expectedLanguage === "darija" && !looksLikeDarija(parsed.answer))
     ) return null;
     return {
       answer: parsed.answer.trim(),
@@ -124,6 +131,7 @@ export async function POST(request: NextRequest) {
     validation.data.message,
     validation.data.preferredLanguage,
   );
+  const groundedReasoning = buildGroundedReasoning(validation.data.message, language);
   const localResponse = resolveLocalIntent(
     validation.data.message,
     validation.data.preferredLanguage,
@@ -151,7 +159,10 @@ export async function POST(request: NextRequest) {
       content: `${CHATBOT_SYSTEM_PROMPT}\n\nPORTFOLIO_CONTEXT:\n${JSON.stringify(context)}`,
     },
     ...conversation,
-    { role: "user" as const, content: validation.data.message },
+    {
+      role: "user" as const,
+      content: `${validation.data.message}\n\nMANDATORY RESPONSE INSTRUCTIONS:\n- Write the answer naturally in ${language}${language === "darija" ? " (Moroccan Darija matching the user's Arabizi/mixed style, never French or Modern Standard Arabic)" : ""}.\n- Start with the direct conclusion.\n- If this asks why, for the best items, relevance, candidacy, or a comparison, follow the conclusion with 2–4 concise evidence-based reasons from PORTFOLIO_CONTEXT.\n- Do not merely list names when a justification or comparison was requested.`,
+    },
   ];
 
   try {
@@ -160,22 +171,34 @@ export async function POST(request: NextRequest) {
       messages: retry
         ? [...messages, {
             role: "system" as const,
-            content: "Your previous output was invalid. Return exactly one valid JSON object matching the required keys and types, with no markdown.",
+            content: `Your previous output was invalid. Return exactly one valid JSON object matching the required keys and types, with no markdown. The answer itself must be written naturally in ${language}${language === "darija" ? ", using Moroccan Darija rather than French or Modern Standard Arabic" : ""}. Fully answer any requested comparison, selection, or why question.`,
           }]
         : messages,
       response_format: { type: "json_object" },
       temperature: 0.1,
-      max_tokens: 450,
+      max_tokens: 600,
     });
 
     let completion = await createCompletion();
-    let parsed = parseModelResponse(completion.choices[0]?.message.content ?? null);
+    let parsed = parseModelResponse(completion.choices[0]?.message.content ?? null, language);
     if (!parsed) {
       completion = await createCompletion(true);
-      parsed = parseModelResponse(completion.choices[0]?.message.content ?? null);
+      parsed = parseModelResponse(completion.choices[0]?.message.content ?? null, language);
     }
     if (!parsed) {
+      if (groundedReasoning) {
+        return NextResponse.json({
+          answer: groundedReasoning.answer,
+          language,
+          resources: resolveResources(groundedReasoning.resourceIds),
+        } satisfies ChatResponse);
+      }
       throw new Error("The model returned an invalid structured response.");
+    }
+
+    if (groundedReasoning) {
+      parsed.answer = groundedReasoning.answer;
+      parsed.resourceIds = groundedReasoning.resourceIds;
     }
 
     const result: ChatResponse = {
