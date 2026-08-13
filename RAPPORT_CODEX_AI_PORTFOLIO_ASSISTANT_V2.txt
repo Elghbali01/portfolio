@@ -1,0 +1,157 @@
+===== RAPPORT CODEX — AI PORTFOLIO ASSISTANT V2 =====
+
+1. PROBLÈMES TROUVÉS
+
+- Origine de la lenteur : toutes les requêtes, même "bonjour" ou "cv ?", passaient par Groq. Chaque appel envoyait le prompt, l'historique, toutes les données du profil, les descriptions longues des projets, toutes les compétences, toutes les certifications et le catalogue complet des ressources.
+- Origine des erreurs certifications : la liste structurée existait déjà dans data/certifications.ts mais était reconstruite par le LLM. Les erreurs historiques exactes ne sont pas démontrables sans les anciens logs Groq ; les causes possibles dans le code étaient une limite Groq, une sortie JSON invalide et le second appel de retry. La V2 retire Groq de ce chemin.
+- Origine du message de rate limit observé : dans l'ancienne route, le message "The AI assistant has reached its temporary usage limit" était utilisé uniquement pour un statut 429 renvoyé par Groq. Le limiteur local retournait un autre texte. L'incident observé venait donc du fournisseur Groq.
+- Problème Darija : le prompt ne contenait pas assez d'exemples et la détection dépendait entièrement du modèle, question par question. L'Arabizi et les phrases mélangées français/Darija n'étaient pas explicitement reconnus côté application.
+- Autres problèmes : les erreurs étaient toujours en anglais ; aucune préférence de langue ne persistait ; aucune notification n'était affichée si la réponse arrivait pendant que le widget était fermé ; les compétences principales pouvaient devenir une liste très longue.
+
+2. ARCHITECTURE AVANT
+
+ChatWidget -> POST /api/chat -> validation -> rate limiter local -> contexte complet -> Groq -> JSON Object Mode -> validation JSON -> ressources contrôlées -> frontend.
+
+Toutes les questions valides appelaient Groq. Le contexte complet était envoyé à chaque appel.
+
+3. ARCHITECTURE APRÈS
+
+ChatWidget -> POST /api/chat -> validation -> normalisation -> intent resolver.
+
+- Intent connu : réponse locale structurée -> ressources contrôlées -> frontend.
+- Question IA : rate limiter local -> sélection du contexte utile -> Groq -> JSON Object Mode -> validation stricte -> retry unique si nécessaire -> ressources contrôlées -> frontend.
+
+4. FICHIERS CRÉÉS
+
+- lib/chatbot/language.ts : normalisation, détection anglais/français/arabe/Darija, Arabizi et changements explicites de langue.
+- lib/chatbot/intent-resolver.ts : reconnaissance testable des intentions locales.
+- lib/chatbot/local-responses.ts : réponses structurées construites depuis les données réelles.
+- RAPPORT_CODEX_AI_PORTFOLIO_ASSISTANT_V2.txt : présent rapport transférable à ChatGPT.
+
+5. FICHIERS MODIFIÉS
+
+- app/api/chat/route.ts : fast path avant rate limiting/Groq, erreurs localisées, distinction limite locale/Groq, contexte ciblé et réponse Groq ramenée à 450 tokens.
+- lib/chatbot/types.ts : preferredLanguage dans la requête et languagePreference optionnelle dans la réponse.
+- lib/chatbot/validation.ts : validation stricte de preferredLanguage.
+- lib/chatbot/portfolio-context.ts : sélection des domaines utiles, catalogue de ressources filtré et descriptions longues uniquement pour un projet explicitement ciblé.
+- lib/chatbot/prompts.ts : exemples Darija arabe, Arabizi et mélange français/Darija ; consignes renforcées.
+- components/chatbot/ChatWidget.tsx : préférence de langue, langue initiale du navigateur, badge de réponse non lue et animation courte respectant reduced motion.
+- README.md : documentation du fast path et de la préférence linguistique.
+- ARCHITECTURE.md : architecture V2 documentée.
+
+6. FAST PATH LOCAL
+
+Intentions supportées : GREETING, CV, CERTIFICATIONS, PROJECTS, SKILLS, GITHUB, LINKEDIN, CONTACT et LANGUAGE_SWITCH.
+
+Le message est normalisé puis comparé à des motifs courts français, anglais, arabes et Arabizi. Une réponse ChatResponse complète est construite localement. Ces intentions passent avant le rate limiter réservé aux appels IA : elles ne consomment ni requête Groq, ni token Groq, ni quota local d'appel IA.
+
+7. LATENCE
+
+- Tests HTTP locaux observés : environ 5 à 52 ms selon l'intention.
+- Contexte Groq filtré par sujet : profil, parcours, compétences, projets ou certifications.
+- Catalogue de ressources filtré par sujet.
+- Les projets utilisent shortDescription par défaut ; fullDescription est envoyée seulement quand le message cible un projet identifiable.
+- Historique toujours limité à 6 messages.
+- Sortie Groq réduite de 700 à 450 tokens.
+- Aucun retry pour les fast paths. Pour Groq, un seul retry est conservé uniquement si le JSON est absent ou invalide.
+
+8. CERTIFICATIONS
+
+La liste vient exclusivement de data/certifications.ts. La réponse locale affiche les 10 certifications actuellement présentes avec titre, organisme et date disponible. Les quatre premières cartes sont retournées conformément à la limite UI actuelle. Aucune description inexistante n'est inventée.
+
+9. CV
+
+Les formes "cv", "cv ?", "resume", "show cv", "voir cv", "3tini cv" et équivalents reconnus produisent immédiatement un texte naturel dans la langue active et la ressource vérifiée profile:cv, résolue vers /cv-issam_elghbali.pdf.
+
+10. SKILLS
+
+- "Principales compétences" : 10 compétences clés groupées en Backend, Data Science et AI / Machine Learning.
+- "Toutes les compétences" / "all skills" : listes complètes issues de data/skills.ts.
+- Aucune compétence n'est inventée.
+
+11. DARIJA
+
+- Détection arabe : mots comme شنو, واش, ديال, بغيت, هضر, كيعرف.
+- Détection Arabizi : salam, labas, kidayr, chno, wach, dyal, 3tini, hder, m3aya, kay3ref, fin 9ra.
+- Les formes 3=ع, 7=ح et 9=ق sont documentées dans le prompt.
+- Les phrases mixtes comme "chno les projets dyalo" sont reconnues comme Darija.
+- "hder m3aya b darija" renvoie languagePreference=darija ; ChatWidget conserve ensuite cette préférence.
+- La langue initiale des messages ambigus comme "cv ?" suit la langue du navigateur.
+
+12. RATE LIMIT
+
+- Limite locale conservée : 10 appels IA par minute et par IP dans la mémoire du processus.
+- Les fast paths ne sont pas comptabilisés.
+- Limite locale : HTTP 429 avec un message naturel du type "Vous envoyez des messages un peu trop rapidement...".
+- Limite Groq : réponse visiteur distincte "Le service IA est temporairement occupé...".
+- Les erreurs sont localisées en anglais, français, arabe ou Darija.
+- Le test automatisé répétitif du rate limiter a expiré au niveau du script PowerShell ; le serveur temporaire a ensuite été identifié et arrêté proprement. Cette répétition doit être revérifiée manuellement.
+
+13. NOTIFICATION UI
+
+- Si une réponse ou erreur arrive quand le chat est fermé, unreadCount augmente.
+- Le bouton effectue une animation courte et affiche un badge 1, 2, etc. (9+ au maximum visuel).
+- À l'ouverture, le compteur est remis à zéro.
+- Si le chat est ouvert, aucune notification n'est ajoutée.
+- useReducedMotion désactive l'animation de notification pour les utilisateurs concernés.
+
+14. MODÈLE GROQ
+
+- Modèle conservé : llama-3.1-8b-instant.
+- Raisons : disponible, faible latence, JSON Object Mode, contexte large et quotas free tier favorables.
+- Aucun passage automatique à un modèle plus coûteux.
+- Un modèle plus grand pourrait améliorer certaines nuances Darija, mais augmenterait la consommation et n'est pas nécessaire avant les tests réels de cette V2.
+
+15. TESTS
+
+bonjour : réussi, français, local, 0 ressource, environ 52 ms au premier appel.
+cv : réussi, local, 1 carte CV, environ 5 ms. Avec préférence française du navigateur, le texte est français.
+certifications : réussi, liste des 10 entrées réelles, 4 cartes, environ 17 ms.
+projets : réussi, projets principaux issus de data/projects.ts, environ 16 ms.
+skills : réussi, liste courte groupée, environ 11 ms.
+français : réussi.
+anglais : réussi, "hello" environ 7 ms.
+arabe : réussi pour les compétences principales, environ 13 ms.
+Darija arabe : logique de détection et réponses locales validées.
+Darija Arabizi : réussi pour "salam", "3tini cv" et "chno homa les projets dyal Issam", environ 6 à 23 ms.
+Switch Darija : réussi ; languagePreference=darija puis réponse skills en Darija.
+Kubernetes : chemin Groq et contexte skills vérifiés statiquement ; test fournisseur réel non exécuté car GROQ_API_KEY n'est pas configurée dans .env.local.
+Prompt injection : protections du prompt conservées et renforcées ; test fournisseur réel non exécuté sans GROQ_API_KEY.
+API key absente : la route renvoie une erreur de configuration localisée sans exposer de secret.
+
+16. ESLINT
+
+Commande : npm run lint
+Résultat : succès, 0 erreur. Trois avertissements préexistants next/no-img-element dans CertificatePreviewModal.tsx, CertificationCard.tsx et ProjectCard.tsx.
+
+17. BUILD
+
+Commande : npm run build
+Résultat : succès. Compilation Next.js 16.1.6, TypeScript réussi, pages statiques générées et /api/chat reconnue comme route dynamique.
+
+18. LIMITATIONS RESTANTES
+
+- Une vraie GROQ_API_KEY est nécessaire pour tester les réponses non locales, Kubernetes, prompt injection et les limites réelles Groq.
+- Le rate limiter local est en mémoire : il n'est pas partagé entre plusieurs instances serverless.
+- Seules quatre cartes sont affichées par réponse, même si la liste textuelle contient davantage d'éléments.
+- data/certifications.ts ne contient pas de description détaillée des cours ; la V2 n'en invente pas.
+- La préférence linguistique vit dans l'état React de la page, sans stockage serveur ni sessionStorage.
+- Le test répétitif PowerShell de la limite locale a expiré et doit être refait manuellement.
+
+19. CE QUE JE DOIS TESTER MANUELLEMENT MAINTENANT
+
+1. Remplacer OPENAI_API_KEY par GROQ_API_KEY dans .env.local puis redémarrer npm run dev.
+2. Tester les questions Kubernetes et prompt injection.
+3. Tester une conversation longue après "hder m3aya b darija".
+4. Fermer le widget pendant une vraie réponse Groq et vérifier le badge.
+5. Envoyer plus de 10 questions non locales en moins d'une minute pour confirmer le message de limite locale.
+6. Contrôler les limites Groq dans la console Groq et provoquer éventuellement un 429 en environnement de test.
+7. Vérifier Darija arabe et Arabizi avec plusieurs formulations personnelles.
+
+20. VERDICT FINAL
+
+- V2 terminée : oui pour l'implémentation, les fast paths, l'UX, lint et build.
+- Chatbot prêt pour tests réels : oui, après ajout de GROQ_API_KEY.
+- Validation fournisseur complète : non tant qu'aucune clé Groq réelle n'est disponible localement.
+
+===== FIN RAPPORT =====

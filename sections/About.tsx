@@ -22,7 +22,7 @@ export default function About() {
           </h2>
 
           <p className="text-[#94A3B8] mt-4 max-w-3xl mx-auto">
-            A Data Science Master's student with a strong foundation in Computer
+            A Data Science Master&apos;s student with a strong foundation in Computer
             Science, passionate about building intelligent and scalable systems.
           </p>
         </motion.div>

@@ -34,3 +34,42 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## AI Portfolio Assistant
+
+The portfolio includes a multilingual AI assistant available on every page. It answers questions in English, French, Modern Standard Arabic, and Moroccan Darija using only the documented portfolio content.
+
+### Setup
+
+Copy `.env.example` to `.env.local` and add a server-side Groq API key:
+
+```env
+GROQ_API_KEY=your_key_here
+```
+
+Never prefix this key with `NEXT_PUBLIC_`. Install and start the project normally:
+
+```bash
+npm install
+npm run dev
+```
+
+### Architecture
+
+- `components/chatbot/` contains the floating widget, messages, input, and resource cards.
+- `app/api/chat/route.ts` validates requests and calls Groq from the server using the open-source `llama-3.1-8b-instant` model.
+- `lib/chatbot/` builds the controlled context, prompt, resource catalog, types, and validation.
+- `data/profile.ts` contains profile facts that are not already represented elsewhere.
+- Existing projects, certifications, skills, and journey entries are read directly from `data/` as the source of truth.
+
+To update the assistant's knowledge, edit the relevant file in `data/`. New project and certification resources are derived automatically from their existing URLs and public assets. Add other verified resources to `lib/chatbot/resources.ts`.
+
+The current rate limiter is deliberately lightweight and process-local. Replace it with a shared store such as Redis before deploying across multiple production instances at scale.
+
+The model uses Groq JSON Object Mode. The server validates the returned shape, retries once when JSON is invalid, and resolves resource IDs through the controlled local catalog. Groq free-tier limits may change; consult the Limits page in your Groq Console for the quota attached to your account.
+
+### Fast path and language preference
+
+`lib/chatbot/intent-resolver.ts` handles greetings, CV, projects, certifications, skills, GitHub, LinkedIn, contact, and explicit language switches locally. These requests do not call Groq or consume the local LLM-request quota. Other questions receive a topic-filtered portfolio context before the Groq call.
+
+An explicit request to continue in English, French, Arabic, or Moroccan Darija is kept in the widget state for the current page session. Darija detection supports Arabic script, Latin Arabizi, and common mixed French/Darija phrasing.

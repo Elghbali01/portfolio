@@ -256,7 +256,11 @@ export default function Skills() {
             opacity: star.opacity,
           }}
           animate={{ opacity: [star.opacity, star.opacity * 0.3, star.opacity] }}
-          transition={{ duration: 2 + Math.random() * 3, repeat: Infinity, delay: Math.random() * 2 }}
+          transition={{
+            duration: 2 + (star.id % 6) * 0.5,
+            repeat: Infinity,
+            delay: (star.id % 5) * 0.4,
+          }}
         />
       ))}
 

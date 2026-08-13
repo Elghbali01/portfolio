@@ -55,7 +55,7 @@ export default function Hero() {
 
         {/* TEXT SIDE */}
         <div className="space-y-6 text-center md:text-left">
-          <p className="text-[#94A3B8] tracking-wide text-lg">Hi, I'm</p>
+          <p className="text-[#94A3B8] tracking-wide text-lg">Hi, I&apos;m</p>
 
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold leading-tight">
             Issam <span className="text-[#3B82F6]">Elghbali</span>

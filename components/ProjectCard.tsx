@@ -12,6 +12,7 @@ export default function ProjectCard({ project, index }: ProjectCardProps) {
   return (
     <motion.div
       key={project.slug}
+      id={project.slug}
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}

@@ -1,0 +1,176 @@
+# Architecture du portfolio
+
+Ce document décrit l'état actuel du projet et sert de référence avant l'ajout d'un chatbot.
+
+## 1. Vue d'ensemble
+
+Le projet est un portfolio personnel construit avec :
+
+- Next.js 16.1.6 et son App Router ;
+- React 19.2.3 et TypeScript 5 en mode strict ;
+- Tailwind CSS 4 pour les styles ;
+- Framer Motion pour les animations ;
+- EmailJS pour l'envoi du formulaire de contact ;
+- Lucide React et React Icons pour les icônes.
+
+L'application utilise maintenant une Route Handler Next.js pour son assistant IA. Elle ne contient toujours ni backend séparé, ni base de données, ni système d'authentification.
+
+## 2. Arborescence utile
+
+```text
+portfolio/
+|-- app/                         # Routes et mise en page Next.js
+|   |-- layout.tsx               # Layout racine, polices et métadonnées SEO
+|   |-- page.tsx                 # Page d'accueil et assemblage des sections
+|   |-- globals.css              # Tailwind, couleurs et styles globaux
+|   |-- favicon.ico              # Icône du site
+|   |-- projects/
+|   |   `-- page.tsx             # Page contenant tous les projets
+|   `-- certifications/
+|       `-- page.tsx             # Page contenant toutes les certifications
+|   `-- api/chat/route.ts         # Endpoint serveur sécurisé du chatbot
+|-- components/                  # Composants réutilisables de l'interface
+|   |-- AnimatedBackground.tsx   # Arrière-plan animé partagé
+|   |-- CertificatePreviewModal.tsx # Fenêtre de prévisualisation d'un certificat
+|   |-- CertificationCard.tsx    # Carte de certification
+|   |-- Footer.tsx               # Pied de page
+|   |-- IntroAnimation.tsx       # Animation d'introduction
+|   |-- LoadingScreen.tsx        # Écran de chargement initial
+|   |-- Navbar.tsx               # Navigation principale
+|   |-- ProjectCard.tsx          # Carte de projet
+|   `-- RotatingText.tsx         # Texte animé de la section Hero
+|-- sections/                    # Grandes sections de la page d'accueil
+|   |-- Hero.tsx                 # Présentation principale
+|   |-- About.tsx                # Profil et spécialités
+|   |-- Projects.tsx             # Sélection des projets vedettes
+|   |-- Skills.tsx               # Compétences techniques
+|   |-- Certifications.tsx       # Certifications vedettes
+|   |-- Experience.tsx           # Parcours académique et professionnel
+|   `-- Contact.tsx              # Formulaire envoyé avec EmailJS
+|-- data/                        # Contenu structuré séparé de l'interface
+|   |-- projects.ts              # 9 projets et liste des projets vedettes
+|   |-- certifications.ts        # 11 certifications et liste vedette
+|   |-- skills.ts                # Compétences dev, data et IA/ML
+|   `-- journey.ts               # 4 étapes du parcours
+|-- public/                      # Fichiers accessibles directement par URL
+|   |-- profile.jpg              # Photo de profil
+|   |-- cv-issam_elghbali.pdf    # CV téléchargeable
+|   |-- *.png / *.svg            # Images des projets et icônes statiques
+|   |-- certificate-images/      # Aperçus des certificats
+|   `-- certificates/            # Certificats PDF ou image à ouvrir
+|-- lib/                         # Dossier vide, prévu pour la logique partagée
+|   `-- chatbot/                 # Contexte, prompt, ressources, types et validation
+|-- .env.local                   # Identifiants publics EmailJS, non versionnés
+|-- package.json                 # Dépendances et scripts npm
+|-- next.config.ts               # Configuration Next.js (actuellement minimale)
+|-- tsconfig.json                # Configuration TypeScript et alias @/*
+|-- postcss.config.mjs           # Intégration Tailwind/PostCSS
+|-- eslint.config.mjs            # Règles ESLint Next.js
+|-- README.md                    # Documentation initiale du projet
+`-- ARCHITECTURE.md              # Le présent document
+```
+
+Les dossiers `node_modules/` et `.next/` sont générés automatiquement. Ils ne font pas partie du code métier et ne doivent pas être modifiés manuellement. Le fichier `tsconfig.tsbuildinfo` est également un cache généré par TypeScript.
+
+## 3. Routes actuelles
+
+| URL | Fichier | Rôle |
+|---|---|---|
+| `/` | `app/page.tsx` | Page principale composée de toutes les sections |
+| `/projects` | `app/projects/page.tsx` | Liste complète des projets |
+| `/certifications` | `app/certifications/page.tsx` | Liste complète et aperçu des certifications |
+
+La page d'accueil affiche les éléments dans cet ordre : arrière-plan, barre de navigation, Hero, About, Projects, Skills, Certifications, Experience, Contact et Footer. Un écran de chargement est affiché une seule fois par session grâce à `sessionStorage`.
+
+## 4. Organisation et flux des données
+
+```text
+data/*.ts
+   |
+   v
+sections/*.tsx ou app/*/page.tsx
+   |
+   v
+components/*.tsx
+   |
+   v
+Interface affichée dans le navigateur
+```
+
+- `data/projects.ts` alimente la section des projets, la page `/projects` et `ProjectCard`.
+- `data/certifications.ts` alimente la section des certifications, la page `/certifications`, `CertificationCard` et `CertificatePreviewModal`.
+- `data/skills.ts` alimente directement la section `Skills`.
+- `data/journey.ts` alimente la section `Experience`.
+- Les images référencées dans ces données sont servies depuis `public/`.
+- Le formulaire `Contact` appelle directement EmailJS depuis le navigateur avec les variables `NEXT_PUBLIC_EMAILJS_SERVICE_ID`, `NEXT_PUBLIC_EMAILJS_TEMPLATE_ID` et `NEXT_PUBLIC_EMAILJS_PUBLIC_KEY`.
+
+La majorité des pages et composants sont des Client Components (`"use client"`) parce qu'ils utilisent des animations, des événements, le stockage de session ou un état React. `app/layout.tsx` reste un Server Component et fournit les métadonnées globales.
+
+## 5. Limites actuelles importantes
+
+- Aucun stockage persistant : les conversations ne peuvent pas encore être sauvegardées.
+- Les variables EmailJS commencent par `NEXT_PUBLIC_` et sont donc volontairement visibles côté navigateur. Une future clé d'API d'IA ne doit jamais utiliser ce préfixe.
+- La limite de requêtes est stockée en mémoire du processus et devra être remplacée par un stockage partagé pour un déploiement distribué à grande échelle.
+
+## 6. Architecture du chatbot
+
+L'intégration ajoute les éléments suivants :
+
+```text
+app/
+`-- api/
+    `-- chat/
+        `-- route.ts             # Endpoint serveur : validation et appel au modèle
+components/
+`-- chatbot/
+    |-- ChatWidget.tsx           # Bouton flottant et fenêtre du chat
+    |-- ChatMessages.tsx         # Historique visuel des messages
+    `-- ChatInput.tsx            # Saisie et envoi
+lib/
+`-- chatbot/
+    |-- portfolio-context.ts     # Contexte fiable extrait du portfolio
+    |-- prompts.ts               # Instructions système du chatbot
+    `-- types.ts                 # Types Message, Request et Response
+```
+
+Flux recommandé :
+
+```text
+Visiteur -> ChatWidget -> POST /api/chat -> fournisseur IA
+                              |
+                              `-> contexte contrôlé du portfolio
+```
+
+Principes à respecter lors de l'implémentation :
+
+1. Garder la clé Groq dans la variable serveur `GROQ_API_KEY`, sans `NEXT_PUBLIC_`.
+2. Effectuer l'appel au modèle uniquement dans `app/api/chat/route.ts`.
+3. Donner au modèle un contexte construit depuis les données réelles du portfolio pour limiter les réponses inventées.
+4. Valider la taille et la forme des messages reçus par l'API.
+5. Ajouter une limite de requêtes avant la mise en production pour contrôler les abus et les coûts.
+6. Monter `ChatWidget` dans `app/layout.tsx` si le chatbot doit être disponible sur toutes les pages, ou dans `app/page.tsx` s'il doit rester limité à l'accueil.
+
+## 7. Scripts disponibles
+
+| Commande | Utilité |
+|---|---|
+| `npm run dev` | Lance le serveur de développement |
+| `npm run build` | Produit et vérifie la version de production |
+| `npm run start` | Lance la version déjà compilée |
+| `npm run lint` | Analyse le code avec ESLint |
+
+## 8. Résumé pour la prochaine étape
+
+Le projet possède une séparation simple et saine : `app/` définit les routes, `sections/` compose l'accueil, `components/` contient les briques réutilisables, `data/` contient le contenu et `public/` les ressources. Le chatbot devra ajouter une petite couche serveur sécurisée et un composant d'interface, sans modifier cette organisation principale.
+
+## 9. Fournisseur IA actuel
+
+Le chatbot appelle Groq exclusivement depuis `app/api/chat/route.ts` avec le modèle open-source `llama-3.1-8b-instant`. La clé privée est fournie par `GROQ_API_KEY` et ne doit jamais être préfixée par `NEXT_PUBLIC_`.
+
+Le modèle utilise JSON Object Mode. La route valide strictement `answer`, `language` et `resourceIds`, retente une seule fois une sortie invalide, puis transforme uniquement les identifiants connus en ressources locales vérifiées. Le rate limiting, la limitation de l'historique et les protections contre les hallucinations et prompt injections restent actifs.
+
+## 10. Fast path V2
+
+Avant le rate limiter et l'appel Groq, `lib/chatbot/intent-resolver.ts` normalise le message et reconnaît les salutations, CV, certifications, projets, compétences, GitHub, LinkedIn, contact et changements explicites de langue. `local-responses.ts` construit alors une réponse structurée directement depuis `data/` et le catalogue de ressources. Ces réponses sont instantanées et ne consomment aucun quota Groq.
+
+Les requêtes réellement conversationnelles passent encore par Groq. `portfolio-context.ts` sélectionne les sections utiles selon la question afin de ne pas envoyer systématiquement tous les projets, certifications et compétences. Le frontend conserve une préférence linguistique explicite pendant la conversation et affiche un badge animé lorsqu'une réponse arrive pendant que le widget est fermé, avec respect de `prefers-reduced-motion`.
