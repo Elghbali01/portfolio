@@ -14,7 +14,7 @@ export function buildGroundedReasoning(message: string, language: ChatLanguage):
   const dataScience = /data science|data scientist|علم البيانات/.test(text);
   const projects = /project|projet|مشروع|مشاريع/.test(text);
   const certifications = /certif|certificate|شهاد/.test(text);
-  const comparison = /between|compar|stronger|plus fort|أقوى/.test(text);
+  const comparison = /between|compar|stronger|plus fort|backend (?:ou|or) data science|choisis|choose|أقوى/.test(text);
   const candidacy = /candidate|candidat|poste|role|profil|مرشح|مناسب/.test(text);
 
   if (/kubernetes|cyber ?security|cybers[eé]curit[eé]/.test(text)) return {

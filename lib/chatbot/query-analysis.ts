@@ -58,7 +58,7 @@ export function analyzeQuery(message: string): QueryAnalysis {
       comparisonRequired: /compar|backend ou data science|backend or data science/.test(normalized),
       multilingualOrder: /français puis (?:en )?anglais|french then english/.test(normalized) ? ["fr", "en"] : [],
     },
-    isFollowUp: /ces (?:trois|3)|these (?:three|3)|parmi (?:eux|elles|ces)|among them/.test(normalized),
+    isFollowUp: /ces (?:trois|3)|these (?:three|3)|parmi (?:eux|elles|ces)|among them|laquelle est la plus forte|which (?:one )?is (?:the )?strongest/.test(normalized),
     hasUserAssertedMetric: /\b\d+(?:[.,]\d+)?\s*%/.test(message),
     domains: [
       ...(normalized.includes("backend") || /java|spring/.test(normalized) ? ["backend" as const] : []),

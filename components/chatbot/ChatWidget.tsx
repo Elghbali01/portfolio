@@ -136,7 +136,7 @@ export default function ChatWidget() {
                   <Bot size={19} />
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold">Ask Issam’s AI Assistant</h2>
+                  <h2 className="text-sm font-semibold">Issam Assistant</h2>
                   <p className="flex items-center gap-1 text-[11px] text-[#94A3B8]">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Portfolio guide
                   </p>

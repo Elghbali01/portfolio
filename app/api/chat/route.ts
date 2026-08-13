@@ -3,10 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { buildPortfolioContext } from "@/lib/chatbot/portfolio-context";
 import { CHATBOT_SYSTEM_PROMPT } from "@/lib/chatbot/prompts";
 import { resolveResources } from "@/lib/chatbot/resources";
-import { resolveLocalIntent } from "@/lib/chatbot/intent-resolver";
+import { identifyLocalIntent, resolveLocalIntent } from "@/lib/chatbot/intent-resolver";
 import { resolveResponseLanguage } from "@/lib/chatbot/language";
 import { buildGroundedReasoning } from "@/lib/chatbot/grounded-reasoning";
 import { buildTrustedResponse } from "@/lib/chatbot/v4-responses";
+import { createLocalResponse, type LocalIntent } from "@/lib/chatbot/local-responses";
+import { routeSemantically, type SemanticIntent, type SemanticRouterResult } from "@/lib/chatbot/semantic-router";
 import type { ChatLanguage, ChatResponse } from "@/lib/chatbot/types";
 import { validateChatRequest } from "@/lib/chatbot/validation";
 
@@ -18,6 +20,30 @@ const requestLog = new Map<string, number[]>();
 
 const GROQ_MODEL = "llama-3.1-8b-instant";
 const supportedLanguages: ChatLanguage[] = ["en", "fr", "ar", "darija"];
+const semanticLocalIntents: Partial<Record<SemanticIntent, LocalIntent>> = {
+  GREETING: "GREETING", CV: "CV", GITHUB: "GITHUB", LINKEDIN: "LINKEDIN",
+  CONTACT: "CONTACT", PROJECTS: "PROJECTS", CERTIFICATIONS: "CERTIFICATIONS", SKILLS: "SKILLS",
+};
+
+function clarificationResponse(language: ChatLanguage): ChatResponse {
+  const answers: Record<ChatLanguage, string> = {
+    en: "Of course. Which of Issam's projects would you like to know about?",
+    fr: "Bien sûr. De quel projet d'Issam souhaitez-vous parler ?",
+    ar: "بالتأكيد. عن أي مشروع من مشاريع عصام تريد أن تعرف؟",
+    darija: "أكيد. على أنهي projet ديال Issam بغيتي تعرف؟",
+  };
+  return { answer: answers[language], language, resources: [] };
+}
+
+function outOfScopeResponse(language: ChatLanguage): ChatResponse {
+  const answers: Record<ChatLanguage, string> = {
+    en: "I can only answer questions about Issam using his documented portfolio and CV.",
+    fr: "Je peux uniquement répondre aux questions sur Issam à partir de son portfolio et de son CV documentés.",
+    ar: "يمكنني الإجابة فقط عن الأسئلة المتعلقة بعصام اعتماداً على ملفه وسيرته الذاتية الموثقين.",
+    darija: "نقدر نجاوب غير على الأسئلة على Issam انطلاقاً من الـ portfolio والـ CV الموثقين ديالو.",
+  };
+  return { answer: answers[language], language, resources: [] };
+}
 
 function isRateLimited(identifier: string): boolean {
   const now = Date.now();
@@ -149,15 +175,12 @@ export async function POST(request: NextRequest) {
     validation.data.message,
     validation.data.preferredLanguage,
   );
-  if (localResponse) return NextResponse.json(localResponse);
-  if (groundedReasoning) {
-    return NextResponse.json({
-      answer: groundedReasoning.answer,
-      language,
-      resources: resolveResources(groundedReasoning.resourceIds),
-    } satisfies ChatResponse);
+  if (localResponse) {
+    const localIntent = identifyLocalIntent(validation.data.message)?.intent ?? "LOCAL";
+    return NextResponse.json(localResponse, {
+      headers: { "x-chat-source": "local", "x-chat-intent": localIntent },
+    });
   }
-
   if (isRateLimited(identifier)) {
     return errorResponse(localizedError("local-limit", language), 429);
   }
@@ -169,9 +192,96 @@ export async function POST(request: NextRequest) {
 
   const client = new Groq({
     apiKey: process.env.GROQ_API_KEY,
-    timeout: 15_000,
+    timeout: 8_000,
     maxRetries: 0,
   });
+  const totalStartedAt = performance.now();
+  const routerStartedAt = performance.now();
+  let semanticRoute: SemanticRouterResult | null;
+  try {
+    semanticRoute = await routeSemantically(client, validation.data.message, validation.data.history, validation.data.preferredLanguage);
+  } catch (error) {
+    console.error("Semantic router failed:", error instanceof Error ? error.message : "Unknown error");
+    semanticRoute = null;
+  }
+  const routerLatencyMs = Math.round(performance.now() - routerStartedAt);
+
+  const logLatency = (route: string, generationLatencyMs = 0) => console.info("Chat latency", {
+    routerLatencyMs,
+    generationLatencyMs,
+    totalLatencyMs: Math.round(performance.now() - totalStartedAt),
+    route,
+  });
+
+  if (!semanticRoute || semanticRoute.confidence < 0.6) {
+    if (groundedReasoning) {
+      logLatency("router-grounded-fallback");
+      return NextResponse.json({
+        answer: groundedReasoning.answer,
+        language,
+        resources: resolveResources(groundedReasoning.resourceIds),
+      } satisfies ChatResponse, { headers: { "x-chat-source": "grounded-fallback" } });
+    }
+    // Preserve the pre-V4.2 safe behavior: if classification failed but no
+    // deterministic answer exists, attempt the normal grounded generator.
+    semanticRoute = {
+      language,
+      intent: "PORTFOLIO_QUESTION",
+      confidence: 1,
+      domain: "general",
+      entityType: null,
+      entityName: null,
+      route: "REASONING",
+      clarificationReason: null,
+    };
+  }
+
+  // A high-confidence deterministic reasoning match is also a validator: the
+  // semantic router may not downgrade it to an unrelated simple local intent.
+  if (groundedReasoning && semanticRoute.route === "LOCAL") {
+    semanticRoute = {
+      ...semanticRoute,
+      intent: "RECRUITER_REASONING",
+      route: "REASONING",
+      clarificationReason: null,
+    };
+  }
+
+  const responseLanguage = groundedReasoning ? language : semanticRoute.intent === "GREETING"
+    ? resolveResponseLanguage(validation.data.message, validation.data.preferredLanguage ?? semanticRoute.language)
+    : semanticRoute.language;
+  const mappedLocalIntent = semanticLocalIntents[semanticRoute.intent];
+  if (semanticRoute.route === "LOCAL" && mappedLocalIntent) {
+    logLatency("semantic-local");
+    return NextResponse.json(createLocalResponse(mappedLocalIntent, responseLanguage), {
+      headers: { "x-chat-source": "semantic-local", "x-chat-intent": semanticRoute.intent },
+    });
+  }
+  if (semanticRoute.route === "LOCAL" && semanticRoute.intent === "OUT_OF_SCOPE") {
+    logLatency("out-of-scope");
+    return NextResponse.json(outOfScopeResponse(responseLanguage), {
+      headers: { "x-chat-source": "semantic-local", "x-chat-intent": semanticRoute.intent },
+    });
+  }
+  if (semanticRoute.route === "CLARIFICATION") {
+    logLatency("clarification");
+    return NextResponse.json(clarificationResponse(responseLanguage), {
+      headers: { "x-chat-source": "semantic-clarification", "x-chat-intent": semanticRoute.intent },
+    });
+  }
+  if (semanticRoute.intent === "ENTITY_DETAIL" && semanticRoute.entityName) {
+    const entityResponse = buildTrustedResponse(semanticRoute.entityName, responseLanguage, validation.data.history);
+    if (entityResponse) {
+      logLatency("semantic-entity");
+      return NextResponse.json({
+        answer: entityResponse.answer,
+        language: responseLanguage,
+        resources: resolveResources(entityResponse.resourceIds),
+      } satisfies ChatResponse, { headers: { "x-chat-source": "semantic-local", "x-chat-intent": semanticRoute.intent } });
+    }
+  }
+
+  const generationClient = new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 15_000, maxRetries: 0 });
   const context = buildPortfolioContext(validation.data.message);
   const conversation = validation.data.history.map((message) => ({
     role: message.role,
@@ -185,17 +295,18 @@ export async function POST(request: NextRequest) {
     ...conversation,
     {
       role: "user" as const,
-      content: `${validation.data.message}\n\nMANDATORY RESPONSE INSTRUCTIONS:\n- Write the answer naturally in ${language}${language === "darija" ? " (Moroccan Darija matching the user's Arabizi/mixed style, never French or Modern Standard Arabic)" : ""}.\n- Start with the direct conclusion.\n- If this asks why, for the best items, relevance, candidacy, or a comparison, follow the conclusion with 2–4 concise evidence-based reasons from PORTFOLIO_CONTEXT.\n- Do not merely list names when a justification or comparison was requested.`,
+      content: `${validation.data.message}\n\nMANDATORY RESPONSE INSTRUCTIONS:\n- Write the answer naturally in ${responseLanguage}${responseLanguage === "darija" ? " (Moroccan Darija matching the user's Arabizi/mixed style, never French or Modern Standard Arabic)" : ""}.\n- Start with the direct conclusion.\n- If this asks why, for the best items, relevance, candidacy, or a comparison, follow the conclusion with 2–4 concise evidence-based reasons from PORTFOLIO_CONTEXT.\n- Do not merely list names when a justification or comparison was requested.`,
     },
   ];
 
   try {
-    const createCompletion = (retry = false) => client.chat.completions.create({
+    const generationStartedAt = performance.now();
+    const createCompletion = (retry = false) => generationClient.chat.completions.create({
       model: GROQ_MODEL,
       messages: retry
         ? [...messages, {
             role: "system" as const,
-            content: `Your previous output was invalid. Return exactly one valid JSON object matching the required keys and types, with no markdown. The answer itself must be written naturally in ${language}${language === "darija" ? ", using Moroccan Darija rather than French or Modern Standard Arabic" : ""}. Fully answer any requested comparison, selection, or why question.`,
+            content: `Your previous output was invalid. Return exactly one valid JSON object matching the required keys and types, with no markdown. The answer itself must be written naturally in ${responseLanguage}${responseLanguage === "darija" ? ", using Moroccan Darija rather than French or Modern Standard Arabic" : ""}. Fully answer any requested comparison, selection, or why question.`,
           }]
         : messages,
       response_format: { type: "json_object" },
@@ -204,35 +315,45 @@ export async function POST(request: NextRequest) {
     });
 
     let completion = await createCompletion();
-    let parsed = parseModelResponse(completion.choices[0]?.message.content ?? null, language);
+    let parsed = parseModelResponse(completion.choices[0]?.message.content ?? null, responseLanguage);
     if (!parsed) {
       completion = await createCompletion(true);
-      parsed = parseModelResponse(completion.choices[0]?.message.content ?? null, language);
+      parsed = parseModelResponse(completion.choices[0]?.message.content ?? null, responseLanguage);
     }
     if (!parsed) {
       throw new Error("The model returned an invalid structured response.");
     }
 
-    const result: ChatResponse = {
-      answer: parsed.answer,
-      language: parsed.language,
-      resources: resolveResources(parsed.resourceIds),
-    };
-    return NextResponse.json(result);
+    const generationLatencyMs = Math.round(performance.now() - generationStartedAt);
+    if (groundedReasoning) {
+      parsed.answer = groundedReasoning.answer;
+      parsed.resourceIds = groundedReasoning.resourceIds;
+    }
+    const result: ChatResponse = { answer: parsed.answer, language: parsed.language, resources: resolveResources(parsed.resourceIds) };
+    logLatency(groundedReasoning ? "grounded-generation" : "generation", generationLatencyMs);
+    return NextResponse.json(result, { headers: { "x-chat-source": groundedReasoning ? "grounded-generation" : "generation", "x-chat-intent": semanticRoute.intent } });
   } catch (error) {
     const providerStatus = getProviderStatus(error);
     console.error(
       "Groq chat request failed:",
       error instanceof Error ? error.message : "Unknown error",
     );
+    if (groundedReasoning) {
+      logLatency("grounded-generation-fallback");
+      return NextResponse.json({
+        answer: groundedReasoning.answer,
+        language: responseLanguage,
+        resources: resolveResources(groundedReasoning.resourceIds),
+      } satisfies ChatResponse, { headers: { "x-chat-source": "grounded-fallback", "x-chat-intent": semanticRoute.intent } });
+    }
     if (providerStatus === 429) {
-      return errorResponse(localizedError("provider-limit", language), 503);
+      return errorResponse(localizedError("provider-limit", responseLanguage), 503);
     }
     if (providerStatus === 404 || providerStatus === 422) {
-      return errorResponse(localizedError("unavailable", language), 503);
+      return errorResponse(localizedError("unavailable", responseLanguage), 503);
     }
     return errorResponse(
-      localizedError("unavailable", language),
+      localizedError("unavailable", responseLanguage),
       502,
     );
   }

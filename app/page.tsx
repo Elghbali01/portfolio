@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import LoadingScreen from "../components/LoadingScreen";
 import Navbar from "../components/Navbar";
 import Hero from "../sections/Hero";
@@ -15,19 +15,35 @@ import Footer from "../components/Footer";
 
 const LOADING_SEEN_KEY = "portfolio-loading-seen";
 
-/**
- * Synchronous check — runs during the very first render so the LoadingScreen
- * component is never mounted when navigating back from /projects or /certifications.
- */
-function shouldSkipLoading(): boolean {
-  if (typeof window === "undefined") return false;
-  if (window.location.hash.length > 0) return true;
-  if (sessionStorage.getItem(LOADING_SEEN_KEY) === "true") return true;
-  return false;
-}
+type LoadingState = "checking" | "loading" | "complete";
 
 export default function Home() {
-  const [loadingFinished, setLoadingFinished] = useState(shouldSkipLoading);
+  const [loadingState, setLoadingState] = useState<LoadingState>("checking");
+  const loadingFinished = loadingState === "complete";
+
+  // Resolve session state after hydration. Server and client now share the
+  // same deterministic first render, and storage failures fail open.
+  useEffect(() => {
+    let active = true;
+    let nextState: LoadingState = "complete";
+    try {
+      const seen = window.sessionStorage.getItem(LOADING_SEEN_KEY) === "true";
+      nextState = window.location.hash.length > 0 || seen ? "complete" : "loading";
+    } catch {}
+    queueMicrotask(() => {
+      if (active) setLoadingState(nextState);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Final safety net: an animation can never block portfolio access forever.
+  useEffect(() => {
+    if (loadingState !== "loading") return;
+    const failsafe = window.setTimeout(() => setLoadingState("complete"), 5_000);
+    return () => window.clearTimeout(failsafe);
+  }, [loadingState]);
 
   // Scroll to the hash target after mount (loading is already skipped)
   useEffect(() => {
@@ -42,10 +58,14 @@ export default function Home() {
   }, []);
 
   // Called when the loading animation finishes for the first time
-  const handleLoadingComplete = () => {
-    sessionStorage.setItem(LOADING_SEEN_KEY, "true");
-    setLoadingFinished(true);
-  };
+  const handleLoadingComplete = useCallback(() => {
+    try {
+      window.sessionStorage.setItem(LOADING_SEEN_KEY, "true");
+    } catch {
+      // Storage can be disabled; portfolio access must still continue.
+    }
+    setLoadingState("complete");
+  }, []);
 
   return (
     <>
@@ -67,10 +87,9 @@ export default function Home() {
       </main>
 
       {/* LOADER AU DESSUS */}
-      {!loadingFinished && (
+      {loadingState === "loading" && (
         <LoadingScreen onComplete={handleLoadingComplete} />
       )}
     </>
   );
 }
-

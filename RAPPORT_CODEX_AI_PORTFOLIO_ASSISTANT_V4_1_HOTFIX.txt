@@ -1,0 +1,105 @@
+===== RAPPORT CODEX — AI PORTFOLIO ASSISTANT V4.1 HOTFIX =====
+
+1. BUG GREETINGS
+- Cause exacte : identifyLocalIntent comparait la salutation à une expression régulière exacte après une normalisation générale qui ne réduisait pas les répétitions. « salam » correspondait, mais « salaaaaam », « bonjourrr » et les alias bjr/bjour/slt n'appartenaient pas à la liste et partaient vers Groq.
+- Fichiers concernés : language.ts, intent-resolver.ts, local-responses.ts et route.ts.
+- L'appel Groq inutile pouvait ensuite exposer les erreurs de quota, réseau ou timeout à une simple salutation.
+
+2. NORMALISATION AJOUTÉE
+- Nouveau module conversational-normalization.ts.
+- Pour les messages courts de 40 caractères maximum seulement : NFKC, minuscules, ponctuation/espaces, réduction de 3 lettres latines identiques ou plus, puis alias sûrs.
+- Alias FR : bonjour, bjr, bjour, salut, slt, bonsoir, bsr, coucou. EN : hi/hii, hello, hey, yo. Darija/Arabizi : salam/salaam, slm, salam alikoum/3likom, labas, kidayr/ki dayr. Arabe : سلام, السلام عليكم, مرحبا, أهلا.
+- Les expressions sont ancrées sur le message entier : salaires, hello world project et hi-tech architecture ne sont pas des greetings.
+- Le message original reste utilisé partout ailleurs, notamment pour les entités, technologies, URLs et Groq.
+
+3. TESTS GREETINGS
+salam : GREETING, local, PASS.
+salaaaaaam : GREETING, local, PASS.
+slm : GREETING, local, PASS.
+bonjour : GREETING, local, PASS.
+bonjouuuuur : GREETING, local, PASS.
+bjr : GREETING, local, PASS.
+salut : GREETING, local, PASS.
+saluuuuut : GREETING, local, PASS.
+hello : GREETING, local, PASS.
+helloooo : GREETING, local, PASS.
+hi : GREETING, local, PASS.
+hiiii : GREETING, local, PASS.
+arabe (سلام / السلام عليكم / مرحبا / أهلا) : GREETING, local, PASS.
+La suite complète vérifie 30 variantes et le header x-chat-source=local/x-chat-intent=GREETING. Aucun appel Groq.
+
+4. BUG LOADING 0 %
+- Cause racine : useState(shouldSkipLoading) produisait un état initial dépendant de l'environnement. Le serveur retournait false faute de window, alors que l'hydratation client pouvait lire sessionStorage=true. Cette divergence serveur/client rendait le montage de l'overlay non déterministe. La lecture/écriture de sessionStorage n'était pas protégée ; une exception empêchait le flux. Enfin, le timer final de sortie n'était pas nettoyé et aucun failsafe ne garantissait le démontage.
+- Scénario : intro déjà vue ou stockage dans un état particulier, reload, rendu serveur avec loader 0 %, hydratation avec une décision différente ou interrompue, effet de progression non garanti, overlay restant au-dessus du contenu.
+- ChatWidget n'écrit aucune clé de loading et ne partage aucun état avec Home ; il augmentait seulement la probabilité d'observer le reload problématique, sans en être la cause directe.
+
+5. CORRECTION LOADING
+- État initial déterministe commun serveur/client : checking.
+- Après hydratation seulement, un useEffect lit sessionStorage dans try/catch et choisit loading ou complete.
+- introSeen=true ou hash : portfolio direct. Valeur absente : animation normale. Stockage indisponible/invalide : fail-open vers le portfolio.
+- handleLoadingComplete est stabilisé avec useCallback et protège l'écriture sessionStorage.
+- Les timers sont nettoyés, y compris le timer de sortie.
+- Failsafe parent de 5 secondes : le contenu reste toujours accessible même si l'animation échoue.
+- data-testid a été ajouté sans changement visuel afin de vérifier le runtime.
+
+6. TESTS LOADING
+- Première visite/session neuve : loader visible, progression puis disparition, portfolio visible — PASS navigateur.
+- Reload même session : aucun 0 %, portfolio visible — PASS.
+- Après utilisation chatbot (bonjour étiré + salam étiré) : PASS.
+- Après fermeture chatbot puis reload : PASS.
+- Navigation /projects -> / -> reload : PASS.
+- Navigation /certifications -> / -> reload : PASS.
+- sessionStorage vide : validé avec un nouvel onglet de session, animation puis portfolio — PASS.
+- sessionStorage existant : reload direct — PASS.
+
+7. MODIFICATIONS UI
+- Bouton flottant : Issam Assistant conservé.
+- Titre widget : « Ask Issam’s AI Assistant » remplacé par « Issam Assistant ».
+- Welcome message portfolio + CV conservé.
+- Footer « Answers use Issam's documented portfolio and CV only » conservé.
+
+8. FICHIERS CRÉÉS
+- lib/chatbot/conversational-normalization.ts
+- scripts/chatbot-v4-1-regression.mjs
+- RAPPORT_CODEX_AI_PORTFOLIO_ASSISTANT_V4_1_HOTFIX.txt
+
+9. FICHIERS MODIFIÉS
+- lib/chatbot/intent-resolver.ts
+- lib/chatbot/local-responses.ts
+- app/api/chat/route.ts
+- app/page.tsx
+- components/LoadingScreen.tsx
+- components/chatbot/ChatWidget.tsx
+- package.json
+
+10. TESTS V4 DE NON-RÉGRESSION
+- npm run test:chatbot-v4 : 21/21 PASS, incluant Backend, Data Science, arabe, Darija, fausse prémisse, entités inconnues et conversation follow-up.
+
+11. NOUVEAUX TESTS V4.1
+- 30 salutations + 3 anti-faux-positifs = 33 tests.
+- Résultat : 33/33 PASS via /api/chat sur le build de production.
+
+12. ESLINT
+- Résultat final : 0 erreur. Les 3 warnings next/no-img-element préexistants restent hors périmètre.
+
+13. BUILD
+- Build Next.js 16.1.6 et TypeScript strict réussi. Route /api/chat dynamique présente.
+
+14. LIMITATIONS RESTANTES
+- Le failsafe garantit l'accès mais ne remplace pas une supervision des erreurs JavaScript en production.
+- Le stockage indisponible suit volontairement un comportement fail-open : l'intro est ignorée plutôt que de risquer un blocage.
+
+15. TESTS MANUELS QUE JE DOIS FAIRE
+- Déployer la hotfix puis vider le cache de déploiement si nécessaire.
+- Dans un onglet neuf : ouvrir / et vérifier l'animation complète.
+- Envoyer bonjouuuuur, salaaaaam, bjr et helloooo ; vérifier les réponses immédiates.
+- Fermer le widget, F5, vérifier l'affichage direct.
+- Tester les navigations projects/certifications et retour.
+- Tester aussi une fenêtre privée et un navigateur avec stockage bloqué si disponible.
+
+16. VERDICT
+- Greetings corrigés : OUI.
+- Reload 0 % corrigé : OUI, cause d'hydratation/stockage éliminée et failsafe vérifié au runtime.
+- Prêt pour test production : OUI.
+
+===== FIN RAPPORT =====

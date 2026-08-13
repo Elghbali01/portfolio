@@ -1,6 +1,7 @@
 import { detectLanguageSwitch, normalizeMessage, resolveResponseLanguage } from "./language";
 import { createLocalResponse, type LocalIntent } from "./local-responses";
 import type { ChatLanguage, ChatResponse } from "./types";
+import { detectGreeting } from "./conversational-normalization";
 
 interface IntentMatch { intent: LocalIntent; all?: boolean; detailed?: boolean }
 
@@ -13,13 +14,14 @@ function matchesOnly(message: string, pattern: RegExp): boolean {
 export function identifyLocalIntent(message: string): IntentMatch | null {
   const text = normalizeMessage(message);
   if (detectLanguageSwitch(text)) return { intent: "LANGUAGE_SWITCH" };
-  if (matchesOnly(text, /^(?:bonjour|bonsoir|salut|hello|hi|hey|salam|slm|labas|kidayr(?: chef)?|السلام عليكم|مرحبا)$/)) return { intent: "GREETING" };
-  if (matchesOnly(text, /\b(?:cv|resume|résumé)\b|بغيت cv|3tini cv/)) return { intent: "CV" };
+  if (detectGreeting(message)) return { intent: "GREETING" };
+  if (/^(?:cv|resume|résumé)$/.test(text)) return { intent: "CV" };
   if (matchesOnly(text, /\bgithub\b/)) return { intent: "GITHUB" };
   if (matchesOnly(text, /\blinkedin\b/)) return { intent: "LINKEDIN" };
   if (matchesOnly(text, /\b(?:contact|email|e mail|contacter)\b|تواصل/)) return { intent: "CONTACT" };
   if (/\b(?:bac|baccalaur[eé]at|baccalaureate)\b|الباك|البكالوريا/.test(text)) return { intent: "BACCALAUREATE" };
   if (REASONING_REQUEST.test(text)) return null;
+  if (/\b(?:son|his) (?:projet|project)\b/.test(text) && !/\b(?:projets|projects)\b/.test(text)) return null;
   if (/\b(?:certifications?|certificats?|certifs?|certif)\b|الشهادات|شهادات/.test(text)) {
     return { intent: "CERTIFICATIONS", detailed: /\b(?:description|detail|détails?|tous|toutes|all)\b/.test(text) };
   }
@@ -38,6 +40,8 @@ export function resolveLocalIntent(
 ): ChatResponse | null {
   const match = identifyLocalIntent(message);
   if (!match) return null;
-  const language = resolveResponseLanguage(message, preferredLanguage);
+  const language = match.intent === "GREETING"
+    ? detectGreeting(message)?.language ?? resolveResponseLanguage(message, preferredLanguage)
+    : resolveResponseLanguage(message, preferredLanguage);
   return createLocalResponse(match.intent, language, match);
 }

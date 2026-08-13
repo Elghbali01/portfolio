@@ -184,3 +184,28 @@ Les demandes complexes ne passent plus par le fast path de simple liste. Groq re
 ## 12. Routeur V4
 
 `query-analysis.ts` extrait les contraintes de sortie et les indices de suivi conversationnel. `entity-resolver.ts` valide les projets et certifications nommés avec des alias prudents. `v4-responses.ts` traite avant les listes génériques les scénarios sûrs : entité précise, fausse prémisse, fait non documenté, preuves croisées, contraintes exactes et langues arabe/Darija. Les synthèses recruteur déjà contrôlées sont maintenant retournées avant Groq afin d'éviter un appel inutile. Groq reste utilisé pour les questions portfolio valides non couvertes, avec un timeout de 15 secondes et aucun retry implicite du SDK ; un seul retry applicatif demeure réservé au JSON invalide.
+
+## 13. Semantic Router V4.2
+
+```text
+User
+  ↓
+Trusted protections + Local Safe Fast Path
+  ↓ unknown
+Semantic Router Groq (message + 2 derniers messages, sans portfolio)
+  ├── LOCAL ───────────→ réponse déterministe depuis data/
+  ├── CLARIFICATION ───→ question courte à l'utilisateur
+  └── REASONING
+         ↓
+    Portfolio Context filtré
+         ↓
+      Groq #2
+         ↓
+    JSON Validator + grounded override/fallback
+         ↓
+    Ressources whitelistées
+```
+
+`lib/chatbot/semantic-router.ts` ne répond jamais à la question et ne reçoit aucune donnée métier complète. Il retourne un JSON strict comprenant langue, intention, confiance, domaine, entité, route et motif éventuel de clarification. Une classification simple déclenche `local-responses.ts` sans second appel. Une ambiguïté indispensable déclenche une clarification. Seule une vraie synthèse utilise le contexte filtré puis la génération grounded.
+
+Le rate limit compte un message utilisateur une seule fois, même lorsqu'il entraîne deux appels fournisseur. Les latences `routerLatencyMs`, `generationLatencyMs` et `totalLatencyMs` sont consignées uniquement dans les logs serveur. En cas de panne du routeur, les protections trusted, les fast paths exacts et les réponses grounded déjà disponibles restent fonctionnels.

@@ -83,3 +83,7 @@ The controlled knowledge base now includes verified facts from the public CV, do
 ### V4 intent safety
 
 V4 analyzes response constraints and resolves named projects/certifications before the legacy list fast paths. Trusted deterministic responses protect against false premises, preserve the distinction between “not documented” and “false,” and support recruiter comparisons and conversational follow-ups without unnecessary Groq calls. Run `npm run test:chatbot-v4` to build the application and exercise the 20 regression scenarios plus the conversational test through `/api/chat`.
+
+### V4.2 semantic routing
+
+Unknown formulations now pass through a small Groq semantic router before any portfolio generation. The router receives no full portfolio context and can select a deterministic local response, request a necessary clarification, or authorize grounded generation with a filtered context. Exact local commands and trusted anti-hallucination responses remain available during a Groq outage. Run `npm run test:chatbot-v4-2` for semantic, clarification, multilingual, grounding, and provider-outage regression coverage.

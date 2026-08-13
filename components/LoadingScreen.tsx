@@ -36,6 +36,8 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   // TYPEWRITER LOGIC
   // ------------------------
   useEffect(() => {
+    let exitTimer: ReturnType<typeof setTimeout> | undefined;
+
     if (phase === "typing") {
       let i = 0;
       const interval = setInterval(() => {
@@ -60,10 +62,14 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
     }
 
     if (phase === "exit") {
-      setTimeout(() => {
+      exitTimer = setTimeout(() => {
         onComplete();
       }, 1200);
     }
+
+    return () => {
+      if (exitTimer) clearTimeout(exitTimer);
+    };
   }, [phase, onComplete]);
 
   const radiusOuter = 85;
@@ -74,6 +80,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
 
   return (
     <motion.div
+      data-testid="portfolio-loading-screen"
       className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-[#0b1120] via-[#0f172a] to-[#0b1120] z-50"
       animate={phase === "exit" ? { opacity: 0 } : { opacity: 1 }}
       transition={{ duration: 0.8 }}

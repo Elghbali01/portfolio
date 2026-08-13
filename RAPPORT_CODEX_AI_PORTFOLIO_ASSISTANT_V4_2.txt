@@ -1,0 +1,101 @@
+===== RAPPORT CODEX — AI PORTFOLIO ASSISTANT V4.2 =====
+
+1. Diagnostic de l'ancienne architecture
+V4/V4.1 protégeait correctement les faits et les contraintes, mais tout message non reconnu était assimilé à une question complexe et envoyé directement à la génération portfolio. La compréhension des messages courts reposait donc sur une accumulation de regex, alias et réduction de répétitions. Cela augmentait la maintenance et exposait une simple faute à un appel long ou indisponible.
+
+2. Pourquoi les regex/aliases seuls ne sont pas scalables
+Les fautes, abréviations, mélanges linguistiques, Darija/Arabizi et variations humaines sont ouverts et impossibles à énumérer proprement. Les regex restent utiles uniquement pour des commandes exactes à haute confiance et des protections critiques ; elles ne constituent plus le mécanisme général de compréhension.
+
+3. Nouvelle architecture
+Message -> protections trusted V4 -> fast path local exact -> rate limit utilisateur -> Semantic Router Groq sans portfolio -> LOCAL, CLARIFICATION ou REASONING. LOCAL appelle les réponses déterministes. CLARIFICATION pose une question ciblée. REASONING sélectionne le contexte portfolio/CV, appelle Groq #2, valide le JSON, applique l'override/fallback grounded et résout les ressources whitelistées.
+
+4. Fichiers créés
+- lib/chatbot/semantic-router.ts
+- scripts/chatbot-v4-2-regression.mjs
+- RAPPORT_CODEX_AI_PORTFOLIO_ASSISTANT_V4_2.txt
+
+5. Fichiers modifiés
+- app/api/chat/route.ts
+- lib/chatbot/intent-resolver.ts
+- lib/chatbot/conversational-normalization.ts
+- lib/chatbot/query-analysis.ts
+- lib/chatbot/grounded-reasoning.ts
+- scripts/chatbot-v4-1-regression.mjs
+- package.json
+- README.md
+- ARCHITECTURE.md
+
+6. Fonctionnement du Semantic Router
+Il reçoit uniquement le dernier message, au maximum deux messages d'historique tronqués à 300 caractères et un indice de langue UI utilisé comme tie-breaker. Il ne reçoit ni data/*, ni catalogue de projets, ni certifications, ni contexte portfolio complet. Il utilise llama-3.1-8b-instant, JSON Object Mode, température 0, max_tokens 180, timeout 8 s et aucun retry implicite. Le serveur valide strictement toutes les clés, enums, nulls, types et la confiance 0..1.
+
+7. Schéma JSON exact
+{
+  "language": "en | fr | ar | darija",
+  "intent": "GREETING | CV | GITHUB | LINKEDIN | CONTACT | PROJECTS | CERTIFICATIONS | SKILLS | ENTITY_DETAIL | EDUCATION | EXPERIENCE | RECRUITER_REASONING | PORTFOLIO_QUESTION | OUT_OF_SCOPE | UNKNOWN",
+  "confidence": 0.0,
+  "domain": "backend | data_science | ai | education | certification | general | null",
+  "entityType": "project | certification | technology | education | cv | null",
+  "entityName": "string | null",
+  "route": "LOCAL | REASONING | CLARIFICATION",
+  "clarificationReason": "string | null"
+}
+Toutes les clés sont obligatoires. clarificationReason doit être non nul uniquement pour CLARIFICATION. Une confiance inférieure à 0,6 déclenche le fallback sûr.
+
+8. Fonctionnement des fast paths
+Les protections trusted (94 %, AWS, entité connue/inconnue, bac, PFE, contraintes exactes) restent prioritaires. Les commandes exactes cv, github, linkedin et les salutations sûres restent locales. Les formulations libres comme « donne moi cv de issm stp » passent par le routeur puis déclenchent localement CV sans génération #2. slm a été retiré de l'alias V4.1 et est désormais testé comme semantic-local.
+
+9. Fonctionnement de la clarification
+« parle moi de son projet » n'est plus intercepté par la liste PROJECTS. Le routeur retourne CLARIFICATION et le serveur demande quel projet. Au tour suivant, « Advanced Ticket Management » est résolu contre les données officielles grâce à l'historique de clarification, puis répondu localement avec la ressource pertinente. Aucune clarification n'est utilisée pour une liste, un CV ou une salutation claire.
+
+10. Fonctionnement du contexte conversationnel
+L'historique reste limité et validé à six messages par l'API. Le routeur n'en reçoit que les deux derniers, tronqués. Il sert à résoudre pronoms, références et réponses aux clarifications. query-analysis reconnaît aussi « laquelle est la plus forte ? ». Les faits de l'historique ne deviennent jamais des faits portfolio ; toute réponse finale est reconstruite depuis data/* et le contexte serveur.
+
+11. Protection contre les fausses prémisses
+buildTrustedResponse reste exécuté avant le Semantic Router. La valeur 94 % est donc refusée sans dépendre du modèle. AWS pendant le stage reste « non documenté », sans service inventé et sans négation absolue. Le routeur ne reçoit aucune autorité pour valider un fait utilisateur.
+
+12. Fallback en cas de panne Groq
+Les réponses trusted et fast paths exacts s'exécutent avant la vérification de GROQ_API_KEY. Si le routeur échoue ou renvoie un JSON invalide/faible confiance, une réponse grounded disponible est retournée. Sinon le pipeline tente le générateur grounded historique ; si le fournisseur est réellement indisponible, une erreur localisée propre est renvoyée. Une classification locale incohérente ne peut pas écraser un match grounded fort.
+
+13. Stratégie de latence
+Le routeur utilise un prompt court, aucun portfolio, max_tokens 180 et timeout 8 s. La génération #2 n'est appelée que pour REASONING ou une question portfolio non déterministe. Les logs serveur enregistrent séparément routerLatencyMs, generationLatencyMs, totalLatencyMs et le chemin choisi. Aucun timing ni secret n'est exposé au client.
+
+14. Stratégie rate-limit
+Le rate limit est appliqué une seule fois par message utilisateur, avant le premier appel fournisseur. Un message nécessitant router + génération compte donc comme une requête utilisateur, pas deux. Les réponses trusted/locales ne consomment toujours pas le quota fournisseur. Le store reste process-local comme avant.
+
+15. Résultats des nouveaux tests
+npm run test:chatbot-v4-2 : 27/27 PASS.
+- Semantic greetings non hardcodés : hy, helo, hyyyy, bnjr, slm — PASS semantic-local.
+- Fast paths exacts : cv, github, linkedin, bonjour, hello, salam — PASS local.
+- CV libre avec faute Issam — PASS semantic-local, ressource CV, aucun Groq #2.
+- Reasoning Backend — PASS routé et grounded.
+- Clarification projet + réponse Advanced Ticket — PASS sur deux tours.
+- Follow-up « laquelle » — PASS Water Potability.
+- 94 %, AWS, hors scope — PASS.
+- EN, FR, arabe, Darija/Arabizi — PASS.
+- Panne Groq simulée avec clé invalide : cv/bonjour/hello/salam restent locaux — PASS.
+
+16. Résultats V4
+npm run test:chatbot-v4 : 21/21 PASS. La comparaison Backend/Data Science a été étendue dans grounded-reasoning pour couvrir explicitement « Backend ou Data Science : choisis » et fournir un fallback stable si le routeur/fournisseur est limité.
+
+17. Résultats V4.1
+npm run test:chatbot-v4-1 : 33/33 PASS. Adaptation légitime : slm n'est plus attendu comme alias exact ; il doit maintenant produire GREETING via semantic-local. Les 29 autres greetings sûrs et les trois anti-faux-positifs restent inchangés.
+
+18. Résultat lint
+npm run lint : succès, 0 erreur. Trois warnings next/no-img-element préexistants restent dans CertificatePreviewModal, CertificationCard et ProjectCard.
+
+19. Résultat build
+npm run build : succès avec Next.js 16.1.6 et TypeScript strict. /api/chat reste une route dynamique serveur. GROQ_API_KEY n'est jamais exposée et .env.local n'a pas été modifié.
+
+20. Limitations restantes
+- Le routeur sémantique dépend du quota/réseau pour les formulations réellement inconnues ; seuls les chemins sûrs disposent d'un fallback entièrement local.
+- llama-3.1-8b-instant peut parfois choisir une langue surprenante sur un token très court ; pour les greetings ambigus, la détection locale et la préférence UI servent de garde linguistique, sans ajouter le token comme alias.
+- Le rate limiter est en mémoire et non partagé entre instances.
+- L'historique transporte encore du texte, pas des références structurées d'entités/intentions.
+
+21. Recommandations éventuelles
+- Ajouter ultérieurement un cache court des classifications sémantiques anonymisées pour réduire les appels répétés, sans stocker le contenu conversationnel durablement.
+- Stocker côté client des métadonnées de clarification structurées afin de rendre les follow-ups encore plus déterministes.
+- Utiliser un rate limiter distribué lors d'un déploiement multi-instance.
+- Ajouter une métrique serveur agrégée sur taux de routeur invalide, clarification et fallback, sans journaliser les messages visiteurs.
+
+===== FIN RAPPORT =====

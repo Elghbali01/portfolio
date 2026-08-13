@@ -31,10 +31,10 @@ export function createLocalResponse(
   }
 
   if (intent === "GREETING") return base(phrase(language, {
-    en: "Hello 👋 I’m Issam’s AI Portfolio Assistant. Ask me about his projects, skills, experience, education, or certifications.",
-    fr: "Bonjour 👋 Je suis l’assistant IA du portfolio d’Issam. Vous pouvez me poser des questions sur ses projets, compétences, expériences, études ou certifications.",
-    ar: "مرحباً 👋 أنا المساعد الذكي لملف عصام المهني. يمكنك سؤالي عن مشاريعه ومهاراته وخبراته ودراسته وشهاداته.",
-    darija: "سلام 👋 أنا الـ assistant ديال portfolio ديال Issam. سولني على المشاريع، skills، التجارب، القراية ولا الشهادات ديالو.",
+    en: "Hi 👋 I’m Issam’s portfolio assistant. What would you like to know about his profile?",
+    fr: "Bonjour 👋 Je suis l’assistant du portfolio d’Issam. Que souhaitez-vous savoir sur son profil ?",
+    ar: "مرحباً 👋 أنا مساعد ملف عصام المهني. ماذا تريد أن تعرف عن ملفه؟",
+    darija: "Salam 👋 Ana Issam Assistant. Chno bghiti t3ref 3la profil dyalo?",
   }), language);
 
   if (intent === "BACCALAUREATE") return base(phrase(language, {
