@@ -13,30 +13,13 @@ import Contact from "../sections/Contact";
 import AnimatedBackground from "../components/AnimatedBackground";
 import Footer from "../components/Footer";
 
-const LOADING_SEEN_KEY = "portfolio-loading-seen";
-
-type LoadingState = "checking" | "loading" | "complete";
+type LoadingState = "loading" | "complete";
 
 export default function Home() {
-  const [loadingState, setLoadingState] = useState<LoadingState>("checking");
+  // Every full home-page load starts from the same server/client state.
+  // No persisted flag can skip the visual loading sequence.
+  const [loadingState, setLoadingState] = useState<LoadingState>("loading");
   const loadingFinished = loadingState === "complete";
-
-  // Resolve session state after hydration. Server and client now share the
-  // same deterministic first render, and storage failures fail open.
-  useEffect(() => {
-    let active = true;
-    let nextState: LoadingState = "complete";
-    try {
-      const seen = window.sessionStorage.getItem(LOADING_SEEN_KEY) === "true";
-      nextState = window.location.hash.length > 0 || seen ? "complete" : "loading";
-    } catch {}
-    queueMicrotask(() => {
-      if (active) setLoadingState(nextState);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   // Final safety net: an animation can never block portfolio access forever.
   useEffect(() => {
@@ -45,7 +28,7 @@ export default function Home() {
     return () => window.clearTimeout(failsafe);
   }, [loadingState]);
 
-  // Scroll to the hash target after mount (loading is already skipped)
+  // Preserve hash navigation while the loader remains a visual overlay.
   useEffect(() => {
     const hash = window.location.hash;
     if (hash.length > 0) {
@@ -57,13 +40,8 @@ export default function Home() {
     }
   }, []);
 
-  // Called when the loading animation finishes for the first time
+  // Called whenever the loading animation finishes.
   const handleLoadingComplete = useCallback(() => {
-    try {
-      window.sessionStorage.setItem(LOADING_SEEN_KEY, "true");
-    } catch {
-      // Storage can be disabled; portfolio access must still continue.
-    }
     setLoadingState("complete");
   }, []);
 
