@@ -75,6 +75,29 @@ export const projectKnowledge: Record<string, ProjectKnowledge> = {
     demonstratedCapabilities: ["End-to-end Machine Learning pipeline", "EDA and feature engineering", "Model evaluation and threshold tuning", "SHAP explainability", "FastAPI inference API", "Automated testing", "Docker containerization"],
     recruiterValue: "Strong evidence of delivering an end-to-end Data Science project from a business problem to a tested and containerized ML application.",
   },
+  "football-intelligence-player-recommendation-system": {
+    primaryDomain: "data-science",
+    secondaryDomains: [
+      "ai-ml",
+      "backend",
+      "frontend",
+      "data-engineering",
+    ],
+    objective:
+      "Use football performance data to help scouts and analysts explore players, compare statistical profiles, identify similar players, build recruitment shortlists, find replacement candidates, and discover statistically interesting profiles.",
+    demonstratedCapabilities: [
+      "End-to-end Data Science pipeline",
+      "Football analytics and position-aware feature engineering",
+      "Player similarity and recommendation systems",
+      "Intelligent scouting and ranking",
+      "Replacement and sporting talent discovery",
+      "FastAPI production backend",
+      "React and TypeScript analytical frontend",
+      "Automated backend and frontend testing",
+    ],
+    recruiterValue:
+      "Strong evidence of building an end-to-end Data Science product that transforms raw football data into explainable recommendation services and a complete analytical web application.",
+  },
 };
 
 export const projects: Project[] = [
@@ -455,6 +478,70 @@ This project demonstrates:
     ],
     github: "https://github.com/Elghbali01/customer-churn-prediction.git",
     image: "/customer-churn-prediction.png",
+    featured: true,
+  },
+
+  {
+    title: "Football Intelligence & Player Recommendation System",
+    slug: "football-intelligence-player-recommendation-system",
+    category: "Data Science / Recommendation System",
+    shortDescription:
+      "An end-to-end football intelligence platform for player analysis, statistical similarity, scouting, replacement recommendations, and sporting talent discovery.",
+    fullDescription: `
+This project is an end-to-end Football Intelligence and Player Recommendation System designed to transform football performance data into explainable scouting and recruitment insights.
+
+**Business Goal:**
+- Help scouts and analysts explore football players through statistical evidence
+- Find players with similar playing profiles
+- Build recruitment shortlists from sporting requirements
+- Identify possible replacement profiles
+- Compare players within relevant positional contexts
+- Surface lower-exposure players with strong position-relative statistical dimensions
+
+**Data Science & Football Analytics:**
+- Collects, validates, cleans, and prepares football event and player data
+- Builds contextual player-team-competition-season profiles
+- Applies position-aware feature engineering
+- Computes per-90 metrics and position-relative percentiles
+- Produces radar profiles and analytical comparisons
+
+**Recommendation System:**
+- Player similarity using normalized statistical profiles and cosine similarity
+- Same-position recommendation logic
+- Intelligent scouting with hard constraints and weighted sporting preferences
+- Replacement recommendations with reference-team exclusion
+- Sporting Hidden Gems discovery based on exposure and percentile strengths
+- Explainable and context-aware recommendation outputs
+
+**Backend & Application:**
+- Production Data Science services exposed through FastAPI and Pydantic
+- REST endpoints for players, profiles, similarity, scouting, replacements, Hidden Gems, comparison, and analytics
+- React and TypeScript frontend with interactive player exploration, radar charts, comparison tools, scouting workflows, and analytics
+- Centralized typed API client connecting the frontend to the recommendation backend
+
+**Validation:**
+- Backend, recommendation, data validation, and API tests
+- Frontend TypeScript, ESLint, component/API tests, and production build validation
+- Final technical audit completed with no critical remaining issues
+
+The project demonstrates how Data Science, recommendation systems, football analytics, backend engineering, and frontend visualization can be combined into a complete decision-support application.
+  `,
+    technologies: [
+      "Python",
+      "Pandas",
+      "NumPy",
+      "Scikit-learn",
+      "FastAPI",
+      "Pydantic",
+      "React",
+      "TypeScript",
+      "Vite",
+      "Recharts",
+      "Pytest",
+    ],
+    github:
+      "https://github.com/Elghbali01/football-intelligence-player-recommendation-system.git",
+    image: "/football-intelligence-player.png",
     featured: true,
   },
 ];

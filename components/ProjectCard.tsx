@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import type { Project } from "../data/projects";
 
 interface ProjectCardProps {
@@ -56,7 +57,7 @@ export default function ProjectCard({ project, index }: ProjectCardProps) {
         </div>
 
         {/* LINKS */}
-        <div className="flex justify-between items-center pt-4">
+        <div className="flex justify-between items-center gap-4 pt-4">
           <a
             href={project.github}
             target="_blank"
@@ -65,22 +66,12 @@ export default function ProjectCard({ project, index }: ProjectCardProps) {
             GitHub →
           </a>
 
-          {project.demo ? (
-            <a
-              href={project.demo}
-              target="_blank"
-              className="text-sm bg-[#3B82F6] px-4 py-2 rounded-lg hover:bg-[#2563EB] transition"
-            >
-              Demo
-            </a>
-          ) : (
-            <button
-              disabled
-              className="text-sm bg-[#3B82F6] px-4 py-2 rounded-lg opacity-50 cursor-not-allowed"
-            >
-              Demo
-            </button>
-          )}
+          <Link
+            href={`/projects/${project.slug}`}
+            className="text-sm bg-[#3B82F6] px-4 py-2 rounded-lg hover:bg-[#2563EB] transition"
+          >
+            View Details
+          </Link>
         </div>
       </div>
     </motion.div>
