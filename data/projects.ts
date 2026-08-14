@@ -99,7 +99,7 @@ The website includes:
 The project focuses on front-end structure, responsive design, and dynamic interaction using JavaScript.
     `,
     technologies: ["HTML", "CSS", "JavaScript", "PHP"],
-    github: "https://github.com/Elghbali01",
+    github: "https://github.com/Elghbali01/IndonesiaTourismWebsite.git",
     image: "/indonesia.png",
     featured: false,
   },
