@@ -19,7 +19,20 @@ export default function Home() {
   // Every full home-page load starts from the same server/client state.
   // No persisted flag can skip the visual loading sequence.
   const [loadingState, setLoadingState] = useState<LoadingState>("loading");
+  const [loadingCycle, setLoadingCycle] = useState(0);
   const loadingFinished = loadingState === "complete";
+
+  // A browser may restore an already mounted page with its previous React
+  // state. Restart the visual sequence whenever the document is shown again,
+  // without persisting any "intro seen" flag.
+  useEffect(() => {
+    const restartLoading = () => {
+      setLoadingState("loading");
+      setLoadingCycle((cycle) => cycle + 1);
+    };
+    window.addEventListener("pageshow", restartLoading);
+    return () => window.removeEventListener("pageshow", restartLoading);
+  }, []);
 
   // Final safety net: an animation can never block portfolio access forever.
   useEffect(() => {
@@ -66,7 +79,7 @@ export default function Home() {
 
       {/* LOADER AU DESSUS */}
       {loadingState === "loading" && (
-        <LoadingScreen onComplete={handleLoadingComplete} />
+        <LoadingScreen key={loadingCycle} onComplete={handleLoadingComplete} />
       )}
     </>
   );
