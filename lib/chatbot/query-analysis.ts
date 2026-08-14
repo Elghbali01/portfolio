@@ -58,7 +58,7 @@ export function analyzeQuery(message: string): QueryAnalysis {
       explanation: explanationForbidden ? "forbidden" : explanationRequired ? "required" : "optional",
       separateItems: /chacun(?:e)? séparément|each separately|بشكل منفصل/.test(normalized),
       conclusionFirst: /première phrase|first sentence|d abord|first/.test(normalized),
-      selectionRequired: /choisis|choose|best|meilleur|plus fort|strongest|أقوى|افضل|أفضل/.test(normalized),
+      selectionRequired: /choisis|choose|best|meilleur|plus fort|strongest|a9wa|أقوى|افضل|أفضل/.test(normalized),
       comparisonRequired: /compar|backend ou data science|backend or data science/.test(normalized),
       multilingualOrder: /français puis (?:en )?anglais|french then english/.test(normalized) ? ["fr", "en"] : [],
     },

@@ -8,7 +8,7 @@ interface ChatResourceCardProps {
 
 const labels: Record<ChatResource["type"], string> = {
   project: "View project",
-  certificate: "View certificate",
+  certificate: "Verify Certificate",
   pdf: "View CV",
   image: "View image",
   github: "Open GitHub",
@@ -24,6 +24,7 @@ export default function ChatResourceCard({ resource }: ChatResourceCardProps) {
       href={resource.url}
       target={isExternal || resource.type === "pdf" || resource.type === "certificate" ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
+      aria-label={resource.type === "certificate" ? `Verify ${resource.title} certificate (opens in a new tab)` : undefined}
       className="group flex gap-3 overflow-hidden rounded-xl border border-[#334155] bg-[#0F172A]/80 p-3 transition hover:border-[#3B82F6]"
     >
       {resource.image && (

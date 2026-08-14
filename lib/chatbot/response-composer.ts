@@ -28,6 +28,47 @@ function countFor(plan: RequestPlan, sub: SubRequest, available: number): number
   return Math.min(available, exact ?? max ?? available);
 }
 
+function localizedProjectReason(slug: string, language: ChatLanguage): string {
+  const fallback = projectKnowledge[slug].recruiterValue;
+  const reasons: Partial<Record<string, Record<ChatLanguage, string>>> = {
+    "ticket-management-system": {
+      en: fallback,
+      fr: "une preuve claire d'architecture Backend Java ciblée avec Spring Boot, REST, JPA et PostgreSQL",
+      ar: "دليل واضح على بناء Backend بـ Java وSpring Boot وREST وJPA وPostgreSQL",
+      darija: "كيبيّن Backend Java واضح بـ Spring Boot وREST وJPA وPostgreSQL",
+    },
+    "resource-management-system": {
+      en: fallback,
+      fr: "une preuve de workflows d'entreprise complexes, de Spring Security et de contrôle d'accès par rôles",
+      ar: "دليل على تدفقات عمل مؤسساتية معقدة وSpring Security والتحكم حسب الأدوار",
+      darija: "كيبيّن workflows ديال enterprise وSpring Security وrole-based access",
+    },
+  };
+  return reasons[slug]?.[language] ?? fallback;
+}
+
+function localizedEvidenceDetail(name: string, fallback: string, language: ChatLanguage): string {
+  if (language === "en") return fallback;
+  const details: Record<string, Record<Exclude<ChatLanguage, "en">, string>> = {
+    "Master in Data Science": {
+      fr: "un alignement académique avancé avec la Data Science",
+      ar: "تكوين أكاديمي متقدم ومتوافق مباشرة مع علم البيانات",
+      darija: "تكوين أكاديمي متقدم ومركز على Data Science",
+    },
+    "Water Potability Prediction System": {
+      fr: "un workflow ML complet avec prétraitement, comparaison, évaluation, validation croisée et déploiement",
+      ar: "مسار تعلم آلي متكامل يشمل المعالجة والمقارنة والتقييم والتحقق المتقاطع والنشر",
+      darija: "workflow ML كامل فيه preprocessing ومقارنة وتقييم وcross-validation وdeployment",
+    },
+    "Customer Churn Prediction": {
+      fr: "une classification appliquée avec feature engineering, comparaison de modèles et interprétation SHAP",
+      ar: "تصنيف تطبيقي مع هندسة الخصائص ومقارنة النماذج وتفسير SHAP",
+      darija: "classification تطبيقية فيها feature engineering ومقارنة models وSHAP",
+    },
+  };
+  return details[name]?.[language] ?? fallback;
+}
+
 function projectSelection(plan: RequestPlan, sub: SubRequest) {
   const domain = sub.domain ?? "general";
   const candidates = domain === "data_science"
@@ -36,7 +77,7 @@ function projectSelection(plan: RequestPlan, sub: SubRequest) {
   const selected = candidates.slice(0, countFor(plan, sub, candidates.length));
   if (!selected.length) return null;
   const lines = selected.map((project, index) => {
-    const reason = projectKnowledge[project.slug].recruiterValue;
+    const reason = localizedProjectReason(project.slug, plan.language);
     return `${index + 1}. ${project.title}${sub.requiresExplanation ? ` — ${reason}` : ""}`;
   });
   if (sub.requiresSelection) lines[lines.length - 1] += ` ${labels[plan.language].strongest}: ${selected[0].title}.`;
@@ -51,10 +92,10 @@ function evidenceSelection(plan: RequestPlan, sub: SubRequest, language: ChatLan
       })
     : dataEvidence;
   const selected = evidence.slice(0, countFor(plan, sub, evidence.length));
-  const lines = selected.map((item, index) => `${index + 1}. ${item.name}${sub.requiresExplanation ? ` — ${item.detail}.` : ""}`);
+  const lines = selected.map((item, index) => `${index + 1}. ${item.name}${sub.requiresExplanation ? ` — ${localizedEvidenceDetail(item.name, item.detail, language)}.` : ""}`);
   if (sub.requiresSelection) {
     const strongest = sub.domain === "backend" ? selected[0] : selected.find((item) => item.name.includes("Water Potability")) ?? selected[0];
-    lines[lines.length - 1] += ` ${labels[language].strongest}: ${strongest.name} — ${strongest.detail}.`;
+    lines[lines.length - 1] += ` ${labels[language].strongest}: ${strongest.name} — ${localizedEvidenceDetail(strongest.name, strongest.detail, language)}.`;
   }
   return { text: lines.join("\n"), resources: [...new Set(selected.map((item) => item.resource))] };
 }
@@ -63,7 +104,7 @@ function technologyEvidence(sub: SubRequest, language: ChatLanguage) {
   const name = sub.entityName?.trim() || "Cette technologie";
   const normalized = normalizeMessage(name);
   if (normalized.includes("spring security")) return {
-    text: `${name} — ${labels[language].proof}: University Material Resource Management System (Spring Security et contrôle d'accès par rôles).`,
+    text: `${name} — ${labels[language].proof}: University Material Resource Management System (${language === "en" ? "Spring Security and role-based access control" : language === "fr" ? "Spring Security et contrôle d'accès par rôles" : language === "ar" ? "Spring Security والتحكم في الوصول حسب الأدوار" : "Spring Security وrole-based access"}).`,
     resources: ["project:resource-management-system"],
   };
   return { text: `${name} ${labels[language].notDocumented}.`, resources: [] as string[] };
@@ -93,6 +134,10 @@ function certificationSelection(plan: RequestPlan, sub: SubRequest) {
   const candidates = certifications.filter((cert) => {
     const domain = certificationKnowledge[cert.id].domain;
     return sub.domain === "data_science" ? domain === "data-science" || domain === "machine-learning" : true;
+  }).sort((a, b) => {
+    if (sub.domain !== "backend") return 0;
+    const backendScore = (title: string) => /spring/i.test(title) ? 3 : /software engineering/i.test(title) ? 2 : /java/i.test(title) ? 1 : 0;
+    return backendScore(b.title) - backendScore(a.title);
   });
   const selected = candidates.slice(0, countFor(plan, sub, candidates.length));
   return { text: selected.map((cert, i) => `${i + 1}. ${cert.title}${sub.requiresExplanation ? ` — ${certificationKnowledge[cert.id].relevance}` : ""}`).join("\n"), resources: selected.map((c) => `certificate:${c.id}`) };

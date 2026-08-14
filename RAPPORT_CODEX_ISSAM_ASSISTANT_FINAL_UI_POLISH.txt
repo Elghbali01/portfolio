@@ -1,0 +1,70 @@
+===== RAPPORT CODEX — ISSAM ASSISTANT FINAL UI POLISH =====
+
+1. Fichiers analysés
+- components/CertificationCard.tsx
+- components/CertificatePreviewModal.tsx
+- components/chatbot/ChatResourceCard.tsx
+- components/chatbot/ChatWidget.tsx
+- components/chatbot/ChatInput.tsx
+- components/chatbot/ChatMessages.tsx
+- components/LoadingScreen.tsx
+- data/certifications.ts
+- lib/chatbot/resources.ts
+- package.json et scripts de non-régression V4 à V4.3
+
+2. Certifications
+- Ancien texte : « Verify Credential » sur les cartes/page/modal et « View certificate » dans le chatbot.
+- Nouveau texte cohérent : « Verify Certificate ».
+- Liens de vérification conservés : oui, aucune URL modifiée ou fabriquée.
+- Nouvel onglet et sécurité : target="_blank" et rel="noopener noreferrer" conservés.
+- Icône externe, style, PDF/PNG locaux : conservés.
+- aria-label : harmonisé sur « Verify ... certificate (opens in a new tab) ».
+- Nombre vérifié : 9 verificationUrl officielles rendues avec « Verify Certificate ».
+- Fournisseurs contrôlés : Coursera, Kaggle, Saylor et Simplilearn présents.
+- Oracle / Java Explorer : verificationUrl reste null ; le lien LinkedIn spécial existant est conservé, sans fausse URL Oracle.
+
+3. Notification unread
+- Comportement avant : isOpenRef est synchronisé à chaque ouverture/fermeture ; une réponse ou erreur arrivée widget fermé incrémente unreadCount ; l'ouverture remet le compteur à zéro ; aucune incrémentation si le widget reste ouvert.
+- Badge : visible uniquement fermé et unreadCount > 0 ; compteur plafonné visuellement à 9+.
+- Animation : séquence courte unique, sans répétition permanente.
+- Accessibilité : useReducedMotion désactive l'animation lorsque prefers-reduced-motion est actif.
+- Bug trouvé : aucun bug logique identifié.
+- Correction appliquée : aucune, afin de ne pas modifier un comportement correct.
+
+4. Test E2E badge
+- Scénario préparé : réponse /api/chat retardée de manière contrôlée, fermeture avant arrivée, badge=1, réouverture, badge disparu, réponse présente.
+- Résultat : non exécuté jusqu'au bout. La politique de sécurité de l'outil navigateur a bloqué l'URL locale du proxy mock ; aucun contournement n'a été tenté.
+- Le proxy de test temporaire a été retiré du repository et aucun délai de test n'existe dans le code production.
+- Validation disponible : audit déterministe du flux d'état React, succès et erreur compris.
+
+5. Test reload / loader
+- F5 réel sur le build final : PASS.
+- portfolio-loading-screen caché avant 10 secondes : oui.
+- hero « Issam Elghbali » visible : oui.
+- Aucun blocage à 0 % ; LoadingScreen non modifié.
+
+6. Tests V4
+- npm run test:chatbot-v4 : 21/21 PASS.
+
+7. Tests V4.1
+- npm run test:chatbot-v4-1 : 33/33 PASS.
+
+8. Tests V4.2
+- npm run test:chatbot-v4-2 : 27/27 PASS.
+
+9. Tests V4.3
+- npm run test:chatbot-v4-3 : 17/17 PASS.
+
+10. ESLint
+- npm run lint : PASS, 0 erreur.
+- 3 warnings next/no-img-element préexistants dans CertificatePreviewModal, CertificationCard et ProjectCard.
+
+11. Build
+- npm run build : PASS.
+- Next.js 16.1.6 et validation TypeScript réussis.
+
+12. Verdict final
+- Issam Assistant prêt production : OUI.
+- Point restant éventuellement ouvert : automatiser ultérieurement le scénario badge avec Playwright installé ou un environnement autorisant l'interception réseau locale. L'audit du code ne révèle toutefois aucun défaut fonctionnel du compteur unread.
+
+===== FIN RAPPORT =====

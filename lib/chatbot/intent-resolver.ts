@@ -19,7 +19,7 @@ export function identifyLocalIntent(message: string): IntentMatch | null {
   if (matchesOnly(text, /\bgithub\b/)) return { intent: "GITHUB" };
   if (matchesOnly(text, /\blinkedin\b/)) return { intent: "LINKEDIN" };
   if (matchesOnly(text, /\b(?:contact|email|e mail|contacter)\b|تواصل/)) return { intent: "CONTACT" };
-  if (/\b(?:bac|baccalaur[eé]at|baccalaureate)\b|الباك|البكالوريا/.test(text)) return { intent: "BACCALAUREATE" };
+  if (/\b(?:bac|bachelor|baccalaur[eé]at|baccalaureate)\b|الباك|البكالوريا/.test(text)) return { intent: "BACCALAUREATE" };
   if (REASONING_REQUEST.test(text)) return null;
   if (/\b(?:son|his) (?:projet|project)\b/.test(text) && !/\b(?:projets|projects)\b/.test(text)) return null;
   if (/\b(?:certifications?|certificats?|certifs?|certif)\b|الشهادات|شهادات/.test(text)) {

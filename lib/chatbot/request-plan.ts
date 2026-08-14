@@ -1,7 +1,7 @@
 import type Groq from "groq-sdk";
 import type { ChatHistoryMessage, ChatLanguage } from "./types";
 import { analyzeQuery } from "./query-analysis";
-import { projects } from "@/data/projects";
+import { projectKnowledge, projects } from "@/data/projects";
 import { certifications } from "@/data/certifications";
 import { aiSkills, dataSkills, devSkills } from "@/data/skills";
 import { normalizeMessage } from "./language";
@@ -109,13 +109,13 @@ export function shouldBuildRequestPlan(message: string): boolean {
   const q = analyzeQuery(message);
   const multipleQuestions = (message.match(/\?/g) ?? []).length > 1;
   const composedConstraint = Boolean(q.constraints.exactCount || q.constraints.maxCount);
-  const countedItems = /\b(?:\d+|one|two|three|un|une|deux|trois)\s+(?:projects?|projets?|preuves?|evidences?|éléments?)\b/i.test(message);
+  const countedItems = /\b(?:\d+|one|two|three|un|une|deux|trois)\s+(?:(?:strongest|best|meilleurs?|pertinents?|aham)\s+)?(?:projects?|projets?|preuves?|evidences?|éléments?|7wayej)\b/i.test(message);
   const arabicCountedItems = /(?:ثلاثة|ثلاث|٣|اثنان|اثنين|٢)\s+(?:أدلة|دليل|مشاريع|مشروع)/.test(message);
   const singularRankedItem = /(?:le|the|only)\s+(?:meilleur|best|strongest)|uniquement\s+(?:la|le)\s+plus fort/i.test(message)
     && /project|projet|proof|preuve|evidence|دليل|مشروع/i.test(message);
   const multipleNamedEntities = /(?:compare|tell me about|présente).*(?:system|prediction).*(?:and|et).*(?:system|platform|prediction)/i.test(message)
     || /AWS.*Kubernetes.*Spring Security|AWS.*(?:,|et|and).*Kubernetes/i.test(message);
-  const crossCategory = /(?:projet|project|system|platform|prediction).*(?:certification|stage|internship)|(?:education|parcours académique|formation).*(?:stage|internship)|capitale du japon.*(?:projet|project)/i.test(message);
+  const crossCategory = /(?:projet|project|system|platform|prediction|ticket management|water potability).*(?:certification|stage|internship)|(?:education|parcours académique|formation).*(?:stage|internship)|capitale du japon.*(?:projet|project)/i.test(message);
   return multipleQuestions || composedConstraint || countedItems || arabicCountedItems || singularRankedItem || multipleNamedEntities || crossCategory
     || q.constraints.comparisonRequired || (q.hasUserAssertedMetric && /intern|stage|experience|project|projet/i.test(message));
 }
@@ -159,7 +159,7 @@ export function buildDeterministicFallbackPlan(message: string, language: ChatLa
   let nextId = 1;
   const add = (request: Omit<SubRequest, "id">) => subRequests.push({ id: `r${nextId++}`, ...request });
   const base = { requestedCount: null, requiresExplanation: false, requiresEvidence: false, requiresSelection: false, scope: "portfolio" as const };
-  const explicitCount = normalized.match(/\b(\d+|one|two|three|un|une|deux|trois)\s+(?:strongest\s+|best\s+|meilleures?\s+|أقوى\s+)?(?:projects?|projets?|proofs?|evidences?|preuves?|أدلة|مشاريع)\b/);
+  const explicitCount = normalized.match(/\b(\d+|one|two|three|un|une|deux|trois)\s+(?:strongest\s+|best\s+|meilleures?\s+|pertinents?\s+|aham\s+|أقوى\s+)?(?:projects?|projets?|proofs?|evidences?|preuves?|7wayej|أدلة|مشاريع)\b/);
   const countWords: Record<string, number> = { one: 1, un: 1, une: 1, two: 2, deux: 2, three: 3, trois: 3 };
   const directCount = explicitCount ? (/^\d+$/.test(explicitCount[1]) ? Number(explicitCount[1]) : countWords[explicitCount[1]]) : undefined;
   const arabicCount = /(?:ثلاثة|ثلاث|٣)\s+(?:أدلة|مشاريع)/.test(normalized) ? 3 : /(?:اثنان|اثنين|٢)\s+(?:دليل|أدلة|مشاريع)/.test(normalized) ? 2 : undefined;
@@ -169,7 +169,7 @@ export function buildDeterministicFallbackPlan(message: string, language: ChatLa
   const dataScience = /data science|data scientist|عالم بيانات|علم البيانات/.test(normalized);
 
   const asksProjects = /projects?|projets?|مشاريع|مشروع/.test(normalized);
-  const asksEvidence = /proof|evidence|preuve|دليل|أدلة|preuves/.test(normalized);
+  const asksEvidence = /proof|evidence|preuve|دليل|أدلة|preuves|7wayej/.test(normalized);
   if (asksProjects && (count || analysis.constraints.selectionRequired)) add({
     ...base, intent: "PROJECT_SELECTION", domain: backend ? "backend" : dataScience ? "data_science" : "general",
     entityType: "project", entityName: null, requestedCount: count ?? 1,
@@ -183,7 +183,12 @@ export function buildDeterministicFallbackPlan(message: string, language: ChatLa
     requiresSelection: analysis.constraints.selectionRequired || /strongest|plus forte|meilleure|الأفضل|أقوى/.test(normalized),
   });
 
-  const knownProjectNames = projects.filter((project) => normalized.includes(project.title.toLocaleLowerCase()) || normalized.includes(project.title.toLocaleLowerCase().replace(/ system| platform/g, "")));
+  const knownProjectNames = projects.filter((project) => {
+    const title = project.title.toLocaleLowerCase();
+    const shortened = title.replace(/ system| platform/g, "");
+    const distinctivePrefix = shortened.split(/\s+/).slice(0, 2).join(" ");
+    return normalized.includes(title) || normalized.includes(shortened) || (distinctivePrefix.length >= 8 && normalized.includes(distinctivePrefix));
+  });
   if (!asksProjects || /actually documented|documenté|tell me about|présente|compare|explain|اشرح/.test(normalized)) {
     for (const project of knownProjectNames) add({ ...base, intent: "PROJECT_DETAIL", domain: null, entityType: "project", entityName: project.title, requiresExplanation: true });
   }
@@ -195,6 +200,10 @@ export function buildDeterministicFallbackPlan(message: string, language: ChatLa
     const distinctiveTitle = title.split(":")[0];
     if (normalized.includes(title) || normalized.includes(distinctiveTitle)) add({ ...base, intent: "CERTIFICATION_DETAIL", domain: "certification", entityType: "certification", entityName: cert.title });
   }
+  if (/certification/.test(normalized) && /plus proche|closest|most relevant|pertinent/.test(normalized)) add({
+    ...base, intent: "CERTIFICATION_SELECTION", domain: backend || knownProjectNames.some((project) => projectKnowledge[project.slug].primaryDomain === "backend") ? "backend" : dataScience ? "data_science" : "general",
+    entityType: "certification", entityName: null, requestedCount: 1, requiresExplanation: true, requiresSelection: true,
+  });
 
   const knownTechnologies = [...devSkills, ...dataSkills, ...aiSkills].map(({ name }) => name);
   const knownMentions = knownTechnologies.filter((technology) => normalized.includes(technology.toLocaleLowerCase()));
@@ -205,7 +214,7 @@ export function buildDeterministicFallbackPlan(message: string, language: ChatLa
     && !projects.some((project) => normalizeMessage(project.title).includes(normalizeMessage(name)))
     && !certifications.some((cert) => normalizeMessage(cert.title).includes(normalizeMessage(name))),
   )])];
-  const asksAboutTechnologyEvidence = /services?|utilis|used|professional|professionnel|evidence|preuve|conna[iî]t|knows|kay3ref|خبرة/.test(normalized);
+  const asksAboutTechnologyEvidence = /services?|utilis|used|professional|professionnel|evidence|preuve|conna[iî]t|knows|kay3ref|khdem|استخدم|مهني|موثق|دليل|خبرة/.test(normalized);
   if (asksAboutTechnologyEvidence) {
     for (const technology of technologies) add({ ...base, intent: "TECHNOLOGY_EVIDENCE", domain: technology === "Spring Security" ? "backend" : null, entityType: "technology", entityName: technology, requiresEvidence: true, requiresSelection: false });
     if (technologies.length && !/(?:poste|role|rôle|job|candidat|candidate)/.test(normalized)) {
@@ -214,15 +223,18 @@ export function buildDeterministicFallbackPlan(message: string, language: ChatLa
   }
 
   if (analysis.hasUserAssertedMetric) {
-    const metric = message.match(/\b\d+(?:[.,]\d+)?\s*%[^,.?]*/)?.[0]?.trim() ?? "The asserted metric";
+    const metric = (message.match(/\b\d+(?:[.,]\d+)?\s*%[^,.?]*/)?.[0]?.split(/\s+(?:and|et)\s+/i)[0].trim()) ?? "The asserted metric";
     add({ ...base, intent: "FACT_VERIFICATION", domain: dataScience ? "data_science" : null, entityType: "metric", entityName: metric });
   }
   if (/stage|internship|intern\b|التدريب/.test(normalized)) add({ ...base, intent: "EXPERIENCE", domain: "backend", entityType: "experience", entityName: "documented internship", requiresExplanation: true });
-  if (/education|parcours académique|formation|دراس|قراية/.test(normalized)) add({ ...base, intent: "EDUCATION", domain: "education", entityType: "education", entityName: null });
+  if (/\b(?:education|parcours académique|formation)\b|دراس|قراية/.test(normalized)) add({ ...base, intent: "EDUCATION", domain: "education", entityType: "education", entityName: null });
   if (/backend (?:ou|or) data science|compare.*backend.*data science/.test(normalized)) add({ ...base, intent: "DOMAIN_COMPARISON", domain: "general", entityType: null, entityName: null, requiresExplanation: true, requiresSelection: true });
   if (/capitale du japon|capital of japan|عاصمة اليابان/.test(normalized)) add({ ...base, intent: "OUT_OF_SCOPE", domain: null, entityType: null, entityName: "capital of Japan" });
 
   if (!subRequests.length) return null;
+  if (/y9dro ybeyno|kaybano|why each|pourquoi chacun/.test(normalized)) {
+    for (const sub of subRequests) if (sub.intent === "PROJECT_SELECTION" || sub.intent === "EVIDENCE_SELECTION") sub.requiresExplanation = true;
+  }
   const deduped = subRequests.filter((item, index, all) => all.findIndex((other) => other.intent === item.intent && other.entityName === item.entityName) === index).slice(0, 6);
   return {
     language,

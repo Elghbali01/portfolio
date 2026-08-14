@@ -49,7 +49,7 @@ export function buildTrustedResponse(
 
   if (/projet de pfe|pfe project|مشروع.*التخرج/.test(text)) return response(notDocumented(language, language === "fr" ? "Le projet de PFE précis d'Issam" : language === "en" ? "Issam's specific PFE project" : "مشروع نهاية الدراسة المحدد لعصام"));
 
-  if (/année.*\bbac\b|\bbac\b.*document|baccalaur/.test(text)) {
+  if (/année.*\bbac\b|\bbac\b.*document|baccalaur|bachelor.*year|year.*bachelor/.test(text)) {
     if (analysis.constraints.answerMode === "yes-no") return response(language === "fr" ? "NON" : language === "en" ? "NO" : "لا");
     return response(notDocumented(language, language === "fr" ? "L'année d'obtention du baccalauréat d'Issam" : language === "en" ? "Issam's baccalaureate year" : "سنة حصول عصام على البكالوريا"));
   }

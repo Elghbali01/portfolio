@@ -1,0 +1,200 @@
+===== RAPPORT CODEX — AI PORTFOLIO REAL-WORLD TESTS =====
+
+1. Environnement de test
+- Windows / PowerShell, repository C:\dev\portfolio.
+- Next.js 16.1.6, build de production, TypeScript.
+- GROQ_API_KEY existante utilisée uniquement côté serveur ; .env.local non lu dans les sorties, non modifié.
+- Première campagne exécutée intégralement avant toute correction.
+
+2. Serveur utilisé
+- npm run build puis npm run start -- -H 127.0.0.1 -p 3231.
+- /, /projects, /certifications : HTTP 200.
+- /api/chat : HTTP 200 sur le contrôle local « cv ».
+
+3. Nombre total de tests
+- 30 tours API real-world (questions et follow-ups compris).
+- 7 greetings inclus dans ces 30 tours.
+- 6 contrôles UI navigateur.
+- 4 contrôles de routes HTTP.
+- 98 scénarios de non-régression automatisés (21 + 33 + 27 + 17).
+- Total campagne : 138 contrôles/scénarios.
+
+4. Tableau du premier passage API — aucune correction encore appliquée
+Les latences sont mesurées côté client. Les routes planner ont generationLatencyMs=0. Les logs serveur ont notamment mesuré plannerLatencyMs 992/718/363/408 ms sur les premiers plans et routerLatencyMs 149 ms sur un fallback grounded. Les réponses trusted/locales n'exposent volontairement pas de métrique interne.
+
+ID | Langue | Route | Temps | Ressources | Verdict
+FR1 | fr | planner/plan-composed, fallback déterministe | 1078 ms | ticket-management, resource-management, CV | PASS
+Réponse exacte : « 1. Advanced Ticket Management System — One of the clearest demonstrations of focused Java backend architecture in the portfolio.\n2. University Material Resource Management System — Strong evidence of handling complex enterprise requirements, security, and backend workflows.\n\nStage — Issam a effectué un stage Full-Stack documenté de deux mois à l'École Polytechnique des Génies à Fès, avec conception d'API REST Java/Spring Boot et intégration React.js. »
+
+FR2 | fr | planner/plan-composed, fallback déterministe | 763 ms | resource-management, CV | PARTIAL
+Réponse exacte : « Spring Security — Preuve documentée: University Material Resource Management System (Spring Security et contrôle d'accès par rôles).\n\nAWS n'est pas documenté dans le portfolio ou le CV d'Issam.\n\nKubernetes n'est pas documenté dans le portfolio ou le CV d'Issam.\n\nParcours académique: DEUST (...) → Licence (...) → Master (...). »
+Raison : AWS/Kubernetes/Spring corrects et séparés, mais ajout académique parasite causé par « information » contenant « formation ».
+
+FR3 | fr | trusted entity | 42 ms | ticket-management | FAIL
+Réponse exacte : « Advanced Ticket Management System: A backend REST API for managing support tickets, users, and workflows using Spring Boot and a clean layered architecture. (In Development) Provide an enterprise-style REST API for support tickets, users, and ticket workflows. It demonstrates Spring Boot REST API, Controller-Service-Repository layers, DTO and Mapper patterns, JPA persistence, Validation. »
+Raison : la certification demandée est oubliée.
+
+FR4 | fr | planner/plan-composed | 412 ms | water-potability, CV | PASS
+Réponse exacte : « 1. Master in Data Science — advanced academic alignment with Data Science.\n2. Water Potability Prediction System — an end-to-end ML workflow with preprocessing, model comparison, evaluation, cross-validation and deployment. »
+
+EN1 | en | planner/plan-composed | 498 ms | water-potability, CV | PASS
+Réponse exacte : « 1. Master in Data Science — advanced academic alignment with Data Science.\n2. Water Potability Prediction System — an end-to-end ML workflow with preprocessing, model comparison, evaluation, cross-validation and deployment.\n3. Customer Churn Prediction — applied classification, feature engineering, model comparison and SHAP interpretation. Strongest: Water Potability Prediction System — an end-to-end ML workflow with preprocessing, model comparison, evaluation, cross-validation and deployment. »
+
+EN2 | en | planner/plan-composed | 181 ms | CV | FAIL
+Réponse exacte : « AWS is not documented in Issam's portfolio or CV.\n\n94% accuracy on water potability and that he used AWS during his internship is not documented in Issam's portfolio or CV; so it cannot be confirmed.\n\nInternship — Issam completed a documented two-month Full-Stack internship at École Polytechnique des Génies in Fez, designing Java/Spring Boot REST APIs and integrating React.js. »
+Raison : Water Potability n'est pas expliqué et la métrique absorbe une seconde affirmation.
+
+EN3 | en | fournisseur indisponible | 492 ms | aucune | FAIL
+Réponse exacte : erreur HTTP 503 « The AI service is temporarily busy. Please try again shortly. »
+Raison : « bachelor year » n'était pas couvert par la protection locale BACCALAUREATE.
+
+EN4-Q1 | en | fournisseur indisponible | 260 ms | aucune | FAIL initial transitoire
+Réponse exacte : erreur HTTP 503. Un second passage sans correction a produit la clarification correcte : « Of course. Which of Issam's projects would you like to know about? » ; Q2 « Advanced Ticket Management » a retourné le projet précis et sa carte.
+
+DA1 | darija | planner/plan-composed | 923 ms | CV | FAIL
+Réponse exacte : « الـ stage — Issam دار stage موثق ديال شهرين فـ École Polytechnique des Génies ففاس، صايب REST APIs بـ Java/Spring Boot ودمج React.js. »
+Raison : « 2 aham projet » n'était pas reconnu comme cardinalité de projets.
+
+DA2 | darija | planner/plan-composed | 180 ms | resource-management, CV | PASS
+Réponse exacte : Spring Security documenté, AWS non documenté, Kubernetes non documenté, puis stage documenté, en quatre blocs séparés.
+
+DA3 | darija | grounded-fallback | 200 ms | water-potability + 2 certificats | FAIL
+Réponse exacte : paragraphe général sur Master, projets, certifications et outils.
+Raison : « 3 7wayej » et « a9wa » n'étaient ni une cardinalité ni une sélection reconnues.
+
+AR1 | ar | planner/plan-composed | 182 ms | water-potability, CV | PARTIAL
+Réponse exacte : trois preuves et « أقوى دليل: Water Potability Prediction System », mais justifications en anglais.
+
+AR2 | ar | planner/plan-composed | 163 ms | ticket-management | FAIL
+Réponse exacte : « 1. Advanced Ticket Management System — One of the clearest demonstrations of focused Java backend architecture in the portfolio. أقوى دليل: Advanced Ticket Management System... »
+Raison : AWS, Kubernetes et Spring Security perdus ; le vocabulaire arabe de preuve technologique n'activait pas les sous-demandes technologie.
+
+H1 | fr | trusted | 24 ms | water-potability | PASS
+Réponse exacte : « La valeur de 94 % de précision n'est documentée ni dans le portfolio ni dans le CV d'Issam ; je ne peux donc pas la confirmer. »
+
+H2 | fr | trusted unknown entity | 24 ms | aucune | PASS
+Réponse exacte : « AWS Certified Cloud Practitioner n'est pas documenté dans le portfolio ou le CV d'Issam. »
+
+H3 | fr | trusted unknown entity | 24 ms | aucune | PASS
+Réponse exacte : « E-commerce Recommendation Platform n'est pas documenté dans le portfolio ou le CV d'Issam. »
+
+CONV1-Q1 | fr | planner/semantic | 1004 ms | water-potability, CV | PASS
+Réponse exacte : « 1. Master in Data Science\n2. Water Potability Prediction System\n3. Customer Churn Prediction Preuve la plus forte: Water Potability Prediction System — ... »
+CONV1-Q2 | fr | trusted follow-up | 20 ms | water-potability | PASS
+Réponse exacte : « La preuve la plus forte parmi les trois est le Water Potability Prediction System, car il documente un workflow ML appliqué complet : prétraitement, comparaison de plusieurs modèles, évaluation orientée sécurité, validation croisée, persistance du modèle et déploiement Streamlit. »
+
+CONV2-Q1 | fr | semantic-clarification | 48 ms | aucune | PASS
+Réponse exacte : « Bien sûr. De quel projet d'Issam souhaitez-vous parler ? »
+CONV2-Q2 | fr | trusted entity | 20 ms | water-potability | PASS
+Réponse exacte : description officielle du Water Potability Prediction System, objectif et capacités documentées.
+CONV2-Q3 | fr | semantic-local | 309 ms ; routerLatencyMs 283 ms | water-potability | PASS
+Réponse exacte : même projet officiel reconstruit depuis le catalogue ; l'historique sert uniquement à résoudre la référence.
+
+MIX | fr | planner/plan-composed | 175 ms | ticket-management | PASS
+Réponse exacte : « 1. Advanced Ticket Management System Preuve la plus forte: Advanced Ticket Management System.\n\nHors périmètre: je réponds uniquement sur le portfolio et le CV d'Issam. »
+
+Greetings :
+- hy : semantic-local, 64 ms, fr, « Bonjour 👋 Je suis l’assistant du portfolio d’Issam... » — PASS.
+- hyyyy : semantic-local, 24 ms, fr, même réponse — PASS.
+- helo : semantic-local, 23 ms, fr, même réponse — PASS.
+- bnjr : semantic-local, 23 ms, fr, même réponse — PASS.
+- slm : semantic-local, 396 ms, darija, « Salam 👋 Ana Issam Assistant... » — PASS.
+- salaaaaaam : local, 24 ms, darija, même accueil — PASS.
+- bonjouuuuuur : local, 24 ms, fr, accueil français — PASS.
+Aucune ressource et aucune génération Groq pour ces greetings ; slm a utilisé le routeur sémantique, les autres chemins indiqués sont déterministes.
+
+5. Questions exactes
+Les questions exactes sont celles imposées dans la campagne utilisateur. Elles ont été envoyées sans réécriture ; les citations ci-dessus conservent les réponses exactes, hors normalisation d'affichage UTF-8 du terminal PowerShell.
+
+6. Problèmes trouvés
+- FR3 : seconde sous-demande certification ignorée.
+- EN2 : projet omis et métrique trop gourmande.
+- DA1/DA3 : cardinalités Arabizi non reconnues.
+- AR2 : sous-demandes technologiques arabes non reconnues.
+- FR2 : faux positif education dans « information ».
+- EN3 : bachelor dépendait inutilement de Groq.
+- AR1 et plusieurs sélections : justifications anglaises dans une réponse arabe/française/Darija.
+- UI : le texte visible du lien est « View certificate », pas « Verify certificate » ; les URL de vérification sont néanmoins correctes.
+- UI notification : le badge n'a pas pu être observé de façon concluante, car l'action navigateur attendait la fin de la requête avant de permettre la fermeture ; le code incrémente bien unreadCount si la réponse arrive fermé, mais ce point reste PARTIAL en test black-box.
+
+7. Causes racines
+- Déclencheur du planner trop strict autour des noms de projet et catégories croisées.
+- Lexique structurel incomplet pour aham, 7wayej, a9wa et les verbes arabes de preuve/usage.
+- Résolution d'un projet exigeant un titre trop complet.
+- Regex education sans frontières de mot.
+- Extraction de métrique allant jusqu'à la ponctuation au lieu de s'arrêter à une conjonction.
+- Certification Backend classée sans héritage du domaine du projet.
+
+8. Corrections appliquées
+- Extension généralisée des cardinalités avec adjectifs FR/EN/Darija.
+- Ajout de 7wayej/a9wa et du vocabulaire arabe technologique.
+- Résolution par préfixe distinctif de projet.
+- Ajout de CERTIFICATION_SELECTION avec héritage du domaine du projet et classement Spring > Software Engineering > Java pour un contexte Backend.
+- Séparation de la métrique avant and/et.
+- Frontières de mots pour education/formation.
+- Bachelor ajouté aux protections BACCALAUREATE et OUI/NON locales.
+- Clarification déterministe pour « talk about his project ».
+- Justifications de sélection localisées en FR/AR/Darija.
+- Aucune donnée de data/* ni .env.local modifiée.
+
+9. Résultats après correction
+- FR2 : PASS, trois technologies séparées, aucun bloc académique parasite.
+- FR3 : PASS, projet précis + « Spring — Ecosystem and Core », deux cartes officielles.
+- EN2 : PASS, Water Potability + AWS + 94 % + stage tous traités.
+- EN3 : PASS exact « NO », 45 ms, aucun Groq requis.
+- EN4 : PASS clarification locale puis projet précis.
+- DA1 : PASS, exactement deux projets, raisons Darija, stage, deux cartes.
+- DA3 : PASS, exactement trois preuves et sélection « أقوى دليل ».
+- AR1 : PASS, trois justifications en arabe et meilleure preuve.
+- AR2 : PASS, Spring Security/AWS/Kubernetes séparés et sans invention.
+
+10. Tests navigateur
+A. Fermeture avant réponse / badge : PARTIAL, non reproductible de manière concluante avec l'attente automatique de l'outil navigateur ; aucun badge observé dans cette exécution.
+B. Exactement deux projets : PASS visuel et DOM. Deux cartes seulement : Advanced Ticket Management et University Material Resource Management.
+C. Certifications : PASS fonctionnel. Quatre cartes rendues (limite UI), quatre URL de vérification officielles valides. Libellé observé « View certificate », et non « Verify certificate ».
+D. Darija : PASS visuel ; texte lisible, retours à la ligne corrects. Le mélange RTL/LTR avec noms techniques anglais reste naturellement irrégulier mais exploitable.
+E. F5 / loader : PASS. Après reload, loader absent/caché avant 10 s et hero « Issam Elghbali » visible ; aucun blocage à 0 %.
+F. Mobile 390×844 : PASS. Bouton accessible, dialogue visible, largeur adaptée, champ et fermeture accessibles.
+
+11. Tests loader/reload
+Résultat mesuré : loaderInitially=0 après DOMContentLoaded, loaderHiddenWithin10s=true, homeVisible=true. Aucun écran bloqué à 0 %.
+
+12. Tests multilingues
+FR, EN, arabe standard et Darija/Arabizi testés. Après correction, tous les scénarios obligatoires répondent dans la langue attendue. Les noms officiels de projets/technologies restent volontairement dans leur langue de marque.
+
+13. Tests conversationnels
+CONV1 Q2 sélectionne correctement Water Potability parmi les trois preuves précédentes. CONV2 clarifie, résout Water Potability puis comprend le follow-up sur les technologies. Aucun fait de l'historique n'est accepté sans reconstruction catalogue.
+
+14. Tests anti-hallucination
+H1/H2/H3 : PASS dès le premier passage. 94 % non confirmé, AWS Certified Cloud Practitioner sans fausse date, E-commerce Recommendation Platform sans technologies inventées.
+
+15. Résultats de non-régression
+- npm run test:chatbot-v4 : 21/21 PASS.
+- npm run test:chatbot-v4-1 : 33/33 PASS.
+- npm run test:chatbot-v4-2 : 27/27 PASS.
+- npm run test:chatbot-v4-3 : 17/17 PASS.
+- Total : 98/98 PASS.
+
+16. Lint
+npm run lint : succès, 0 erreur. Trois warnings préexistants next/no-img-element dans CertificatePreviewModal.tsx, CertificationCard.tsx et ProjectCard.tsx.
+
+17. Build
+npm run build : PASS. Compilation Next.js 16.1.6 et TypeScript réussie ; /api/chat reste dynamique, les autres pages sont générées normalement.
+
+18. Limitations restantes
+- La notification hors fenêtre doit encore être validée manuellement ou par un test E2E disposant d'interception/délai réseau contrôlé.
+- Le libellé des cartes est « View certificate » plutôt que « Verify certificate » ; les liens eux-mêmes sont bien les liens Verify officiels.
+- Le planner Groq peut être temporairement limité. Les chemins couverts disposent désormais de fallbacks déterministes, mais une formulation totalement nouvelle peut encore recevoir une erreur localisée si aucun fallback grounded n'existe.
+- Les logs de latence sont côté serveur et non corrélés par requestId ; le rapport peut associer les séquences, mais une observabilité production robuste nécessiterait un identifiant anonyme.
+- Le rate limiter reste process-local.
+
+19. Verdict final
+Prêt pour production : OUI, avec réserve mineure.
+Les parcours API critiques, multilingues, conversationnels et anti-hallucination sont stables et les 98 régressions passent. Aucun blocker fonctionnel du chatbot n'est connu.
+
+Points non bloquants à traiter pour considérer la validation UI absolument complète :
+1. ajouter un test E2E contrôlant réellement la réponse arrivée après fermeture et le badge unread ;
+2. décider si le texte UI doit devenir « Verify certificate » au lieu de « View certificate » ;
+3. éventuellement ajouter un requestId anonyme aux logs de latence.
+
+===== FIN RAPPORT =====

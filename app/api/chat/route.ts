@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
     validation.data.message,
     validation.data.preferredLanguage,
   );
-  if (validation.data.history.length === 0 && /^(?:parle moi de|tell me about) (?:son|his) (?:projet|project)$/i.test(validation.data.message.trim())) {
+  if (validation.data.history.length === 0 && /^(?:parle moi de|tell me about|talk about) (?:son|his) (?:projet|project)$/i.test(validation.data.message.trim())) {
     return NextResponse.json(clarificationResponse(language), { headers: { "x-chat-source": "semantic-clarification" } });
   }
   const localResponse = resolveLocalIntent(

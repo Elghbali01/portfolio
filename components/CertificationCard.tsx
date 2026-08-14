@@ -71,7 +71,7 @@ export default function CertificationCard({
                 href={cert.verificationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Verify ${cert.title} credential (opens in a new tab)`}
+                aria-label={`Verify ${cert.title} certificate (opens in a new tab)`}
                 className="inline-flex items-center gap-2 w-full justify-center
                            bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium
                            px-4 py-2.5 rounded-lg transition-colors duration-300"
@@ -89,7 +89,7 @@ export default function CertificationCard({
                     d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
                   />
                 </svg>
-                Verify Credential
+                Verify Certificate
               </a>
             ) : cert.actionType === "external" ? (
               cert.externalUrl ? (
