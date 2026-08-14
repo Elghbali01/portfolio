@@ -69,6 +69,12 @@ export const projectKnowledge: Record<string, ProjectKnowledge> = {
     demonstratedCapabilities: ["Data preprocessing", "Model comparison", "Safety-oriented evaluation", "Cross-validation", "Streamlit deployment"],
     recruiterValue: "Strong evidence of an end-to-end applied Machine Learning workflow, not primarily a backend project.",
   },
+  "customer-churn-prediction": {
+    primaryDomain: "data-science", secondaryDomains: ["ai-ml", "backend"],
+    objective: "Predict customer churn probabilities and identify at-risk customers to help prioritize retention actions.",
+    demonstratedCapabilities: ["End-to-end Machine Learning pipeline", "EDA and feature engineering", "Model evaluation and threshold tuning", "SHAP explainability", "FastAPI inference API", "Automated testing", "Docker containerization"],
+    recruiterValue: "Strong evidence of delivering an end-to-end Data Science project from a business problem to a tested and containerized ML application.",
+  },
 };
 
 export const projects: Project[] = [
@@ -374,6 +380,81 @@ This project demonstrates:
     ],
     github: "https://github.com/Elghbali01",
     image: "/portabilite_eau.png",
+    featured: true,
+  },
+
+  {
+    title: "Customer Churn Prediction",
+    slug: "customer-churn-prediction",
+    category: "Machine Learning / Data Science",
+    shortDescription:
+      "An end-to-end ML system for customer churn prediction, combining explainability with a FastAPI inference API and responsive web application.",
+    fullDescription: `
+This project is an end-to-end Machine Learning system built to predict customer churn and turn model probabilities into actionable retention signals.
+
+**Business Goal:**
+- Predict which customers are likely to churn
+- Produce a churn probability for each customer
+- Help teams prioritize retention actions for customers at risk
+
+**Data & EDA:**
+- Uses the IBM Telco Customer Churn dataset with 7,043 customers
+- Analyzes churn distribution and class imbalance
+- Explores relationships between churn and tenure, Contract, MonthlyCharges, InternetService, TechSupport, PaymentMethod, and other customer attributes
+
+**Machine Learning:**
+- Applies preprocessing without data leakage and deterministic feature engineering
+- Compares Logistic Regression, Decision Tree, Random Forest, and Gradient Boosting
+- Improves and evaluates candidate models before selecting the final Logistic Regression pipeline
+- Tunes the operational decision threshold to 0.30 to favor detection of at-risk customers according to the business precision/recall tradeoff
+
+**Final Performance:**
+- Final test ROC-AUC: 0.8429
+- Detects 285 of the 374 churners in the test set at the 0.30 threshold
+
+**Explainability:**
+- Uses model coefficients and SHAP to analyze global feature influence
+- Interprets the factors associated with churn predictions while avoiding causal claims
+
+**Production & Application:**
+- Serializes the complete preprocessing and Logistic Regression pipeline
+- Exposes validated Pydantic schemas through FastAPI
+- Provides health, model information, single prediction, and batch prediction endpoints with Swagger documentation
+- Includes a responsive web interface for the 19 customer inputs, churn probability, prediction, and operational threshold
+
+**Testing & Docker:**
+- Passes all 39 automated tests
+- Completes 70 final functional and technical validations
+- Runs in a validated healthy Docker container
+- Confirms prediction and model parity across Python, local FastAPI, and Docker environments
+
+This project demonstrates:
+- End-to-end Machine Learning delivery
+- EDA, feature engineering, and model comparison
+- Business-oriented threshold tuning
+- Explainable ML with SHAP
+- FastAPI inference and Pydantic validation
+- Automated testing and Docker containerization
+  `,
+    technologies: [
+      "Python",
+      "Pandas",
+      "NumPy",
+      "Scikit-learn",
+      "Matplotlib",
+      "Seaborn",
+      "SHAP",
+      "FastAPI",
+      "Pydantic",
+      "Pytest",
+      "Docker",
+      "Joblib",
+      "HTML",
+      "CSS",
+      "JavaScript",
+    ],
+    github: "https://github.com/Elghbali01/customer-churn-prediction.git",
+    image: "/customer-churn-prediction.png",
     featured: true,
   },
 ];

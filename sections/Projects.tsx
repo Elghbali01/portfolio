@@ -31,7 +31,7 @@ export default function Projects() {
 
         {/* FEATURED GRID — 2 projects only */}
         <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-10">
-          {featuredProjects.map((project, index) => (
+          {featuredProjects.slice(0, 2).map((project, index) => (
             <ProjectCard
               key={project.slug}
               project={project}
