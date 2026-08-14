@@ -1,0 +1,105 @@
+===== RAPPORT CODEX — AI PORTFOLIO ASSISTANT V4.3 =====
+
+1. Résumé
+V4.3 ajoute une architecture multi-intent : les messages complexes deviennent un RequestPlan strict, chaque sous-demande est résolue depuis les données officielles, puis la réponse et ses cartes sont composées et validées côté serveur. Les fast paths V4/V4.1/V4.2 restent prioritaires pour les requêtes simples.
+
+2. Diagnostic exact du problème V4.2
+Le Semantic Router V4.2 ne représentait qu'une intention et une entité. Une réponse trusted ou locale pouvait retourner immédiatement, tandis que le générateur recevait une question composée sans liste contractuelle des parties à satisfaire.
+
+3. Pourquoi certaines sous-demandes étaient perdues
+Le pipeline associait un message à une route unique. La première protection reconnue pouvait court-circuiter AWS, Kubernetes, métrique, projet ou stage restants. Les nombres et demandes de sélection restaient des indications textuelles plutôt que des invariants validés.
+
+4. Architecture V4.3 retenue
+Simple : message -> trusted/local -> réponse.
+Sémantique simple : message -> Semantic Router V4.2 -> local/grounded -> validation -> réponse.
+Complexe : message -> Semantic Planner -> RequestPlan -> résolveurs officiels -> composer -> validateur -> ressources whitelistées -> réponse.
+
+5. Fichiers inspectés
+app/api/chat/route.ts ; tous les modules lib/chatbot impliqués (semantic-router, query-analysis, intent-resolver, entity-resolver, v4-responses, grounded-reasoning, local-responses, portfolio-context, prompts, resources, types, validation, conversational-normalization) ; data/projects.ts, certifications.ts, skills.ts, profile.ts ; scripts V4/V4.1/V4.2 ; README.md ; ARCHITECTURE.md ; package.json ; rapports V3 à V4.2.
+
+6. Fichiers créés
+- lib/chatbot/request-plan.ts
+- lib/chatbot/response-composer.ts
+- scripts/chatbot-v4-3-regression.mjs
+- RAPPORT_CODEX_AI_PORTFOLIO_ASSISTANT_V4_3.txt
+
+7. Fichiers modifiés
+- app/api/chat/route.ts
+- lib/chatbot/query-analysis.ts
+- package.json
+- README.md
+- ARCHITECTURE.md
+
+8. Structure du RequestPlan
+language ; subRequests (1 à 6) ; globalConstraints avec exactCount, maxCount, concise, answerMode, separateItems et conclusionFirst ; confidence 0..1 ; clarificationNeeded ; clarificationReason.
+
+9. Structure des SubRequests
+Chaque élément possède id, intent, domain, entityType, entityName, requestedCount, requiresExplanation, requiresEvidence, requiresSelection et scope. Les enums et types sont validés strictement.
+
+10. Fonctionnement du Semantic Planner
+request-plan.ts appelle llama-3.1-8b-instant en JSON Object Mode, température 0 et max_tokens 650. Il reçoit le message, un indice de langue et au maximum deux messages d'historique tronqués. Il ne reçoit aucun catalogue portfolio/CV et ne décide jamais qu'un fait est vrai.
+
+11. Trusted protections sans short-circuit abusif
+Une requête simple conserve sa réponse trusted immédiate. Une requête composée est planifiée avant le retour trusted global : métrique, technologie, projet et expérience deviennent des parties indépendantes. Les protections servent de résultat fiable, pas de raison pour ignorer le reste.
+
+12. Gestion des multi-intents
+Les intentions couvrent notamment sélection/détail de projet, sélection/détail de certification, preuve technologique, expérience, éducation, vérification de fait, comparaison de domaines et hors périmètre. Le compositeur exige une résolution pour chaque id.
+
+13. exactCount et maxCount
+Les comptes sont extraits en français, anglais, chiffres et formes arabes couvertes. countFor borne les sélections aux éléments disponibles. Le validateur recompte les lignes numérotées et limite séparément les cartes projet. Une demande de deux projets ne peut donc plus produire trois cartes.
+
+14. explanation, selection et comparison
+requiresExplanation ajoute une justification par élément. requiresSelection ajoute une désignation « Preuve la plus forte / Strongest / أقوى دليل » sans créer un élément numéroté supplémentaire. DOMAIN_COMPARISON produit une conclusion justifiée à partir du Master, des projets ML, du stage et des projets Spring documentés.
+
+15. Response composer
+response-composer.ts sélectionne les projets Backend ou Data Science, les preuves de candidature, les certifications, les détails d'entités, le stage et la formation. Il assemble les parties dans l'ordre du plan et déduplique les ressources.
+
+16. Validateur final
+Il vérifie que toutes les sous-demandes sont résolues, que exactCount/maxCount et le nombre de cartes projet sont respectés, et que toute sélection de liste demandée est présente. Les resourceIds passent ensuite exclusivement par resolveResources et sa whitelist.
+
+17. Fausses prémisses
+94 % et usage professionnel AWS ne sont jamais confirmés sans source. Dans une question composée, ces refus coexistent avec l'explication réelle de Water Potability et du stage. L'historique et le message utilisateur ne deviennent jamais une source métier.
+
+18. Clarifications
+« parle moi de son projet » conserve une clarification ciblée. Les demandes « deux meilleurs projets Backend » ne clarifient pas inutilement. La réponse à la clarification est résolue contre le catalogue officiel.
+
+19. Contexte conversationnel
+Le comportement V4.2 est conservé : historique API limité et validé, deux derniers messages seulement pour le routeur/planner, texte tronqué, usage réservé aux références. Les follow-ups « laquelle » continuent de reconstruire leurs faits depuis data/*.
+
+20. FR/EN/AR/Darija
+Les six scénarios principaux couvrent français, anglais informel, arabe et Darija/Arabizi. La langue du plan est conservée. Les nombres arabes naturels et les contraintes multilingues sont normalisés côté serveur. Les salutations ambiguës helo/hy/hyyyy/bnjr sont stabilisées localement avec la préférence UI.
+
+21. Ressources et cartes
+Les cartes correspondent aux preuves réellement sélectionnées. Les projets sont limités par exactCount/maxCount, les doublons sont supprimés et aucune ressource arbitraire fournie par Groq ou l'utilisateur n'est acceptée.
+
+22. Latence et Groq
+Une requête complexe effectue au maximum un appel planner avant la composition locale ; chaque sous-demande ne déclenche pas un appel séparé. Timeout 8 s et aucun retry. Un plan déterministe adossé au catalogue prend le relais si Groq est limité ou retourne un JSON invalide. Le rate limit reste compté une fois par message. Aucun message ou plan brut n'est journalisé.
+
+23. Résultats exacts V4.3
+npm run test:chatbot-v4-3 : 17/17 PASS. Tests A à F, deux entités connues, connue + inconnue, deux technologies non documentées + Spring Security, projet + certification, éducation + stage, comparaison, exactement 2 sans explication, meilleure seule, hors scope mixte, clarification et follow-up : PASS.
+
+24. Résultats exacts V4
+npm run test:chatbot-v4 : 21/21 PASS après correction de la priorité trusted et du déclenchement trop large du planner.
+
+25. Résultats exacts V4.1
+npm run test:chatbot-v4-1 : 33/33 PASS, dont 30 greetings et 3 anti-faux-positifs.
+
+26. Résultats exacts V4.2
+npm run test:chatbot-v4-2 : 27/27 PASS, dont routage sémantique, clarification, follow-up, multilingue et panne Groq simulée.
+
+27. Résultat lint
+npm run lint : succès, 0 erreur. Trois warnings next/no-img-element préexistants dans CertificatePreviewModal.tsx, CertificationCard.tsx et ProjectCard.tsx ; aucun n'est lié à V4.3.
+
+28. Résultat build
+npm run build : succès Next.js 16.1.6, compilation TypeScript, génération statique et route serveur dynamique /api/chat. GROQ_API_KEY reste exclusivement serveur et .env.local n'a pas été modifié.
+
+29. Limitations restantes
+Le fallback déterministe couvre les structures et catalogues connus mais le planner Groq reste utile pour des compositions linguistiques réellement nouvelles. Le rate limiter reste en mémoire du processus. Le contexte conversationnel ne transporte pas encore une liste structurée persistante des sélections précédentes. Les textes détaillés du composer pourraient être davantage localisés en arabe/Darija.
+
+30. Recommandations pour une future V5
+Ajouter des références conversationnelles structurées signées côté serveur, étendre les tests property-based des cardinalités, mesurer anonymement les taux de plan invalide/fallback, employer un rate limiter distribué en multi-instance et enrichir la localisation des justifications sans modifier les faits métier.
+
+Sécurité et données
+Les tests réels Groq n'ont transmis que le message utilisateur, un historique court nécessaire et les données professionnelles déjà destinées au chatbot lors des chemins grounded existants. Aucune clé, variable d'environnement, donnée privée hors portfolio ou contenu de .env.local n'a été transmis ni journalisé. Aucune donnée métier n'a été modifiée pour faire passer les tests.
+
+===== FIN RAPPORT =====

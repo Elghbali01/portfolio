@@ -9,6 +9,8 @@ import { buildGroundedReasoning } from "@/lib/chatbot/grounded-reasoning";
 import { buildTrustedResponse } from "@/lib/chatbot/v4-responses";
 import { createLocalResponse, type LocalIntent } from "@/lib/chatbot/local-responses";
 import { routeSemantically, type SemanticIntent, type SemanticRouterResult } from "@/lib/chatbot/semantic-router";
+import { buildDeterministicFallbackPlan, buildRequestPlan, shouldBuildRequestPlan, type RequestPlan } from "@/lib/chatbot/request-plan";
+import { composeRequestPlan, validateComposedResponse } from "@/lib/chatbot/response-composer";
 import type { ChatLanguage, ChatResponse } from "@/lib/chatbot/types";
 import { validateChatRequest } from "@/lib/chatbot/validation";
 
@@ -158,11 +160,74 @@ export async function POST(request: NextRequest) {
     validation.data.message,
     validation.data.preferredLanguage,
   );
+  if (validation.data.history.length === 0 && /^(?:parle moi de|tell me about) (?:son|his) (?:projet|project)$/i.test(validation.data.message.trim())) {
+    return NextResponse.json(clarificationResponse(language), { headers: { "x-chat-source": "semantic-clarification" } });
+  }
+  const localResponse = resolveLocalIntent(
+    validation.data.message,
+    validation.data.preferredLanguage,
+  );
+  const requiresRequestPlan = shouldBuildRequestPlan(validation.data.message);
   const trustedResponse = buildTrustedResponse(
     validation.data.message,
     language,
     validation.data.history,
   );
+  if (trustedResponse && !requiresRequestPlan) {
+    return NextResponse.json({
+      answer: trustedResponse.answer,
+      language,
+      resources: resolveResources(trustedResponse.resourceIds),
+    } satisfies ChatResponse);
+  }
+  if (localResponse && !requiresRequestPlan) {
+    const localIntent = identifyLocalIntent(validation.data.message)?.intent ?? "LOCAL";
+    return NextResponse.json(localResponse, {
+      headers: { "x-chat-source": "local", "x-chat-intent": localIntent },
+    });
+  }
+  if (/^(?:hy|helo|h+y+|bnjr)$/i.test(validation.data.message.trim())) {
+    const greetingLanguage = validation.data.preferredLanguage ?? language;
+    return NextResponse.json(createLocalResponse("GREETING", greetingLanguage), {
+      headers: { "x-chat-source": "semantic-local", "x-chat-intent": "GREETING" },
+    });
+  }
+
+  let providerRateCounted = false;
+  let client: Groq | null = null;
+  if (requiresRequestPlan) {
+    if (isRateLimited(identifier)) return errorResponse(localizedError("local-limit", language), 429);
+    providerRateCounted = true;
+    let semanticPlan: RequestPlan | null = null;
+    let plannerLatencyMs = 0;
+    if (process.env.GROQ_API_KEY) {
+      client = new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 8_000, maxRetries: 0 });
+      try {
+        const planStartedAt = performance.now();
+        semanticPlan = await buildRequestPlan(client, validation.data.message, validation.data.history, validation.data.preferredLanguage);
+        plannerLatencyMs = Math.round(performance.now() - planStartedAt);
+        if (semanticPlan?.clarificationNeeded) {
+          console.info("Chat latency", { plannerLatencyMs: Math.round(performance.now() - planStartedAt), generationLatencyMs: 0, route: "plan-clarification" });
+          return NextResponse.json(clarificationResponse(semanticPlan.language), { headers: { "x-chat-source": "plan-clarification" } });
+        }
+      } catch (error) {
+        console.error("Semantic planner failed:", error instanceof Error ? error.message : "Unknown error");
+      }
+    }
+    const fallbackPlan = buildDeterministicFallbackPlan(validation.data.message, language);
+    for (const [plan, strategy] of [[fallbackPlan, "deterministic-fallback"], [semanticPlan, "semantic"]] as const) {
+      if (!plan) continue;
+      const composed = composeRequestPlan(plan);
+      if (composed && validateComposedResponse(plan, composed)) {
+        console.info("Chat latency", { plannerLatencyMs, generationLatencyMs: 0, route: "plan-composed", strategy, subRequests: plan.subRequests.length });
+        return NextResponse.json({ answer: composed.answer, language: plan.language, resources: resolveResources(composed.resourceIds) } satisfies ChatResponse, {
+          headers: { "x-chat-source": "plan-composed", "x-chat-plan-strategy": strategy, "x-chat-subrequests": String(plan.subRequests.length) },
+        });
+      }
+    }
+    console.warn("Request plan could not be safely composed.");
+  }
+
   if (trustedResponse) {
     return NextResponse.json({
       answer: trustedResponse.answer,
@@ -171,17 +236,7 @@ export async function POST(request: NextRequest) {
     } satisfies ChatResponse);
   }
   const groundedReasoning = buildGroundedReasoning(validation.data.message, language);
-  const localResponse = resolveLocalIntent(
-    validation.data.message,
-    validation.data.preferredLanguage,
-  );
-  if (localResponse) {
-    const localIntent = identifyLocalIntent(validation.data.message)?.intent ?? "LOCAL";
-    return NextResponse.json(localResponse, {
-      headers: { "x-chat-source": "local", "x-chat-intent": localIntent },
-    });
-  }
-  if (isRateLimited(identifier)) {
+  if (!providerRateCounted && isRateLimited(identifier)) {
     return errorResponse(localizedError("local-limit", language), 429);
   }
 
@@ -190,11 +245,7 @@ export async function POST(request: NextRequest) {
     return errorResponse(localizedError("configuration", language), 503);
   }
 
-  const client = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-    timeout: 8_000,
-    maxRetries: 0,
-  });
+  client ??= new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 8_000, maxRetries: 0 });
   const totalStartedAt = performance.now();
   const routerStartedAt = performance.now();
   let semanticRoute: SemanticRouterResult | null;

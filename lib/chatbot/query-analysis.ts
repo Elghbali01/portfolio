@@ -43,7 +43,11 @@ export function analyzeQuery(message: string): QueryAnalysis {
   const explanationForbidden = /sans (?:rien )?(?:expliquer|explication)|without explanation|juste|uniquement (?:le|la|les|l information)/.test(normalized);
   const explanationRequired = /pourquoi|why|explique|explain|justifie|justify|اشرح|3lach/.test(normalized);
   const exactCount = requestedCount(normalized, "exact")
-    ?? (/\b(?:les )?(?:trois|three|3) (?:meilleures?|best|preuves?|evidence)/.test(normalized) ? 3 : undefined);
+    ?? (() => {
+      const itemCount = normalized.match(/\b(\d+|one|un|une|two|deux|three|trois|four|quatre|five|cinq)\s+(?:projects?|projets?|preuves?|evidences?|éléments?)\b/);
+      if (itemCount) return /^\d+$/.test(itemCount[1]) ? Number(itemCount[1]) : numberWords[itemCount[1]];
+      return /\b(?:les )?(?:trois|three|3) (?:meilleures?|best|preuves?|evidence)/.test(normalized) ? 3 : undefined;
+    })();
 
   return {
     normalized,

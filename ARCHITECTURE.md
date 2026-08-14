@@ -208,4 +208,18 @@ Semantic Router Groq (message + 2 derniers messages, sans portfolio)
 
 `lib/chatbot/semantic-router.ts` ne répond jamais à la question et ne reçoit aucune donnée métier complète. Il retourne un JSON strict comprenant langue, intention, confiance, domaine, entité, route et motif éventuel de clarification. Une classification simple déclenche `local-responses.ts` sans second appel. Une ambiguïté indispensable déclenche une clarification. Seule une vraie synthèse utilise le contexte filtré puis la génération grounded.
 
+## 14. Planification multi-intent V4.3
+
+Les requêtes simples conservent le flux `trusted/local -> réponse`. Les formulations sémantiques simples conservent `semantic-router -> local/grounded -> validation -> réponse`. Une requête composée suit désormais :
+
+`message -> request-plan.ts -> RequestPlan -> résolution indépendante -> response-composer.ts -> validation -> réponse`.
+
+Le `RequestPlan` contient une langue, jusqu'à six `SubRequest`, les contraintes globales (`exactCount`, `maxCount`, concision, mode de réponse, séparation et ordre de conclusion), une confiance et un éventuel besoin de clarification. Chaque sous-demande porte une intention, un domaine, une entité, une cardinalité et les besoins d'explication, preuve ou sélection.
+
+Le planificateur Groq utilise un prompt compact, JSON Object Mode, température 0, un historique limité à deux messages tronqués et aucun contexte portfolio. Il comprend la structure mais n'établit aucun fait. Les résolveurs serveur utilisent exclusivement les catalogues officiels pour les projets, certifications, technologies, études et expérience. Les assertions utilisateur restent des faits à vérifier.
+
+Le compositeur exige que chaque sous-demande soit résolue. Le validateur vérifie les cardinalités, la sélection finale et la cohérence du nombre de cartes projet. Les identifiants passent encore par la whitelist de `resources.ts`. Si le plan sémantique est indisponible ou invalide, un plan déterministe fondé sur l'analyse des contraintes et les entités officielles permet de conserver une réponse sûre sans transformer l'utilisateur ou l'historique en source de vérité.
+
+Politique mixte hors périmètre : seule la partie externe est signalée comme hors périmètre ; toute sous-demande légitime sur le portfolio est néanmoins résolue et incluse dans la même réponse.
+
 Le rate limit compte un message utilisateur une seule fois, même lorsqu'il entraîne deux appels fournisseur. Les latences `routerLatencyMs`, `generationLatencyMs` et `totalLatencyMs` sont consignées uniquement dans les logs serveur. En cas de panne du routeur, les protections trusted, les fast paths exacts et les réponses grounded déjà disponibles restent fonctionnels.

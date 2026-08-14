@@ -87,3 +87,7 @@ V4 analyzes response constraints and resolves named projects/certifications befo
 ### V4.2 semantic routing
 
 Unknown formulations now pass through a small Groq semantic router before any portfolio generation. The router receives no full portfolio context and can select a deterministic local response, request a necessary clarification, or authorize grounded generation with a filtered context. Exact local commands and trusted anti-hallucination responses remain available during a Groq outage. Run `npm run test:chatbot-v4-2` for semantic, clarification, multilingual, grounding, and provider-outage regression coverage.
+
+### V4.3 multi-intent planning
+
+Complex messages now use a compact semantic `RequestPlan` containing independent subrequests and shared constraints. The planner receives only the visitor message, a short conversation tail, and a language hint—never the portfolio catalog. Server-side resolvers then answer each part from verified `data/*`, compose the result, enforce exact/max counts and selection requirements, and keep resource cards consistent with the selected evidence. A deterministic catalog-backed plan preserves safe multi-part responses during provider quota or malformed JSON failures. Simple trusted and local requests retain their existing fast paths. Run `npm run test:chatbot-v4-3` for the multi-intent regression suite.
