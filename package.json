@@ -10,7 +10,8 @@
     "test:chatbot-v4": "npm run build && node scripts/chatbot-v4-regression.mjs",
     "test:chatbot-v4-1": "npm run build && node scripts/chatbot-v4-1-regression.mjs",
     "test:chatbot-v4-2": "npm run build && node scripts/chatbot-v4-2-regression.mjs",
-    "test:chatbot-v4-3": "npm run build && node scripts/chatbot-v4-3-regression.mjs"
+    "test:chatbot-v4-3": "npm run build && node scripts/chatbot-v4-3-regression.mjs",
+    "test:chatbot-new-projects": "npm run build && node scripts/chatbot-new-projects-regression.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

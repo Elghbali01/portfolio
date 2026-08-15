@@ -15,6 +15,94 @@ const notDocumented = (language: ChatLanguage, subject: string) => ({
   darija: `${subject} ما موثقش فالـ portfolio ولا فالـ CV ديال Issam.`,
 })[language];
 
+const projectResource = (slug: string) => `project:${slug}`;
+
+function technologyProjects(message: string, language: ChatLanguage): TrustedResponse | null {
+  const text = normalizeTechnology(message);
+  const requested = ["fastapi", "scikit learn", "react", "docker", "shap"]
+    .find((technology) => text.includes(technology));
+  if (!requested || !/(?:which|what|quels?|projets?|projects?|used|utilis|experience|worked|combine)/.test(text)) return null;
+  const matches = projects.filter((project) => project.technologies.some((technology) => {
+    const normalized = normalizeTechnology(technology);
+    return requested === "react" ? normalized === "react" || normalized === "react js" : normalized === requested;
+  }));
+  if (!matches.length) return response(notDocumented(language, requested));
+  const display = requested === "scikit learn" ? "Scikit-learn" : requested === "fastapi" ? "FastAPI" : requested === "shap" ? "SHAP" : requested[0].toUpperCase() + requested.slice(1);
+  const names = matches.map((project) => project.title).join(", ");
+  return response({
+    en: `${display} is documented in: ${names}.`,
+    fr: `${display} est documenté dans : ${names}.`,
+    ar: `${display} موثق في المشاريع التالية: ${names}.`,
+    darija: `${display} موثق فهاد المشاريع: ${names}.`,
+  }[language], matches.map((project) => projectResource(project.slug)));
+}
+
+function normalizeTechnology(value: string): string {
+  return value.toLocaleLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[._-]+/g, " ");
+}
+
+function newProjectResponse(text: string, language: ChatLanguage): TrustedResponse | null {
+  const churn = /customer churn|churn prediction|churn model|churners?|shap/.test(text);
+  const football = /football intelligence|player recommendation|recommendation systems?|recommandation de joueurs|syst[eè]mes? de recommandation|similar players|joueurs similaires|cosine similarity|hidden gems|replacement recommendations?|sporting talent|player comparison/.test(text);
+
+  if (churn) {
+    const resourceIds = [projectResource("customer-churn-prediction")];
+    if (/roc.?auc|performance|metric|m[eé]trique/.test(text)) return response({
+      en: "The final Customer Churn test ROC-AUC is 0.8429. At the 0.30 operational threshold, the pipeline detects 285 of the 374 churners in the test set.",
+      fr: "Le ROC-AUC final du projet Customer Churn sur le jeu de test est de 0,8429. Au seuil opérationnel de 0,30, le pipeline détecte 285 des 374 clients qui résilient dans le jeu de test.",
+      ar: "بلغ ROC-AUC النهائي على مجموعة الاختبار 0.8429، ومع العتبة التشغيلية 0.30 يكتشف النظام 285 من أصل 374 عميلاً غادروا.",
+      darija: "الـ ROC-AUC النهائي فالـ test هو 0.8429، ومع threshold ديال 0.30 كيكشف 285 من أصل 374 churners.",
+    }[language], resourceIds);
+    if (/model|mod[eè]le/.test(text)) return response({
+      en: "The final churn pipeline uses Logistic Regression. The project also compared Decision Tree, Random Forest, and Gradient Boosting, then set the operational threshold to 0.30 for the business precision/recall trade-off.",
+      fr: "Le pipeline final de churn utilise la régression logistique. Le projet a aussi comparé Decision Tree, Random Forest et Gradient Boosting, puis fixé le seuil opérationnel à 0,30 selon le compromis métier précision/rappel.",
+      ar: "يستعمل خط churn النهائي Logistic Regression بعد مقارنة Decision Tree وRandom Forest وGradient Boosting، مع ضبط العتبة التشغيلية على 0.30.",
+      darija: "الـ pipeline النهائي ديال churn كيستعمل Logistic Regression من بعد مقارنة Decision Tree وRandom Forest وGradient Boosting، والـ threshold تضبط على 0.30.",
+    }[language], resourceIds);
+    if (/shap/.test(text)) return response({
+      en: "Yes. Customer Churn Prediction uses SHAP and model coefficients to analyze global feature influence, while explicitly avoiding causal claims.",
+      fr: "Oui. Customer Churn Prediction utilise SHAP et les coefficients du modèle pour analyser l’influence globale des variables, sans transformer ces associations en causalité.",
+      ar: "نعم. يستعمل مشروع Customer Churn تقنية SHAP ومعاملات النموذج لتحليل التأثير العام للخصائص دون ادعاء السببية.",
+      darija: "نعم. مشروع Customer Churn كيستعمل SHAP وcoefficients ديال model باش يحلل تأثير features بلا ما يدّعي السببية.",
+    }[language], resourceIds);
+    return response({
+      en: "Customer Churn Prediction is an end-to-end ML system that predicts churn probabilities and turns them into retention signals. It covers leakage-safe preprocessing, feature engineering, model comparison, a final Logistic Regression pipeline, a 0.30 operational threshold, SHAP explainability, FastAPI/Pydantic inference, 39 automated tests, 70 final validations, and validated Docker deployment.",
+      fr: "Customer Churn Prediction est un système ML de bout en bout qui prédit la probabilité de churn et la transforme en signal de rétention. Il couvre le prétraitement sans fuite, le feature engineering, la comparaison de modèles, un pipeline final de régression logistique, un seuil opérationnel de 0,30, l’explicabilité SHAP, une API FastAPI/Pydantic, 39 tests automatisés, 70 validations finales et un déploiement Docker validé.",
+      ar: "Customer Churn Prediction نظام تعلم آلي متكامل لتقدير احتمال مغادرة العملاء وتحويله إلى إشارة للاحتفاظ بهم، ويشمل المعالجة الآمنة، ومقارنة النماذج، وLogistic Regression، وSHAP، وFastAPI، والاختبارات، وDocker.",
+      darija: "Customer Churn Prediction هو système ML كامل كيتوقع churn probability وكيحولها لإشارة retention، وفيه preprocessing بلا leakage، مقارنة models، Logistic Regression، SHAP، FastAPI، tests وDocker.",
+    }[language], resourceIds);
+  }
+
+  if (football) {
+    const resourceIds = [projectResource("football-intelligence-player-recommendation-system")];
+    if (/cosine|similar players|joueurs similaires|identified|identifi/.test(text)) return response({
+      en: "Similar players are identified from normalized statistical profiles using cosine similarity, with same-position logic and position-aware features so comparisons remain contextually relevant.",
+      fr: "Les joueurs similaires sont identifiés à partir de profils statistiques normalisés avec la similarité cosinus, une logique de même poste et des variables adaptées au poste afin de garder des comparaisons pertinentes.",
+      ar: "يتم تحديد اللاعبين المتشابهين باستعمال ملفات إحصائية مطبّعة وcosine similarity، مع مراعاة المركز والخصائص المناسبة له.",
+      darija: "اللاعبين المتشابهين كيتحددو من normalized statistical profiles بـ cosine similarity، مع نفس poste وfeatures واعيين بالمركز.",
+    }[language], resourceIds);
+    if (/modes?|types?|implemented|disponibles?|recommendation/.test(text) && !/experience|worked|projet|project|systeme/.test(text)) return response({
+      en: "The documented recommendation modes are same-position player similarity, intelligent scouting with hard constraints and weighted preferences, replacement recommendations excluding the reference team, and Sporting Hidden Gems discovery based on exposure and position-relative percentile strengths.",
+      fr: "Les modes documentés sont la similarité entre joueurs du même poste, le scouting intelligent avec contraintes strictes et préférences pondérées, les recommandations de remplacement excluant l’équipe de référence et la découverte de Sporting Hidden Gems selon l’exposition et les percentiles relatifs au poste.",
+      ar: "تشمل الأنماط الموثقة تشابه لاعبي المركز نفسه، والاستكشاف بقيود وتفضيلات موزونة، واقتراح البدلاء مع استبعاد الفريق المرجعي، واكتشاف Sporting Hidden Gems.",
+      darija: "الأنماط الموثقين هما same-position similarity، scouting بقيود وweighted preferences، replacement مع إقصاء reference team، وSporting Hidden Gems.",
+    }[language], resourceIds);
+    if (/comparison|compare|comparaison/.test(text)) return response({
+      en: "Yes. The project supports player comparison through contextual profiles, position-relative percentiles, radar charts, and analytical comparison tools in the React/TypeScript frontend.",
+      fr: "Oui. Le projet permet de comparer les joueurs grâce aux profils contextuels, aux percentiles relatifs au poste, aux radar charts et aux outils de comparaison du frontend React/TypeScript.",
+      ar: "نعم. يدعم المشروع مقارنة اللاعبين عبر الملفات السياقية والنسب المئوية حسب المركز ومخططات الرادار وأدوات المقارنة.",
+      darija: "نعم. المشروع كيدعم مقارنة اللاعبين بـ contextual profiles، position-relative percentiles، radar charts وأدوات المقارنة.",
+    }[language], resourceIds);
+    return response({
+      en: "Football Intelligence & Player Recommendation System is an end-to-end Data Science platform for player analysis, statistical similarity, scouting, replacements, comparison, and talent discovery. It combines position-aware per-90 and percentile features, explainable recommendations, FastAPI/Pydantic services, and an interactive React/TypeScript frontend.",
+      fr: "Football Intelligence & Player Recommendation System est une plateforme Data Science de bout en bout pour l’analyse, la similarité statistique, le scouting, les remplacements, la comparaison et la découverte de talents. Elle combine des variables par 90 minutes et des percentiles adaptés au poste, des recommandations explicables, des services FastAPI/Pydantic et un frontend React/TypeScript interactif.",
+      ar: "Football Intelligence & Player Recommendation System منصة علم بيانات متكاملة لتحليل اللاعبين والتشابه الإحصائي والاستكشاف والبدلاء والمقارنة واكتشاف المواهب، مع FastAPI وواجهة React/TypeScript.",
+      darija: "Football Intelligence & Player Recommendation System منصة Data Science كاملة للتحليل، similarity، scouting، replacements، comparison واكتشاف المواهب، مع FastAPI وfrontend React/TypeScript.",
+    }[language], resourceIds);
+  }
+  return null;
+}
+
 export function buildTrustedResponse(
   message: string,
   language: ChatLanguage,
@@ -23,6 +111,11 @@ export function buildTrustedResponse(
   const analysis = analyzeQuery(message);
   const text = analysis.normalized;
   const entity = resolveEntity(message);
+
+  const documentedProjectAnswer = newProjectResponse(text, language);
+  if (documentedProjectAnswer) return documentedProjectAnswer;
+  const documentedTechnologyAnswer = technologyProjects(message, language);
+  if (documentedTechnologyAnswer) return documentedTechnologyAnswer;
 
   if (/capitale du japon|capital of japan|عاصمة اليابان/.test(text)) return response({
     en: "I can only answer questions about Issam using his documented portfolio and CV.",
@@ -75,7 +168,7 @@ export function buildTrustedResponse(
     darija: "المهارات المشتركة الموثقة هي REST APIs بـ Java وSpring Boot والـ full-stack integration. فالـ stage ديال شهرين صايب APIs ودمج React.js؛ وAcademic Resource Platform كيبين نفس التكامل، ومشاريع Ticket وUniversity Resource كيثبتو layered backend والـ persistence.",
   }[language], ["project:resource-platform", "project:ticket-management-system", "project:resource-management-system"]);
 
-  if (/parcours académique|academic journey|education|دراسي|الدراسي/.test(text)) return response({
+  if (/parcours académique|academic journey|academic background|education|دراسي|الدراسي/.test(text)) return response({
     en: "Issam completed a DEUST at FST Fez from 2022 to 2024, then a Licence Sciences et Techniques in Computer Engineering from 2024 to 2025. Since 2025, he has been pursuing a Master's in Data Science at the same institution.",
     fr: "Issam a obtenu un DEUST à la FST de Fès de 2022 à 2024, puis une Licence Sciences et Techniques en génie informatique de 2024 à 2025. Depuis 2025, il poursuit un Master en Data Science dans le même établissement.",
     ar: "حصل عصام على دبلوم DEUST من كلية العلوم والتقنيات بفاس بين 2022 و2024، ثم إجازة العلوم والتقنيات في هندسة الحاسوب بين 2024 و2025. ومنذ 2025 يتابع ماستر في علم البيانات بالمؤسسة نفسها.",
@@ -89,12 +182,23 @@ export function buildTrustedResponse(
     darija: "Issam دار فـ 2025 stage ديال شهرين كـ Full-Stack Developer فـ École Polytechnique des Génies ففاس. خدم منصة داخلية لتسيير الموارد، صايب REST APIs بـ Java وSpring Boot، ودمج الواجهة بـ React.js.",
   }[language]);
 
-  if (/projets?/.test(text) && /data science/.test(text) && /démontre|montrent|show|prouve/.test(text)) return response({
-    en: "The documented Data Science projects are: Water Potability Prediction System, which demonstrates an end-to-end ML pipeline, safety-oriented model evaluation, cross-validation, and deployment; Customer Churn Prediction, which demonstrates data preparation, feature engineering, classification, model comparison, and SHAP interpretation; Intelligent Product Recommendation System, which demonstrates content-based and collaborative filtering with relevance evaluation; and the NoSQL Football Prediction System, which connects model training, Redis, a prediction API, and React.",
-    fr: "Les projets Data Science documentés sont : Water Potability Prediction System, qui démontre un pipeline ML complet, une évaluation orientée sécurité, la validation croisée et le déploiement ; Customer Churn Prediction, qui démontre préparation des données, feature engineering, classification, comparaison de modèles et interprétation SHAP ; Intelligent Product Recommendation System, qui démontre le filtrage par contenu et collaboratif avec évaluation de la pertinence ; et NoSQL Football Prediction System, qui relie entraînement du modèle, Redis, API de prédiction et React.",
-    ar: "مشاريع علم البيانات الموثقة هي: Water Potability Prediction System الذي يثبت إنجاز دورة تعلم آلي متكاملة وتقييماً موجهاً للسلامة والتحقق المتقاطع والنشر؛ وCustomer Churn Prediction الذي يثبت إعداد البيانات وهندسة الخصائص والتصنيف ومقارنة النماذج والتفسير عبر SHAP؛ وIntelligent Product Recommendation System الذي يثبت الترشيح بالمحتوى والترشيح التعاوني؛ إضافة إلى NoSQL Football Prediction System الذي يربط تدريب النموذج وRedis وواجهة التنبؤ وReact.",
-    darija: "مشاريع Data Science الموثقين هما Water Potability Prediction System وفيه pipeline ML كامل وevaluation مركزة على السلامة وdeployment؛ Customer Churn Prediction وفيه data preparation وfeature engineering وclassification وSHAP؛ Intelligent Product Recommendation System وفيه content-based وcollaborative filtering؛ وNoSQL Football Prediction System اللي كيربط model training وRedis وprediction API وReact.",
-  }[language], ["project:water-potability-ml", "project:nosql-ml-redis", "profile:cv"]);
+  if (/projets?|projects?/.test(text) && /data science|machine learning/.test(text) && !/strongest|meilleurs?|plus forts?/.test(text)) {
+    const selected = projects.filter((project) => projectKnowledge[project.slug].primaryDomain === "data-science");
+    const names = selected.map((project) => project.title).join(", ");
+    return response({
+      en: `Issam's documented Data Science and Machine Learning projects are: ${names}. These include end-to-end prediction systems, an ML/Redis application, and the Football Intelligence recommendation platform.`,
+      fr: `Les projets Data Science et Machine Learning documentés d'Issam sont : ${names}. Ils couvrent notamment des systèmes de prédiction de bout en bout, une application ML/Redis et la plateforme de recommandation Football Intelligence.`,
+      ar: `مشاريع علم البيانات والتعلم الآلي الموثقة لدى عصام هي: ${names}. وتشمل أنظمة تنبؤ متكاملة وتطبيق ML/Redis ومنصة Football Intelligence للتوصية.`,
+      darija: `مشاريع Data Science وMachine Learning الموثقين ديال Issam هما: ${names}. فيهم prediction systems كاملين، تطبيق ML/Redis ومنصة Football Intelligence ديال recommendation.`,
+    }[language], selected.map((project) => projectResource(project.slug)));
+  }
+
+  if (/strongest|meilleurs?|plus forts?/.test(text) && /data science/.test(text) && /projets?|projects?/.test(text)) return response({
+    en: "No official ranking is defined by the portfolio. The two most substantial recently documented end-to-end Data Science systems are Customer Churn Prediction and Football Intelligence & Player Recommendation System: the first demonstrates explainable ML delivery through FastAPI and Docker, while the second demonstrates recommendation systems, football analytics, FastAPI, and React/TypeScript integration.",
+    fr: "Le portfolio ne définit aucun classement officiel. Les deux systèmes Data Science de bout en bout récemment documentés les plus complets sont Customer Churn Prediction et Football Intelligence & Player Recommendation System : le premier démontre une livraison ML explicable avec FastAPI et Docker, tandis que le second démontre les systèmes de recommandation, la football analytics, FastAPI et l’intégration React/TypeScript.",
+    ar: "لا يحدد الملف ترتيباً رسمياً. ومن أبرز الأنظمة المتكاملة الموثقة حديثاً Customer Churn Prediction وFootball Intelligence & Player Recommendation System، مع اختلاف الأدلة التي يقدمها كل منهما.",
+    darija: "الـ portfolio ما محددش ranking رسمي. من بين أكثر الأنظمة end-to-end توثيقاً كاين Customer Churn Prediction وFootball Intelligence & Player Recommendation System، وكل واحد كيبين قدرات مختلفة.",
+  }[language], [projectResource("customer-churn-prediction"), projectResource("football-intelligence-player-recommendation-system")]);
 
   if (analysis.isFollowUp && history.some((item) => /Water Potability|potabilit|ماستر|Master/.test(item.content))) return response({
     en: "The strongest of those three is the Water Potability Prediction System because it documents a complete applied ML workflow: preprocessing, comparison of several models, safety-oriented evaluation, cross-validation, model persistence, and Streamlit deployment.",

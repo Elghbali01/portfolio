@@ -11,6 +11,14 @@ const aliases: Record<string, string[]> = {
   "ticket-management-system": ["advanced ticket management", "ticket management system"],
   "resource-management-system": ["university material resource management", "material resource management"],
   "water-potability-ml": ["water potability prediction", "water potability"],
+  "customer-churn-prediction": ["customer churn", "churn prediction", "projet customer churn"],
+  "football-intelligence-player-recommendation-system": [
+    "football intelligence",
+    "player recommendation system",
+    "player recommendation",
+    "systeme de recommandation de joueurs",
+    "recommandation de joueurs",
+  ],
 };
 
 export function resolveEntity(message: string): ResolvedEntity | null {

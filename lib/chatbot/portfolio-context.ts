@@ -13,9 +13,9 @@ function analyzeQuery(message: string) {
   const text = normalizeMessage(message);
   const topics = new Set<ContextTopic>();
   const backend = /backend|back end|java|spring|api|postgres|enterprise/.test(text);
-  const dataScience = /data science|data scientist|machine learning|ml\b|python|pandas|scikit|donn[eé]es|علم البيانات/.test(text);
+  const dataScience = /data science|data scientist|machine learning|ml\b|python|pandas|scikit|churn|shap|football intelligence|recommendation|recommandation|cosine|donn[eé]es|علم البيانات/.test(text);
   if (/skill|comp[eé]tence|technology|technologie|kubernetes|مهار|كيعرف|kay3ref/.test(text) || backend || dataScience) topics.add("skills");
-  if (/project|projet|مشروع|مشاريع|mashari|chno homa/.test(text) || /candidate|candidat|poste|role|profil/.test(text)) topics.add("projects");
+  if (/project|projet|مشروع|مشاريع|mashari|chno homa|churn|football|player|joueur|recommendation|recommandation|cosine|shap/.test(text) || /candidate|candidat|poste|role|profil/.test(text)) topics.add("projects");
   if (/certif|certificate|شهاد/.test(text) || (dataScience && /recruiter|recruteur/.test(text))) topics.add("certifications");
   if (/experience|intern|stage|education|study|studies|[eé]tude|parcours|bac|degree|dipl[oô]me|قرا|خبر|candidate|candidat|poste|role|profil/.test(text)) topics.add("journey");
   if (topics.size === 0) {
