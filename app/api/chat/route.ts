@@ -17,7 +17,7 @@ import { validateChatRequest } from "@/lib/chatbot/validation";
 export const runtime = "nodejs";
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REQUESTS = 10;
+const RATE_LIMIT_MAX_REQUESTS = 60;
 const requestLog = new Map<string, number[]>();
 
 const GROQ_MODEL = "llama-3.1-8b-instant";
@@ -90,10 +90,10 @@ function localizedError(kind: ErrorKind, language: ChatLanguage): string {
       darija: "الـ assistant مشغول شوية دابا. عاود جرّب من بعد لحظات.",
     },
     unavailable: {
-      en: "The AI assistant is temporarily unavailable. Please try again shortly.",
-      fr: "L’assistant IA est temporairement indisponible. Réessayez dans quelques instants.",
-      ar: "المساعد الذكي غير متاح مؤقتاً. يرجى المحاولة بعد قليل.",
-      darija: "الـ assistant ما خدامش مؤقتاً. عاود جرّب من بعد لحظات.",
+      en: "A technical problem is temporarily preventing the AI assistant from answering. Please try your question again shortly. If the problem persists, reload the page and ask your question again.",
+      fr: "Un problème technique empêche momentanément l’assistant IA de répondre. Veuillez réessayer votre question dans quelques instants. Si le problème persiste, rechargez la page puis posez votre question à nouveau.",
+      ar: "توجد مشكلة تقنية تمنع المساعد الذكي مؤقتاً من الإجابة. يرجى إعادة طرح سؤالك بعد قليل. إذا استمرت المشكلة، فأعد تحميل الصفحة ثم اطرح سؤالك من جديد.",
+      darija: "كاين مشكل تقني مانع الـ assistant مؤقتاً من الجواب. عاود جرّب السؤال ديالك من بعد شوية. إلا بقى المشكل، عاود حمّل الصفحة وطرح السؤال من جديد.",
     },
     configuration: {
       en: "The AI assistant is not configured yet.", fr: "L’assistant IA n’est pas encore configuré.",
@@ -160,6 +160,21 @@ export async function POST(request: NextRequest) {
     validation.data.message,
     validation.data.preferredLanguage,
   );
+  // Every configured request is first interpreted by Groq. Deterministic
+  // responses remain safe fallbacks when the provider is unavailable.
+  let providerRateCounted = false;
+  let client: Groq | null = null;
+  let semanticPreflight: SemanticRouterResult | null = null;
+  if (process.env.GROQ_API_KEY) {
+    if (isRateLimited(identifier)) return errorResponse(localizedError("local-limit", language), 429);
+    providerRateCounted = true;
+    client = new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 8_000, maxRetries: 0 });
+    try {
+      semanticPreflight = await routeSemantically(client, validation.data.message, validation.data.history, validation.data.preferredLanguage);
+    } catch (error) {
+      console.error("Semantic preflight failed:", error instanceof Error ? error.message : "Unknown error");
+    }
+  }
   if (validation.data.history.length === 0 && /^(?:parle moi de|tell me about|talk about) (?:son|his) (?:projet|project)$/i.test(validation.data.message.trim())) {
     return NextResponse.json(clarificationResponse(language), { headers: { "x-chat-source": "semantic-clarification" } });
   }
@@ -173,6 +188,11 @@ export async function POST(request: NextRequest) {
     language,
     validation.data.history,
   );
+  if (/\b(?:donne|give)\b.*\b(?:cv|resume)\b/i.test(validation.data.message)) {
+    return NextResponse.json(createLocalResponse("CV", language), {
+      headers: { "x-chat-source": "semantic-local", "x-chat-intent": "CV" },
+    });
+  }
   if (trustedResponse && !requiresRequestPlan) {
     return NextResponse.json({
       answer: trustedResponse.answer,
@@ -186,17 +206,15 @@ export async function POST(request: NextRequest) {
       headers: { "x-chat-source": "local", "x-chat-intent": localIntent },
     });
   }
-  if (/^(?:hy|helo|h+y+|bnjr)$/i.test(validation.data.message.trim())) {
+  if (/^(?:hy|helo|h+y+|bnjr|slm)$/i.test(validation.data.message.trim())) {
     const greetingLanguage = validation.data.preferredLanguage ?? language;
     return NextResponse.json(createLocalResponse("GREETING", greetingLanguage), {
       headers: { "x-chat-source": "semantic-local", "x-chat-intent": "GREETING" },
     });
   }
 
-  let providerRateCounted = false;
-  let client: Groq | null = null;
   if (requiresRequestPlan) {
-    if (isRateLimited(identifier)) return errorResponse(localizedError("local-limit", language), 429);
+    if (!providerRateCounted && isRateLimited(identifier)) return errorResponse(localizedError("local-limit", language), 429);
     providerRateCounted = true;
     let semanticPlan: RequestPlan | null = null;
     let plannerLatencyMs = 0;
@@ -233,7 +251,9 @@ export async function POST(request: NextRequest) {
       answer: trustedResponse.answer,
       language,
       resources: resolveResources(trustedResponse.resourceIds),
-    } satisfies ChatResponse);
+    } satisfies ChatResponse, requiresRequestPlan ? {
+      headers: { "x-chat-source": "plan-composed", "x-chat-plan-strategy": "trusted-fallback" },
+    } : undefined);
   }
   const groundedReasoning = buildGroundedReasoning(validation.data.message, language);
   if (!providerRateCounted && isRateLimited(identifier)) {
@@ -248,8 +268,8 @@ export async function POST(request: NextRequest) {
   client ??= new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 8_000, maxRetries: 0 });
   const totalStartedAt = performance.now();
   const routerStartedAt = performance.now();
-  let semanticRoute: SemanticRouterResult | null;
-  try {
+  let semanticRoute: SemanticRouterResult | null = semanticPreflight;
+  if (!semanticRoute) try {
     semanticRoute = await routeSemantically(client, validation.data.message, validation.data.history, validation.data.preferredLanguage);
   } catch (error) {
     console.error("Semantic router failed:", error instanceof Error ? error.message : "Unknown error");
@@ -282,6 +302,9 @@ export async function POST(request: NextRequest) {
       domain: "general",
       entityType: null,
       entityName: null,
+      sourceScope: "both",
+      responseType: "direct",
+      followUpUseful: false,
       route: "REASONING",
       clarificationReason: null,
     };

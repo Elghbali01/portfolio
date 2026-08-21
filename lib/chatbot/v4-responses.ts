@@ -1,5 +1,7 @@
-import { certifications } from "@/data/certifications";
+import { certificationKnowledge, certifications } from "@/data/certifications";
+import { profile } from "@/data/profile";
 import { projectKnowledge, projects } from "@/data/projects";
+import { dataSkills } from "@/data/skills";
 import { analyzeQuery } from "./query-analysis";
 import { resolveEntity } from "./entity-resolver";
 import type { ChatHistoryMessage, ChatLanguage } from "./types";
@@ -112,6 +114,102 @@ export function buildTrustedResponse(
   const text = analysis.normalized;
   const entity = resolveEntity(message);
 
+  const cvScope = /\b(?:cv|resume)\b|السيرة الذاتية/.test(text);
+  const asksPresentation = /(?:qui est|présente(?: moi)?|présentation|résume(?: moi)? (?:le profil d )?|who is|introduce|tell me about issam|من هو|عرفني على|شكون هو)\s*(?:issam|عصام)?/.test(text)
+    || /(?:profil|profile) (?:général|general|d issam|of issam)/.test(text);
+  if (asksPresentation && !cvScope) return response({
+    en: "Issam Elghbali is a Data Science Master's student at FST Fez, after completing a Computer Engineering degree. His documented interests cover Data Science, Machine Learning, AI and Software Engineering, supported by applied projects. He is currently seeking a final-year project (PFE) in Data Science or Machine Learning. Would you like to explore his education, projects, skills, certifications, or CV?",
+    fr: "Issam Elghbali est étudiant en Master Data Science à la FST de Fès, après une formation en génie informatique. Ses intérêts documentés couvrent la Data Science, le Machine Learning, l’IA et le Software Engineering, avec plusieurs projets appliqués. Il recherche actuellement un PFE en Data Science ou Machine Learning. Souhaitez-vous découvrir son parcours, ses projets, ses compétences, ses certifications ou son CV ?",
+    ar: "عصام الغبالي طالب ماستر في علم البيانات بكلية العلوم والتقنيات بفاس، بعد تكوين في هندسة الحاسوب. تشمل اهتماماته الموثقة علم البيانات والتعلم الآلي والذكاء الاصطناعي وهندسة البرمجيات، وله مشاريع تطبيقية في هذه المجالات. وهو يبحث حالياً عن مشروع نهاية الدراسة في علم البيانات أو التعلم الآلي. هل تريد معرفة مساره أو مشاريعه أو مهاراته أو شهاداته أو الاطلاع على سيرته الذاتية؟",
+    darija: "Issam Elghbali طالب فـ Master Data Science فالـ FST فاس، من بعد تكوين فـ génie informatique. الاهتمامات الموثقين ديالو هما Data Science وMachine Learning وAI وSoftware Engineering، وعندو مشاريع تطبيقية. دابا كيقلب على PFE فـ Data Science ولا Machine Learning. بغيتي تعرف المسار ديالو، المشاريع، skills، certifications ولا تشوف الـ CV؟",
+  }[language]);
+
+  if (/(?:^|\s)(?:âge|age|old)(?:\s|$)|العمر|شحال فعمرو/.test(text)) return response({
+    en: "Issam's age is not documented in his portfolio or CV, so I cannot determine it reliably.",
+    fr: "L’âge d’Issam n’est pas documenté dans son portfolio ou son CV, je ne peux donc pas le déterminer de manière fiable.",
+    ar: "عمر عصام غير موثق في ملفه أو سيرته الذاتية، لذلك لا يمكنني تحديده بشكل موثوق.",
+    darija: "العمر ديال Issam ما موثقش فالـ portfolio ولا فالـ CV ديالو، لذلك ما نقدرش نحددو بشكل موثوق.",
+  }[language]);
+
+  if (cvScope && /projects?|projets?|مشاريع|المشاريع/.test(text)) {
+    const names = profile.cvDocumentedProjects.map(({ title }) => title).join(" ; ");
+    return response({
+      en: `Issam's CV mentions exactly two Data Science / Machine Learning projects: ${names}.`,
+      fr: `Le CV d’Issam mentionne précisément deux projets Data Science / Machine Learning : ${names}.`,
+      ar: `تذكر سيرة عصام الذاتية مشروعين في علم البيانات والتعلم الآلي: ${names}.`,
+      darija: `فالـ CV ديال Issam كاينين جوج مشاريع Data Science / Machine Learning: ${names}.`,
+    }[language], ["project:customer-churn-prediction", "profile:cv"]);
+  }
+
+  if (cvScope && /languages?|langues?|لغات|اللغات/.test(text)) return response({
+    en: "The CV lists Arabic as Issam's native language, French at a good level, and English at a basic level.",
+    fr: "Le CV indique l’arabe comme langue maternelle, le français avec un bon niveau et l’anglais avec des notions de base.",
+    ar: "تذكر السيرة الذاتية العربية كلغة أم، والفرنسية بمستوى جيد، والإنجليزية بمستوى أساسي.",
+    darija: "فالـ CV كاينة العربية كلغة أم، الفرنسية بمستوى مزيان، والإنجليزية بمستوى أساسي.",
+  }[language], ["profile:cv"]);
+
+  if (cvScope && /skills?|comp[eé]tences?|مهارات|المهارات/.test(text)) {
+    const names = profile.cvTechnicalSkills.join(", ");
+    return response({
+      en: `The technical skills explicitly documented in the CV include ${names}.`,
+      fr: `Les compétences techniques explicitement documentées dans le CV comprennent ${names}.`,
+      ar: `تشمل المهارات التقنية الموثقة صراحة في السيرة الذاتية: ${names}.`,
+      darija: `Skills التقنيين اللي موثقين بصراحة فالـ CV فيهم: ${names}.`,
+    }[language], ["profile:cv"]);
+  }
+
+  if (cvScope && /certif|certificate|شهاد/.test(text)) {
+    const selected = certifications.filter(({ id }) => (profile.cvCertificationIds as readonly string[]).includes(id));
+    return response({
+      en: `The CV lists three certifications: ${selected.map(({ title }) => title).join(" ; ")}.`,
+      fr: `Le CV mentionne trois certifications : ${selected.map(({ title }) => title).join(" ; ")}.`,
+      ar: `تذكر السيرة الذاتية ثلاث شهادات: ${selected.map(({ title }) => title).join(" ; ")}.`,
+      darija: `فالـ CV كاينين ثلاثة certifications: ${selected.map(({ title }) => title).join(" ; ")}.`,
+    }[language], ["profile:cv", ...selected.slice(0, 3).map(({ id }) => `certificate:${id}`)]);
+  }
+
+  if (/skills?|comp[eé]tences?|مهارات|المهارات/.test(text) && /data science|علم البيانات/.test(text) && !/projects?|projets?|مشاريع/.test(text)) {
+    const selected = dataSkills.map(({ name }) => name).filter((name) => ["Python", "NumPy", "Pandas", "SQL", "Matplotlib", "Seaborn", "Scikit-Learn", "Data Analysis", "Data Cleaning", "Data Visualization", "EDA", "Feature Engineering", "Statistics", "Model Evaluation", "FastAPI", "Pytest"].includes(name));
+    return response({
+      en: `Issam's documented Data Science skills include ${selected.join(", ")}. This selection focuses only on Data Science, from data preparation and EDA to modeling, evaluation, visualization and API testing. Would you like a breakdown by data analysis, modeling, or deployment?`,
+      fr: `Les compétences Data Science documentées d’Issam comprennent ${selected.join(", ")}. Cette sélection reste centrée sur la Data Science, de la préparation et l’EDA jusqu’à la modélisation, l’évaluation, la visualisation et les tests d’API. Souhaitez-vous un détail par analyse de données, modélisation ou déploiement ?`,
+      ar: `تشمل مهارات عصام الموثقة في علم البيانات: ${selected.join(", ")}. تركز هذه القائمة على علم البيانات فقط، من إعداد البيانات وتحليلها إلى النمذجة والتقييم والتصور واختبار الواجهات. هل تريد تفصيلاً حسب التحليل أو النمذجة أو النشر؟`,
+      darija: `Skills الموثقين ديال Issam فـ Data Science فيهم: ${selected.join(", ")}. هاد الاختيار مركز غير على Data Science من preparation وEDA حتى modeling وevaluation وvisualization وAPI testing. بغيتي نفصلهم حسب analysis ولا modeling ولا deployment؟`,
+    }[language]);
+  }
+
+  if (/certif|certificate|شهاد/.test(text) && /machine learning|\bml\b|التعلم الآلي/.test(text)) {
+    const selected = certifications.filter((cert) => certificationKnowledge[cert.id].domain === "machine-learning");
+    const names = selected.map(({ title }) => title).join(" ; ");
+    return response({
+      en: `The certifications classified specifically under Machine Learning are: ${names}. They are distinct from the broader Data Science certifications.`,
+      fr: `Les certifications classées spécifiquement en Machine Learning sont : ${names}. Elles sont distinctes des certifications plus générales de Data Science.`,
+      ar: `الشهادات المصنفة تحديداً ضمن التعلم الآلي هي: ${names}. وهي منفصلة عن شهادات علم البيانات الأوسع.`,
+      darija: `Certifications المصنفين بالضبط فـ Machine Learning هما: ${names}. راه مختلفين على certifications العامة ديال Data Science.`,
+    }[language], selected.map(({ id }) => `certificate:${id}`));
+  }
+
+  if (/pfe|final year project|مشروع نهاية الدراسة/.test(text) && /candidate|candidat|bon profil|good fit|مناسب|مرشح/.test(text)) return response({
+    en: "Issam is a credible candidate for a Data Science or Machine Learning PFE because his current Master's degree, applied end-to-end ML projects, relevant certifications, and documented Python/data toolkit all align with that exact objective. His CV explicitly states that he is seeking a Data Science / Machine Learning PFE.",
+    fr: "Issam est un candidat crédible pour un PFE en Data Science ou Machine Learning : son Master actuel, ses projets ML appliqués de bout en bout, ses certifications pertinentes et son socle Python/Data sont directement alignés avec cet objectif précis. Son CV indique explicitement qu’il recherche un PFE Data Science / Machine Learning.",
+    ar: "عصام مرشح مناسب لمشروع نهاية الدراسة في علم البيانات أو التعلم الآلي لأن الماستر الحالي والمشاريع التطبيقية المتكاملة والشهادات والأدوات الموثقة في Python والبيانات تتوافق مباشرة مع هذا الهدف. وتذكر سيرته صراحة أنه يبحث عن مشروع نهاية الدراسة في هذا المجال.",
+    darija: "Issam candidat مزيان لـ PFE فـ Data Science ولا Machine Learning حيت الـ Master الحالي، مشاريع ML التطبيقية، certifications وPython/Data toolkit كاملين مرتبطين مباشرة بهاد الهدف. والـ CV كايقول بصراحة باللي كيقلب على PFE فهاد المجال.",
+  }[language], ["project:customer-churn-prediction", "project:water-potability-ml", "certificate:supervised-ml-regression-classification"]);
+
+  if (/parcours professionnel|professional background|résume.*expérience professionnelle|décris.*expérience professionnelle|professional journey|المسار المهني|التجربة المهنية/.test(text)) return response({
+    en: "Issam's documented professional experience is a two-month Full-Stack internship in 2025 at École Polytechnique des Génies. He developed an internal resource-management platform, designed Java/Spring Boot REST APIs, and integrated a React.js interface.",
+    fr: "L’expérience professionnelle documentée d’Issam est un stage Full-Stack de deux mois réalisé en 2025 à l’École Polytechnique des Génies. Il y a développé une plateforme interne de gestion de ressources, conçu des API REST Java/Spring Boot et intégré une interface React.js.",
+    ar: "تتمثل خبرة عصام المهنية الموثقة في تدريب Full-Stack لمدة شهرين سنة 2025 في École Polytechnique des Génies، حيث طور منصة داخلية لإدارة الموارد وصمم واجهات REST بـ Java وSpring Boot ودمج React.js.",
+    darija: "التجربة المهنية الموثقة ديال Issam هي stage Full-Stack ديال شهرين فـ 2025 فـ École Polytechnique des Génies. طور منصة داخلية للموارد، صايب REST APIs بـ Java/Spring Boot ودمج React.js.",
+  }[language]);
+
+  if (/recommendation modes?|modes? de recommandation|أنماط التوصية/.test(text)) return response({
+    en: "The documented recommendation modes are same-position player similarity, intelligent scouting with hard constraints and weighted preferences, replacement recommendations excluding the reference team, and Sporting Hidden Gems discovery based on exposure and position-relative percentile strengths.",
+    fr: "Les modes documentés sont la similarité entre joueurs du même poste, le scouting intelligent avec contraintes strictes et préférences pondérées, les recommandations de remplacement excluant l’équipe de référence et la découverte de Sporting Hidden Gems selon l’exposition et les percentiles relatifs au poste.",
+    ar: "تشمل أنماط التوصية الموثقة تشابه لاعبي المركز نفسه، والاستكشاف الذكي بقيود وتفضيلات موزونة، واقتراح البدلاء مع استبعاد الفريق المرجعي، واكتشاف Sporting Hidden Gems.",
+    darija: "Recommendation modes الموثقين هما same-position similarity، scouting بقيود وweighted preferences، replacement مع إقصاء reference team، وSporting Hidden Gems.",
+  }[language], ["project:football-intelligence-player-recommendation-system"]);
+
   const documentedProjectAnswer = newProjectResponse(text, language);
   if (documentedProjectAnswer) return documentedProjectAnswer;
   const documentedTechnologyAnswer = technologyProjects(message, language);
@@ -167,6 +265,13 @@ export function buildTrustedResponse(
     ar: "القاسم المشترك الموثق هو تطوير واجهات REST باستعمال Java وSpring Boot والتكامل Full-stack. خلال تدريب دام شهرين، صمم عصام واجهات REST ودمج واجهة React.js؛ ويؤكد مشروع Academic Resource Platform التكامل نفسه، بينما يثبت مشروعا التذاكر والموارد الجامعية التصميم الخلفي الطبقي وإدارة البيانات.",
     darija: "المهارات المشتركة الموثقة هي REST APIs بـ Java وSpring Boot والـ full-stack integration. فالـ stage ديال شهرين صايب APIs ودمج React.js؛ وAcademic Resource Platform كيبين نفس التكامل، ومشاريع Ticket وUniversity Resource كيثبتو layered backend والـ persistence.",
   }[language], ["project:resource-platform", "project:ticket-management-system", "project:resource-management-system"]);
+
+  if (analysis.constraints.exactCount === 2 && /backend/.test(text) && /projets?|projects?/.test(text) && /stage|intern/.test(text)) return response({
+    en: "1. Advanced Ticket Management System — a focused Java/Spring Boot REST backend with layered architecture, DTO/Mapper, validation, JPA and PostgreSQL.\n2. University Material Resource Management System — enterprise workflows with Spring Security and role-based access.\n\nInternship — the documented two-month Full-Stack internship adds practical Java/Spring Boot REST API delivery and React.js integration experience.",
+    fr: "1. Advanced Ticket Management System — un Backend REST Java/Spring Boot ciblé avec architecture en couches, DTO/Mapper, validation, JPA et PostgreSQL.\n2. University Material Resource Management System — des workflows d’entreprise avec Spring Security et contrôle d’accès par rôles.\n\nStage — le stage Full-Stack documenté de deux mois ajoute une expérience pratique de livraison d’API REST Java/Spring Boot et d’intégration React.js.",
+    ar: "1. Advanced Ticket Management System — Backend REST بـ Java وSpring Boot مع بنية طبقية وDTO/Mapper والتحقق وJPA وPostgreSQL.\n2. University Material Resource Management System — تدفقات مؤسساتية مع Spring Security والتحكم حسب الأدوار.\n\nالتدريب — يضيف التدريب الموثق لمدة شهرين خبرة عملية في واجهات REST بـ Java/Spring Boot ودمج React.js.",
+    darija: "1. Advanced Ticket Management System — Backend REST بـ Java/Spring Boot مع layered architecture وDTO/Mapper وvalidation وJPA وPostgreSQL.\n2. University Material Resource Management System — workflows ديال enterprise مع Spring Security وrole-based access.\n\nالـ stage — stage موثق ديال شهرين كيزيد تجربة عملية فـ REST APIs بـ Java/Spring Boot وReact.js integration.",
+  }[language], ["project:ticket-management-system", "project:resource-management-system"]);
 
   if (/parcours académique|academic journey|academic background|education|دراسي|الدراسي/.test(text)) return response({
     en: "Issam completed a DEUST at FST Fez from 2022 to 2024, then a Licence Sciences et Techniques in Computer Engineering from 2024 to 2025. Since 2025, he has been pursuing a Master's in Data Science at the same institution.",

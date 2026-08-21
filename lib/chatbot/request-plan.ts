@@ -215,9 +215,9 @@ export function buildDeterministicFallbackPlan(message: string, language: ChatLa
     && !certifications.some((cert) => normalizeMessage(cert.title).includes(normalizeMessage(name))),
   )])];
   const asksAboutTechnologyEvidence = /services?|utilis|used|professional|professionnel|evidence|preuve|conna[iî]t|knows|kay3ref|khdem|استخدم|مهني|موثق|دليل|خبرة/.test(normalized);
-  if (asksAboutTechnologyEvidence) {
+  if (asksAboutTechnologyEvidence && !/(?:poste|role|rôle|job|candidat|candidate)/.test(normalized)) {
     for (const technology of technologies) add({ ...base, intent: "TECHNOLOGY_EVIDENCE", domain: technology === "Spring Security" ? "backend" : null, entityType: "technology", entityName: technology, requiresEvidence: true, requiresSelection: false });
-    if (technologies.length && !/(?:poste|role|rôle|job|candidat|candidate)/.test(normalized)) {
+    if (technologies.length) {
       for (let index = subRequests.length - 1; index >= 0; index--) if (subRequests[index].intent === "EVIDENCE_SELECTION") subRequests.splice(index, 1);
     }
   }

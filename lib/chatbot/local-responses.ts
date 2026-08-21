@@ -101,10 +101,16 @@ export function createLocalResponse(
   };
   const groups = options.all ? all : mainSkills;
   const list = Object.entries(groups).map(([group, skills]) => `• ${group}: ${skills.join(", ")}`).join("\n");
+  const followUp = options.all ? "" : phrase(language, {
+    en: "\n\nWould you like me to focus on Data Science, Machine Learning, or Java Backend skills?",
+    fr: "\n\nSouhaitez-vous que je détaille plutôt ses compétences en Data Science, Machine Learning ou Backend Java ?",
+    ar: "\n\nهل تريد تفصيل مهاراته في علم البيانات أو التعلم الآلي أو Backend Java؟",
+    darija: "\n\nبغيتي نفصل أكثر فـ Data Science ولا Machine Learning ولا Backend Java؟",
+  });
   return base(`${phrase(language, {
     en: options.all ? "Here are Issam’s documented skills:" : "Issam’s main skills are grouped as follows:",
     fr: options.all ? "Voici les compétences documentées d’Issam :" : "Les principales compétences d’Issam sont :",
     ar: options.all ? "إليك مهارات عصام الموثقة:" : "أهم مهارات عصام هي:",
     darija: options.all ? "هادو هما الـ skills الموثقين ديال Issam:" : "أهم skills ديال Issam مجموعين هكا:",
-  })}\n\n${list}`, language);
+  })}\n\n${list}${followUp}`, language);
 }

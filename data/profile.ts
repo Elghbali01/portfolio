@@ -69,7 +69,7 @@ export const profile = {
         "Model comparison using appropriate metrics",
         "Prediction interpretation with SHAP",
       ],
-      note: "Documented in the public CV; no separate project page or repository link is provided in the portfolio.",
+      note: "Documented in the public CV and also available as a complete portfolio project with its own repository.",
     },
     {
       title: "Intelligent Product Recommendation System",
@@ -95,5 +95,17 @@ export const profile = {
     { name: "Arabic", level: "Native" },
     { name: "French", level: "Good" },
     { name: "English", level: "Basic" },
+  ],
+  cvTechnicalSkills: [
+    "Python", "SQL", "Pandas", "NumPy", "Scikit-learn", "EDA", "Data Cleaning",
+    "Feature Engineering", "Classification", "Regression", "Clustering", "Cross-validation",
+    "Hyperparameter optimization", "ROC-AUC", "SHAP", "Matplotlib", "Seaborn", "PostgreSQL",
+    "MySQL", "Git", "GitHub", "REST API", "Model deployment", "Deep Learning fundamentals",
+    "MLOps fundamentals",
+  ],
+  cvCertificationIds: [
+    "supervised-ml-regression-classification",
+    "python-data-science-ai",
+    "kaggle-data-visualization",
   ],
 } as const;
