@@ -9,10 +9,11 @@ import { buildGroundedReasoning } from "@/lib/chatbot/grounded-reasoning";
 import { buildTrustedResponse } from "@/lib/chatbot/v4-responses";
 import { createLocalResponse, type LocalIntent } from "@/lib/chatbot/local-responses";
 import { routeSemantically, type SemanticIntent, type SemanticRouterResult } from "@/lib/chatbot/semantic-router";
-import { buildDeterministicFallbackPlan, buildRequestPlan, shouldBuildRequestPlan, type RequestPlan } from "@/lib/chatbot/request-plan";
+import { buildCompoundRequestPlan, buildDeterministicFallbackPlan, buildRequestPlan, isCompoundRequest, shouldBuildRequestPlan, type RequestPlan } from "@/lib/chatbot/request-plan";
 import { composeRequestPlan, validateComposedResponse } from "@/lib/chatbot/response-composer";
 import type { ChatLanguage, ChatResponse } from "@/lib/chatbot/types";
 import { validateChatRequest } from "@/lib/chatbot/validation";
+import { GROQ_MODEL } from "@/lib/chatbot/model";
 
 export const runtime = "nodejs";
 
@@ -20,7 +21,6 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 60;
 const requestLog = new Map<string, number[]>();
 
-const GROQ_MODEL = "llama-3.1-8b-instant";
 const supportedLanguages: ChatLanguage[] = ["en", "fr", "ar", "darija"];
 const semanticLocalIntents: Partial<Record<SemanticIntent, LocalIntent>> = {
   GREETING: "GREETING", CV: "CV", GITHUB: "GITHUB", LINKEDIN: "LINKEDIN",
@@ -183,6 +183,7 @@ export async function POST(request: NextRequest) {
     validation.data.preferredLanguage,
   );
   const requiresRequestPlan = shouldBuildRequestPlan(validation.data.message);
+  const compoundRequest = isCompoundRequest(validation.data.message);
   const trustedResponse = buildTrustedResponse(
     validation.data.message,
     language,
@@ -232,8 +233,18 @@ export async function POST(request: NextRequest) {
         console.error("Semantic planner failed:", error instanceof Error ? error.message : "Unknown error");
       }
     }
-    const fallbackPlan = buildDeterministicFallbackPlan(validation.data.message, language);
-    for (const [plan, strategy] of [[fallbackPlan, "deterministic-fallback"], [semanticPlan, "semantic"]] as const) {
+    const fallbackPlan = compoundRequest ? null : buildDeterministicFallbackPlan(validation.data.message, language);
+    const compoundPlan = compoundRequest && (semanticPreflight || semanticPlan)
+      ? buildCompoundRequestPlan(validation.data.message, language)
+      : null;
+    console.info("Request plan summary", {
+      compoundRequest,
+      groqRouterSucceeded: Boolean(semanticPreflight),
+      groqPlannerSucceeded: Boolean(semanticPlan),
+      semanticSubRequests: semanticPlan?.subRequests.map(({ intent, domain, scope }) => ({ intent, domain, scope })) ?? [],
+      compoundAspects: compoundPlan?.requiredAspects ?? [],
+    });
+    for (const [plan, strategy] of [[compoundPlan, "compound-covered"], [semanticPlan, "semantic"], [fallbackPlan, "deterministic-fallback"]] as const) {
       if (!plan) continue;
       const composed = composeRequestPlan(plan);
       if (composed && validateComposedResponse(plan, composed)) {
@@ -244,6 +255,9 @@ export async function POST(request: NextRequest) {
       }
     }
     console.warn("Request plan could not be safely composed.");
+    if (compoundRequest) {
+      return errorResponse(localizedError("unavailable", language), 503);
+    }
   }
 
   if (trustedResponse) {

@@ -57,7 +57,7 @@ npm run dev
 ### Architecture
 
 - `components/chatbot/` contains the floating widget, messages, input, and resource cards.
-- `app/api/chat/route.ts` validates requests and calls Groq from the server using the open-source `llama-3.1-8b-instant` model.
+- `app/api/chat/route.ts` validates requests and calls Groq from the server using the production `openai/gpt-oss-20b` model.
 - `lib/chatbot/` builds the controlled context, prompt, resource catalog, types, and validation.
 - `data/profile.ts` contains profile facts that are not already represented elsewhere.
 - Existing projects, certifications, skills, and journey entries are read directly from `data/` as the source of truth.

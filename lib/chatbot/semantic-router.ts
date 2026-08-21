@@ -1,5 +1,6 @@
 import type Groq from "groq-sdk";
 import type { ChatHistoryMessage, ChatLanguage } from "./types";
+import { GROQ_MODEL } from "./model";
 
 export const semanticIntents = [
   "GREETING", "CV", "GITHUB", "LINKEDIN", "CONTACT", "PROJECTS",
@@ -96,7 +97,7 @@ export async function routeSemantically(
 ): Promise<SemanticRouterResult | null> {
   const historyText = minimalHistory(history);
   const completion = await client.chat.completions.create({
-    model: "llama-3.1-8b-instant",
+    model: GROQ_MODEL,
     messages: [
       { role: "system", content: ROUTER_PROMPT },
       { role: "user", content: `${preferredLanguage ? `UI_LANGUAGE_HINT: ${preferredLanguage} (use only as a tie-breaker)\n` : ""}${historyText ? `CONVERSATION:\n${historyText}\n\n` : ""}LATEST_MESSAGE:\n${message}` },

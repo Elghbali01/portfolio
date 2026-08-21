@@ -165,7 +165,7 @@ Le projet possède une séparation simple et saine : `app/` définit les routes,
 
 ## 9. Fournisseur IA actuel
 
-Le chatbot appelle Groq exclusivement depuis `app/api/chat/route.ts` avec le modèle open-source `llama-3.1-8b-instant`. La clé privée est fournie par `GROQ_API_KEY` et ne doit jamais être préfixée par `NEXT_PUBLIC_`.
+Le chatbot appelle Groq exclusivement côté serveur avec le modèle de production `openai/gpt-oss-20b`. La clé privée est fournie par `GROQ_API_KEY` et ne doit jamais être préfixée par `NEXT_PUBLIC_`.
 
 Le modèle utilise JSON Object Mode. La route valide strictement `answer`, `language` et `resourceIds`, retente une seule fois une sortie invalide, puis transforme uniquement les identifiants connus en ressources locales vérifiées. Le rate limiting, la limitation de l'historique et les protections contre les hallucinations et prompt injections restent actifs.
 

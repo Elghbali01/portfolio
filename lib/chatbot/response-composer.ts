@@ -1,11 +1,12 @@
 import { certificationKnowledge, certifications } from "@/data/certifications";
 import { profile } from "@/data/profile";
 import { projectKnowledge, projects } from "@/data/projects";
+import { aiSkills, dataSkills, devSkills } from "@/data/skills";
 import { normalizeMessage } from "./language";
 import type { RequestPlan, SubRequest } from "./request-plan";
 import type { ChatLanguage } from "./types";
 
-export interface ComposedPlanResponse { answer: string; resourceIds: string[]; resolvedSubRequestIds: string[] }
+export interface ComposedPlanResponse { answer: string; resourceIds: string[]; resolvedSubRequestIds: string[]; coveredAspects: string[] }
 
 const backendSlugs = ["ticket-management-system", "resource-management-system", "employee-management"];
 const dataEvidence = [
@@ -71,9 +72,14 @@ function localizedEvidenceDetail(name: string, fallback: string, language: ChatL
 
 function projectSelection(plan: RequestPlan, sub: SubRequest) {
   const domain = sub.domain ?? "general";
-  const candidates = domain === "data_science"
+  if (sub.scope === "cv") {
+    const names = profile.cvDocumentedProjects.map(({ title }) => title);
+    const intro = plan.language === "fr" ? "Projets Machine Learning documentés dans le CV" : plan.language === "en" ? "Machine Learning projects documented in the CV" : "مشاريع التعلم الآلي الموثقة في السيرة الذاتية";
+    return { text: `${intro}: ${names.join(" ; ")}.`, resources: ["project:customer-churn-prediction", "profile:cv"] };
+  }
+  const candidates = domain === "data_science" || domain === "ai"
     ? projects.filter((p) => projectKnowledge[p.slug].primaryDomain === "data-science")
-    : backendSlugs.map((slug) => projects.find((p) => p.slug === slug)!).filter(Boolean);
+    : domain === "backend" ? backendSlugs.map((slug) => projects.find((p) => p.slug === slug)!).filter(Boolean) : projects;
   const selected = candidates.slice(0, countFor(plan, sub, candidates.length));
   if (!selected.length) return null;
   const lines = selected.map((project, index) => {
@@ -82,6 +88,59 @@ function projectSelection(plan: RequestPlan, sub: SubRequest) {
   });
   if (sub.requiresSelection) lines[lines.length - 1] += ` ${labels[plan.language].strongest}: ${selected[0].title}.`;
   return { text: lines.join("\n"), resources: selected.map((p) => `project:${p.slug}`) };
+}
+
+function skillSelection(sub: SubRequest, language: ChatLanguage) {
+  const cvSkills = new Set<string>(profile.cvTechnicalSkills);
+  const source = sub.domain === "backend" ? devSkills : sub.domain === "ai" ? aiSkills : dataSkills;
+  const preferred = sub.domain === "backend"
+    ? ["Java", "Spring Boot", "Spring Security", "REST API", "Spring Data JPA", "PostgreSQL", "MySQL"]
+    : sub.domain === "ai"
+      ? ["Machine Learning", "Deep Learning", "Supervised Learning", "Unsupervised Learning", "Classification", "Regression", "Clustering", "Cross-Validation", "Hyperparameter Tuning", "SHAP"]
+      : ["Python", "NumPy", "Pandas", "SQL", "Scikit-Learn", "Exploratory Data Analysis (EDA)", "Data Cleaning", "Feature Engineering", "Statistics", "Model Evaluation", "Data Visualization"];
+  const available = new Set(source.map(({ name }) => name));
+  const selected = preferred.filter((name) => available.has(name) && (sub.scope !== "cv" || cvSkills.has(name) || [...cvSkills].some((item) => normalizeMessage(item) === normalizeMessage(name))));
+  const fallbackCv = sub.scope === "cv" && sub.domain === "ai"
+    ? profile.cvTechnicalSkills.filter((name) => /scikit|classification|regression|clustering|cross-validation|hyperparameter|shap|deep learning|mlops/i.test(name))
+    : [];
+  const skills = fallbackCv.length ? fallbackCv : selected;
+  const heading = sub.domain === "backend" ? "Backend" : sub.domain === "ai" ? "Machine Learning" : "Data Science";
+  const sourceLabel = sub.scope === "cv" ? (language === "fr" ? " dans le CV" : language === "en" ? " in the CV" : " في السيرة الذاتية") : "";
+  return { text: `${heading}${sourceLabel}: ${skills.join(", ")}.`, resources: sub.scope === "cv" ? ["profile:cv"] : [] as string[] };
+}
+
+function skillComparison(language: ChatLanguage) {
+  const text: Record<ChatLanguage, string> = {
+    en: "Comparison: the Data Science toolkit is centered on data preparation, exploration, statistics and model evaluation, while the Backend toolkit is centered on Java/Spring services, security, persistence and REST API architecture. These are complementary documented strengths; no absolute proficiency score is defined.",
+    fr: "Comparaison : le socle Data Science est centré sur la préparation et l’exploration des données, les statistiques et l’évaluation de modèles, tandis que le socle Backend est centré sur les services Java/Spring, la sécurité, la persistance et l’architecture d’API REST. Ce sont deux forces documentées complémentaires, sans niveau absolu inventé.",
+    ar: "المقارنة: تركز مهارات علم البيانات على إعداد البيانات واستكشافها والإحصاء وتقييم النماذج، بينما تركز مهارات Backend على خدمات Java/Spring والأمان والتخزين وبنية REST. وهما جانبان موثقان متكاملان دون اختلاق تقييم مطلق.",
+    darija: "المقارنة: Data Science مركزة على preparation وEDA وstatistics وmodel evaluation، وBackend مركز على Java/Spring services وsecurity وpersistence وREST architecture. بجوج نقاط قوة موثقين ومتكاملين بلا ما نخترعو niveau مطلق.",
+  };
+  return { text: text[language], resources: [] as string[] };
+}
+
+function projectComparison(sub: SubRequest, language: ChatLanguage) {
+  const names = (sub.entityName ?? "").split("|||");
+  const selected = names.map((name) => projects.find((project) => normalizeMessage(project.title) === normalizeMessage(name))).filter((project): project is (typeof projects)[number] => Boolean(project));
+  if (selected.length !== 2) return null;
+  const [first, second] = selected;
+  const firstKnowledge = projectKnowledge[first.slug];
+  const secondKnowledge = projectKnowledge[second.slug];
+  const intro = language === "fr" ? "Comparaison documentée" : language === "en" ? "Documented comparison" : "مقارنة موثقة";
+  const contrast = language === "fr"
+    ? `${first.title} met davantage l’accent sur ${firstKnowledge.demonstratedCapabilities.slice(0, 3).join(", ")}, tandis que ${second.title} met davantage l’accent sur ${secondKnowledge.demonstratedCapabilities.slice(0, 3).join(", ")}. Aucun score absolu ne permet de déclarer arbitrairement l’un supérieur à l’autre.`
+    : `${first.title} emphasizes ${firstKnowledge.demonstratedCapabilities.slice(0, 3).join(", ")}, while ${second.title} emphasizes ${secondKnowledge.demonstratedCapabilities.slice(0, 3).join(", ")}. No documented absolute score makes either project universally superior.`;
+  return { text: `${intro}: ${contrast}`, resources: selected.map(({ slug }) => `project:${slug}`) };
+}
+
+function educationProjectAlignment(language: ChatLanguage) {
+  const text: Record<ChatLanguage, string> = {
+    en: "Education/project alignment: the current Data Science Master's is most directly reflected by Water Potability Prediction, Customer Churn Prediction and Football Intelligence through applied modeling, evaluation, explainability and recommendation systems.",
+    fr: "Lien formation/projets : le Master Data Science actuel se reflète directement dans Water Potability Prediction, Customer Churn Prediction et Football Intelligence par la modélisation appliquée, l’évaluation, l’explicabilité et les systèmes de recommandation.",
+    ar: "الربط بين التكوين والمشاريع: ينعكس ماستر علم البيانات مباشرة في مشاريع Water Potability وCustomer Churn وFootball Intelligence من خلال النمذجة والتقييم والتفسير وأنظمة التوصية.",
+    darija: "العلاقة بين القراية والمشاريع: Master Data Science باين مباشرة فـ Water Potability وCustomer Churn وFootball Intelligence من خلال modeling وevaluation وexplainability وrecommendation systems.",
+  };
+  return { text: text[language], resources: ["project:water-potability-ml", "project:customer-churn-prediction"] };
 }
 
 function evidenceSelection(plan: RequestPlan, sub: SubRequest, language: ChatLanguage) {
@@ -133,6 +192,8 @@ function factVerification(sub: SubRequest, language: ChatLanguage) {
 function certificationSelection(plan: RequestPlan, sub: SubRequest) {
   const candidates = certifications.filter((cert) => {
     const domain = certificationKnowledge[cert.id].domain;
+    if (sub.scope === "cv") return (profile.cvCertificationIds as readonly string[]).includes(cert.id);
+    if (sub.domain === "ai") return domain === "machine-learning";
     return sub.domain === "data_science" ? domain === "data-science" || domain === "machine-learning" : true;
   }).sort((a, b) => {
     if (sub.domain !== "backend") return 0;
@@ -176,6 +237,10 @@ function resolveSubRequest(plan: RequestPlan, sub: SubRequest, language: ChatLan
     case "EDUCATION": return education(language);
     case "FACT_VERIFICATION": return factVerification(sub, language);
     case "CERTIFICATION_SELECTION": return certificationSelection(plan, sub);
+    case "SKILL_SELECTION": return skillSelection(sub, language);
+    case "SKILL_COMPARISON": return skillComparison(language);
+    case "PROJECT_COMPARISON": return projectComparison(sub, language);
+    case "EDUCATION_PROJECT_ALIGNMENT": return educationProjectAlignment(language);
     case "PROJECT_DETAIL": return projectDetail(sub, language);
     case "CERTIFICATION_DETAIL": return certificationDetail(sub, language);
     case "DOMAIN_COMPARISON": return domainComparison(language);
@@ -189,24 +254,29 @@ export function composeRequestPlan(plan: RequestPlan): ComposedPlanResponse | nu
   const parts: string[] = [];
   const resources: string[] = [];
   const resolved: string[] = [];
+  const coveredAspects: string[] = [];
   for (const sub of plan.subRequests) {
     const result = resolveSubRequest(plan, sub, plan.language);
     if (!result) return null;
     parts.push(result.text);
     resources.push(...result.resources);
     resolved.push(sub.id);
+    if (sub.aspect) coveredAspects.push(sub.aspect);
   }
   const uniqueResources = [...new Set(resources)];
   const projectLimit = plan.globalConstraints.exactCount ?? plan.globalConstraints.maxCount;
-  const limitedResources = projectLimit
+  const limitedResources = plan.requiredAspects?.length
+    ? [...uniqueResources.filter((id) => id.startsWith("project:")).slice(0, 2), ...uniqueResources.filter((id) => !id.startsWith("project:")).slice(0, 2)]
+    : projectLimit
     ? [...uniqueResources.filter((id) => id.startsWith("project:")).slice(0, projectLimit), ...uniqueResources.filter((id) => !id.startsWith("project:"))]
     : uniqueResources;
-  return { answer: parts.join("\n\n"), resourceIds: limitedResources.slice(0, 4), resolvedSubRequestIds: resolved };
+  return { answer: parts.join("\n\n"), resourceIds: limitedResources.slice(0, 4), resolvedSubRequestIds: resolved, coveredAspects };
 }
 
 export function validateComposedResponse(plan: RequestPlan, response: ComposedPlanResponse): boolean {
   if (response.resolvedSubRequestIds.length !== plan.subRequests.length) return false;
   if (!plan.subRequests.every((s) => response.resolvedSubRequestIds.includes(s.id))) return false;
+  if (plan.requiredAspects?.some((aspect) => !response.coveredAspects.includes(aspect))) return false;
   const limit = plan.globalConstraints.exactCount ?? plan.globalConstraints.maxCount;
   if (limit && response.resourceIds.filter((id) => id.startsWith("project:")).length > limit) return false;
   const mainSelection = plan.subRequests.find((s) => s.intent === "PROJECT_SELECTION" || s.intent === "EVIDENCE_SELECTION");

@@ -12,7 +12,8 @@
     "test:chatbot-v4-2": "npm run build && node scripts/chatbot-v4-2-regression.mjs",
     "test:chatbot-v4-3": "npm run build && node scripts/chatbot-v4-3-regression.mjs",
     "test:chatbot-new-projects": "npm run build && node scripts/chatbot-new-projects-regression.mjs",
-    "test:chatbot-source-scope": "npm run build && node scripts/chatbot-source-scope-regression.mjs"
+    "test:chatbot-source-scope": "npm run build && node scripts/chatbot-source-scope-regression.mjs",
+    "test:chatbot-compound": "npm run build && node scripts/chatbot-compound-regression.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
