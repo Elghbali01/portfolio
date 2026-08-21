@@ -104,7 +104,7 @@ export async function routeSemantically(
     ],
     response_format: { type: "json_object" },
     temperature: 0,
-    max_tokens: 240,
+    max_tokens: 650,
   });
   const content = completion.choices[0]?.message.content ?? null;
   const parsed = parseRouterResponse(content);
