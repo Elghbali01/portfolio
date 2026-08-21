@@ -25,6 +25,15 @@ async function ask(baseUrl, message, preferredLanguage = "fr") {
   return { response, payload: await response.json() };
 }
 
+async function askWithoutPreference(baseUrl, message) {
+  const response = await fetch(`${baseUrl}/api/chat`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-forwarded-for": `10.89.0.${sequence++}` },
+    body: JSON.stringify({ message, history: [] }),
+  });
+  return { response, payload: await response.json() };
+}
+
 const contains = (answer, ...terms) => terms.every((term) => answer?.toLocaleLowerCase().includes(term.toLocaleLowerCase()));
 const excludes = (answer, ...terms) => terms.every((term) => !answer?.toLocaleLowerCase().includes(term.toLocaleLowerCase()));
 let failed = 0;
@@ -38,11 +47,14 @@ function report(ok, name, result) {
 
 const main = await startServer(3227);
 try {
-  let result = await ask(main.baseUrl, "Qui est Issam ?");
-  report(result.response.ok && contains(result.payload.answer, "Master", "PFE") && result.payload.resources.length === 0, "profile presentation, not CV display", result);
+  let result = await askWithoutPreference(main.baseUrl, "Qui est Issam ?");
+  report(result.response.ok && result.payload.language === "fr" && contains(result.payload.answer, "est étudiant", "Master", "PFE") && excludes(result.payload.answer, "is a Data Science") && result.payload.resources.length === 0, "French profile presentation, not CV display", result);
 
-  result = await ask(main.baseUrl, "Présente-moi Issam en quelques lignes.");
-  report(result.response.ok && contains(result.payload.answer, "Data Science", "génie informatique"), "short presentation", result);
+  result = await askWithoutPreference(main.baseUrl, "Présente-moi Issam en quelques lignes.");
+  report(result.response.ok && result.payload.language === "fr" && contains(result.payload.answer, "est étudiant", "Data Science", "génie informatique"), "French short presentation", result);
+
+  result = await askWithoutPreference(main.baseUrl, "Who is Issam?");
+  report(result.response.ok && result.payload.language === "en" && contains(result.payload.answer, "is a Data Science", "Master") && excludes(result.payload.answer, "est étudiant"), "English profile presentation", result);
 
   result = await ask(main.baseUrl, "Montre-moi le CV d’Issam.");
   report(result.response.ok && result.payload.resources.some((item) => item.id === "profile:cv"), "explicit CV display", result);
@@ -70,15 +82,35 @@ try {
 
   result = await ask(main.baseUrl, "Quel est son email ?");
   report(result.response.ok && excludes(result.payload.answer, "Souhaitez-vous", "Would you like"), "no artificial follow-up for email", result);
+
+  result = await askWithoutPreference(main.baseUrl, "le numéro de Issam svp");
+  report(result.response.ok && result.payload.language === "fr" && contains(result.payload.answer, "06 20 68 83 40"), "phone with configured Groq", result);
 } finally {
   main.child.kill();
 }
 
 const outage = await startServer(3228, "invalid-source-scope-key");
 try {
-  const result = await ask(outage.baseUrl, "Quelle information totalement inconnue peux-tu fournir sur Issam ?");
+  let result = await askWithoutPreference(outage.baseUrl, "Pourquoi Issam serait-il adapté à cette opportunité ?");
   const expected = "Un problème technique empêche momentanément l’assistant IA de répondre. Veuillez réessayer votre question dans quelques instants. Si le problème persiste, rechargez la page puis posez votre question à nouveau.";
-  report([502, 503].includes(result.response.status) && result.payload.error === expected, "technical Groq error text", result);
+  report([502, 503].includes(result.response.status) && result.payload.error === expected, "French technical Groq error text without language preference", result);
+
+  result = await askWithoutPreference(outage.baseUrl, "Why would Issam be a better fit for this opportunity than another candidate?");
+  report([502, 503].includes(result.response.status) && contains(result.payload.error, "A technical problem", "reload the page"), "English technical Groq error text", result);
+
+  for (const question of ["Quel est le numéro de téléphone d’Issam ?", "le numéro de Issam svp"]) {
+    result = await askWithoutPreference(outage.baseUrl, question);
+    report(result.response.ok && result.payload.language === "fr" && contains(result.payload.answer, "06 20 68 83 40"), `safe phone fallback: ${question}`, result);
+  }
+
+  result = await askWithoutPreference(outage.baseUrl, "Quel est l’email d’Issam ?");
+  report(result.response.ok && result.payload.language === "fr" && contains(result.payload.answer, "elghbaliissam1@gmail.com"), "safe email fallback", result);
+
+  result = await askWithoutPreference(outage.baseUrl, "Montre-moi le CV d’Issam.");
+  report(result.response.ok && result.payload.language === "fr" && result.payload.resources.some((item) => item.id === "profile:cv"), "safe CV fallback", result);
+
+  result = await askWithoutPreference(outage.baseUrl, "Peux-tu chercher ailleurs si l’information n’est pas dans son portfolio ou son CV ?");
+  report(result.response.ok && result.payload.language === "fr" && contains(result.payload.answer, "uniquement", "portfolio", "CV", "pas documentée") && excludes(result.payload.answer, "internet pour"), "documented source policy fallback", result);
 } finally {
   outage.child.kill();
 }

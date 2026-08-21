@@ -7,7 +7,8 @@ import type { ChatLanguage, ChatResponse } from "./types";
 
 export type LocalIntent =
   | "GREETING" | "CV" | "CERTIFICATIONS" | "PROJECTS" | "SKILLS"
-  | "GITHUB" | "LINKEDIN" | "CONTACT" | "LANGUAGE_SWITCH" | "BACCALAUREATE";
+  | "GITHUB" | "LINKEDIN" | "CONTACT" | "PHONE" | "EMAIL" | "LOCATION"
+  | "LANGUAGES" | "SOURCE_POLICY" | "LANGUAGE_SWITCH" | "BACCALAUREATE";
 
 const phrase = (language: ChatLanguage, values: Record<ChatLanguage, string>) => values[language];
 
@@ -58,6 +59,44 @@ export function createLocalResponse(
     en: "Here is Issam’s LinkedIn profile.", fr: "Voici le profil LinkedIn d’Issam.",
     ar: "إليك حساب عصام على LinkedIn.", darija: "ها هو LinkedIn ديال Issam.",
   }), language, ["profile:linkedin"]);
+
+  if (intent === "PHONE") return base(phrase(language, {
+    en: `Issam's documented phone number is ${profile.contact.phone}.`,
+    fr: `Le numéro de téléphone documenté d’Issam est le ${profile.contact.phone}.`,
+    ar: `رقم هاتف عصام الموثق هو ${profile.contact.phone}.`,
+    darija: `النمرة الموثقة ديال Issam هي ${profile.contact.phone}.`,
+  }), language);
+
+  if (intent === "EMAIL") return base(phrase(language, {
+    en: `Issam's documented email address is ${profile.contact.email}.`,
+    fr: `L’adresse email documentée d’Issam est ${profile.contact.email}.`,
+    ar: `عنوان البريد الإلكتروني الموثق لعصام هو ${profile.contact.email}.`,
+    darija: `Email الموثق ديال Issam هو ${profile.contact.email}.`,
+  }), language);
+
+  if (intent === "LOCATION") return base(phrase(language, {
+    en: `Issam's documented location is ${profile.location}.`,
+    fr: `La localisation documentée d’Issam est ${profile.location}.`,
+    ar: `الموقع الموثق لعصام هو ${profile.location}.`,
+    darija: `البلاصة الموثقة ديال Issam هي ${profile.location}.`,
+  }), language);
+
+  if (intent === "LANGUAGES") {
+    const documented = profile.languages.map(({ name, level }) => `${name}: ${level}`).join(", ");
+    return base(phrase(language, {
+      en: `Issam's documented languages are ${documented}.`,
+      fr: `Les langues documentées d’Issam sont : arabe — langue maternelle, français — bon niveau, anglais — notions de base.`,
+      ar: `لغات عصام الموثقة هي: العربية — اللغة الأم، الفرنسية — مستوى جيد، الإنجليزية — مستوى أساسي.`,
+      darija: `اللغات الموثقين ديال Issam هما: العربية لغة أم، الفرنسية مستوى مزيان، والإنجليزية مستوى أساسي.`,
+    }), language);
+  }
+
+  if (intent === "SOURCE_POLICY") return base(phrase(language, {
+    en: "No. I only answer from information documented in Issam's portfolio and CV. If information is absent, I say that it is not documented rather than searching elsewhere or inventing it.",
+    fr: "Non. Je réponds uniquement à partir des informations documentées dans le portfolio et le CV d’Issam. Si une information n’y figure pas, je préfère indiquer qu’elle n’est pas documentée plutôt que de la chercher ailleurs ou de l’inventer.",
+    ar: "لا. أجيب فقط اعتماداً على المعلومات الموثقة في ملف عصام وسيرته الذاتية. إذا كانت المعلومة غير موجودة، أوضح أنها غير موثقة بدلاً من البحث عنها خارج هذه المصادر أو اختلاقها.",
+    darija: "لا. كنجاوب غير بالمعلومات الموثقة فالـ portfolio والـ CV ديال Issam. إلا ما كانتش شي معلومة فيهم، كنقول باللي ما موثقاش بلا ما نقلب عليها فشي بلاصة أخرى ولا نخترعها.",
+  }), language);
 
   if (intent === "CONTACT") return base(phrase(language, {
     en: `You can contact Issam at ${profile.contact.email}, or through LinkedIn.`,

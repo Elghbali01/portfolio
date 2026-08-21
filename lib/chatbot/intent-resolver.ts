@@ -18,7 +18,12 @@ export function identifyLocalIntent(message: string): IntentMatch | null {
   if (/^(?:cv|resume|résumé)$/.test(text) || /(?:montre|affiche|ouvre|show|open|display|عطيني|وريني).*\b(?:cv|resume)\b|(?:cv|resume).*\b(?:issam|عصام)\b.*(?:stp|please)?$/.test(text)) return { intent: "CV" };
   if (matchesOnly(text, /\bgithub\b/)) return { intent: "GITHUB" };
   if (matchesOnly(text, /\blinkedin\b/)) return { intent: "LINKEDIN" };
-  if (matchesOnly(text, /\b(?:contact|email|e mail|contacter)\b|تواصل/)) return { intent: "CONTACT" };
+  if (/\b(?:num[eé]ro|t[eé]l[eé]phone|phone|mobile|tel)\b|رقم الهاتف|النمرة/.test(text)) return { intent: "PHONE" };
+  if (/\b(?:email|e mail|courriel|mail)\b|البريد الإلكتروني/.test(text)) return { intent: "EMAIL" };
+  if (/\b(?:localisation|location|ville|city)\b|(?:^|\s)où (?:habite|se trouve)|أين|فين ساكن/.test(text)) return { intent: "LOCATION" };
+  if (/\b(?:langues?|languages?)\b|اللغات|لغات/.test(text) && !/\b(?:cv|resume)\b|السيرة الذاتية/.test(text)) return { intent: "LANGUAGES" };
+  if (/(?:chercher|rechercher|search|look up).*(?:ailleurs|internet|web|outside|other sources)|(?:ailleurs|internet|web|outside).*(?:portfolio|cv|resume)|مصادر خارجية|الإنترنت/.test(text)) return { intent: "SOURCE_POLICY" };
+  if (matchesOnly(text, /\b(?:contact|contacter)\b|تواصل/)) return { intent: "CONTACT" };
   if (/\b(?:bac|bachelor|baccalaur[eé]at|baccalaureate)\b|الباك|البكالوريا/.test(text)) return { intent: "BACCALAUREATE" };
   if (REASONING_REQUEST.test(text)) return null;
   if (/\b(?:son|his) (?:projet|project)\b/.test(text) && !/\b(?:projets|projects)\b/.test(text)) return null;
