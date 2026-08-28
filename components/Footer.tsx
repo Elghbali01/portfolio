@@ -1,23 +1,15 @@
-"use client";
+interface FooterProps {
+  rights?: string;
+}
 
-export default function Footer() {
+export default function Footer({ rights = "All rights reserved." }: FooterProps) {
   return (
-    <footer className="mt-24 pt-10 pb-8 border-t border-[#1E293B]/60 text-[#64748B]">
-      <div className="max-w-4xl mx-auto px-6 text-center space-y-4">
-        {/* Name */}
-        <h3 className="text-white text-lg font-semibold tracking-wide">
-          Issam Elghbali
-        </h3>
-
-        {/* Small line */}
-        <div className="h-px w-16 mx-auto bg-[#3B82F6]/50 rounded-full"></div>
-
-        {/* Copyright */}
+    <footer className="mt-24 border-t border-[#334155]/80 pb-8 pt-10 text-[#A8B6CA]">
+      <div className="mx-auto max-w-4xl space-y-4 px-6 text-center">
+        <p className="text-lg font-semibold tracking-wide text-white">Issam Elghbali</p>
+        <div aria-hidden="true" className="mx-auto h-px w-16 rounded-full bg-[#60A5FA]/60" />
         <p className="text-sm">
-          © {new Date().getFullYear()} Issam Elghbali.
-          <span className="ml-1 hover:text-[#3B82F6] transition">
-            All rights reserved.
-          </span>
+          © {new Date().getFullYear()} Issam Elghbali. <span>{rights}</span>
         </p>
       </div>
     </footer>

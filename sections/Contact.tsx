@@ -1,21 +1,97 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useId, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import emailjs from "@emailjs/browser";
 import { Mail, Linkedin, Github } from "lucide-react";
 
-export default function Contact() {
-  const formRef = useRef<HTMLFormElement>(null);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
+export interface ContactLabels {
+  heading: string;
+  headingHighlight: string;
+  description: string;
+  formAriaLabel: string;
+  emailLinkAriaLabel: string;
+  linkedInLinkAriaLabel: string;
+  githubLinkAriaLabel: string;
+  nameLabel: string;
+  namePlaceholder: string;
+  emailLabel: string;
+  emailPlaceholder: string;
+  messageLabel: string;
+  messagePlaceholder: string;
+  nameRequiredError: string;
+  emailRequiredError: string;
+  invalidEmailError: string;
+  messageRequiredError: string;
+  sendMessage: string;
+  sending: string;
+  successMessage: string;
+  errorMessage: string;
+}
 
-  const sendEmail = async (e: React.FormEvent) => {
-    e.preventDefault();
+const DEFAULT_LABELS: ContactLabels = {
+  heading: "Let’s Build",
+  headingHighlight: "Something Great",
+  description:
+    "I’m always open to discussing new projects, creative ideas, or opportunities to be part of your vision. Let’s connect and turn ideas into impactful digital solutions.",
+  formAriaLabel: "Contact Issam Elghbali",
+  emailLinkAriaLabel: "Send an email to Issam Elghbali",
+  linkedInLinkAriaLabel:
+    "Visit Issam Elghbali on LinkedIn (opens in a new tab)",
+  githubLinkAriaLabel:
+    "Visit Issam Elghbali on GitHub (opens in a new tab)",
+  nameLabel: "Your name",
+  namePlaceholder: "Your name",
+  emailLabel: "Your email",
+  emailPlaceholder: "you@example.com",
+  messageLabel: "Your message",
+  messagePlaceholder: "Tell me about your project or opportunity",
+  nameRequiredError: "Please enter your name.",
+  emailRequiredError: "Please enter your email address.",
+  invalidEmailError: "Enter a valid email address.",
+  messageRequiredError: "Please enter a message.",
+  sendMessage: "Send Message",
+  sending: "Sending message…",
+  successMessage: "Message sent successfully.",
+  errorMessage: "Something went wrong. Please try again.",
+};
+
+type ContactField = "name" | "email" | "message";
+type FieldErrors = Partial<Record<ContactField, string>>;
+
+interface ContactProps {
+  labels?: Partial<ContactLabels>;
+  dir?: "ltr" | "rtl";
+}
+
+export default function Contact({ labels, dir }: ContactProps) {
+  const copy: ContactLabels = { ...DEFAULT_LABELS, ...labels };
+  const formRef = useRef<HTMLFormElement>(null);
+  const nameId = useId();
+  const emailId = useId();
+  const messageId = useId();
+  const sendingStatusId = useId();
+  const [loading, setLoading] = useState(false);
+  const [submission, setSubmission] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const shouldReduceMotion = useReducedMotion();
+
+  const sendEmail = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!formRef.current) return;
 
+    if (!formRef.current.checkValidity()) {
+      const firstInvalidField =
+        formRef.current.querySelector<HTMLElement>(":invalid");
+      window.requestAnimationFrame(() => firstInvalidField?.focus());
+      return;
+    }
+
     setLoading(true);
-    setSuccess(null);
+    setSubmission(null);
 
     try {
       await emailjs.sendForm(
@@ -25,115 +101,243 @@ export default function Contact() {
         process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!,
       );
 
-      setSuccess("Message sent successfully.");
+      setSubmission({ type: "success", message: copy.successMessage });
+      setFieldErrors({});
       formRef.current.reset();
     } catch {
-      setSuccess("Something went wrong. Please try again.");
+      setSubmission({ type: "error", message: copy.errorMessage });
     } finally {
       setLoading(false);
     }
   };
 
+  const handleInvalid = (
+    field: ContactField,
+    event: React.InvalidEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    let message: string;
+
+    if (field === "email" && event.currentTarget.validity.typeMismatch) {
+      message = copy.invalidEmailError;
+    } else if (field === "email") {
+      message = copy.emailRequiredError;
+    } else if (field === "message") {
+      message = copy.messageRequiredError;
+    } else {
+      message = copy.nameRequiredError;
+    }
+
+    setFieldErrors((current) => ({ ...current, [field]: message }));
+  };
+
+  const clearFieldErrorWhenValid = (
+    field: ContactField,
+    event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    if (!event.currentTarget.validity.valid || !fieldErrors[field]) return;
+
+    setFieldErrors((current) => {
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const motionProps = shouldReduceMotion
+    ? { initial: false as const, transition: { duration: 0 } }
+    : {
+        initial: { opacity: 0, y: 32 },
+        transition: { duration: 0.7 },
+      };
+
   return (
     <section
       id="contact"
-      className="relative min-h-screen flex items-center justify-center px-6 md:px-10 text-white"
+      dir={dir}
+      className="relative flex min-h-screen scroll-mt-24 items-center justify-center px-6 py-24 text-white md:px-10"
     >
-      <div className="max-w-6xl w-full grid md:grid-cols-2 gap-16 items-center">
-        {/* LEFT SIDE */}
+      <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
         <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
+          {...motionProps}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="space-y-6"
+          className="space-y-6 text-start"
         >
-          <h2 className="text-3xl md:text-5xl font-bold">
-            Let’s Build <span className="text-[#3B82F6]">Something Great</span>
+          <h2 className="text-3xl font-bold md:text-5xl">
+            {copy.heading}{" "}
+            <span className="text-[#60A5FA]">{copy.headingHighlight}</span>
           </h2>
 
-          <p className="text-[#94A3B8] leading-relaxed">
-            I’m always open to discussing new projects, creative ideas, or
-            opportunities to be part of your vision. Let’s connect and turn
-            ideas into impactful digital solutions.
-          </p>
+          <p className="leading-relaxed text-[#CBD5E1]">{copy.description}</p>
 
-          <div className="flex gap-4 mt-6">
+          <div data-chat-safe-zone className="mt-6 flex gap-4">
             <a
               href="mailto:elghbaliissam1@gmail.com"
-              className="w-11 h-11 flex items-center justify-center rounded-full border border-[#334155] hover:border-[#3B82F6] hover:text-[#3B82F6] transition"
+              aria-label={copy.emailLinkAriaLabel}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#64748B] transition hover:border-[#60A5FA] hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1120]"
             >
-              <Mail size={18} />
+              <Mail aria-hidden="true" size={18} />
             </a>
 
             <a
               href="https://www.linkedin.com/in/issam-elghbali-2937b6258/"
               target="_blank"
-              className="w-11 h-11 flex items-center justify-center rounded-full border border-[#334155] hover:border-[#3B82F6] hover:text-[#3B82F6] transition"
+              rel="noopener noreferrer"
+              aria-label={copy.linkedInLinkAriaLabel}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#64748B] transition hover:border-[#60A5FA] hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1120]"
             >
-              <Linkedin size={18} />
+              <Linkedin aria-hidden="true" size={18} />
             </a>
 
             <a
               href="https://github.com/Elghbali01"
               target="_blank"
-              className="w-11 h-11 flex items-center justify-center rounded-full border border-[#334155] hover:border-[#3B82F6] hover:text-[#3B82F6] transition"
+              rel="noopener noreferrer"
+              aria-label={copy.githubLinkAriaLabel}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#64748B] transition hover:border-[#60A5FA] hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1120]"
             >
-              <Github size={18} />
+              <Github aria-hidden="true" size={18} />
             </a>
           </div>
         </motion.div>
 
-        {/* RIGHT SIDE - FORM */}
         <motion.form
+          {...motionProps}
+          data-chat-safe-zone
           ref={formRef}
           onSubmit={sendEmail}
-          initial={{ opacity: 0, x: 40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
+          noValidate
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-[#1E293B]/50 backdrop-blur-md border border-[#334155] p-8 rounded-xl space-y-6"
+          aria-label={copy.formAriaLabel}
+          aria-busy={loading}
+          aria-describedby={loading ? sendingStatusId : undefined}
+          className="space-y-6 rounded-xl border border-[#64748B] bg-[#1E293B]/50 p-6 backdrop-blur-md sm:p-8"
         >
           <div>
+            <label
+              htmlFor={nameId}
+              className="mb-2 block text-sm font-medium text-[#E2E8F0]"
+            >
+              {copy.nameLabel} <span aria-hidden="true">*</span>
+            </label>
             <input
+              id={nameId}
               type="text"
               name="user_name"
               required
-              placeholder="Your Name"
-              className="w-full bg-transparent border border-[#334155] rounded-lg px-4 py-3 focus:border-[#3B82F6] outline-none transition"
+              autoComplete="name"
+              placeholder={copy.namePlaceholder}
+              aria-invalid={fieldErrors.name ? true : undefined}
+              aria-describedby={
+                fieldErrors.name ? `${nameId}-error` : undefined
+              }
+              onInvalid={(event) => handleInvalid("name", event)}
+              onInput={(event) => clearFieldErrorWhenValid("name", event)}
+              className="w-full rounded-lg border border-[#64748B] bg-transparent px-4 py-3 text-white outline-none transition placeholder:text-[#94A3B8] focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/40"
             />
+            {fieldErrors.name && (
+              <p id={`${nameId}-error`} className="mt-2 text-sm text-[#FCA5A5]">
+                {fieldErrors.name}
+              </p>
+            )}
           </div>
 
           <div>
+            <label
+              htmlFor={emailId}
+              className="mb-2 block text-sm font-medium text-[#E2E8F0]"
+            >
+              {copy.emailLabel} <span aria-hidden="true">*</span>
+            </label>
             <input
+              id={emailId}
               type="email"
               name="user_email"
               required
-              placeholder="Your Email"
-              className="w-full bg-transparent border border-[#334155] rounded-lg px-4 py-3 focus:border-[#3B82F6] outline-none transition"
+              autoComplete="email"
+              inputMode="email"
+              dir="ltr"
+              placeholder={copy.emailPlaceholder}
+              aria-invalid={fieldErrors.email ? true : undefined}
+              aria-describedby={
+                fieldErrors.email ? `${emailId}-error` : undefined
+              }
+              onInvalid={(event) => handleInvalid("email", event)}
+              onInput={(event) => clearFieldErrorWhenValid("email", event)}
+              className="w-full rounded-lg border border-[#64748B] bg-transparent px-4 py-3 text-start text-white outline-none transition placeholder:text-[#94A3B8] focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/40"
             />
+            {fieldErrors.email && (
+              <p
+                id={`${emailId}-error`}
+                className="mt-2 text-sm text-[#FCA5A5]"
+              >
+                {fieldErrors.email}
+              </p>
+            )}
           </div>
 
           <div>
+            <label
+              htmlFor={messageId}
+              className="mb-2 block text-sm font-medium text-[#E2E8F0]"
+            >
+              {copy.messageLabel} <span aria-hidden="true">*</span>
+            </label>
             <textarea
+              id={messageId}
               name="message"
               required
               rows={5}
-              placeholder="Your Message"
-              className="w-full bg-transparent border border-[#334155] rounded-lg px-4 py-3 focus:border-[#3B82F6] outline-none transition resize-none"
+              autoComplete="off"
+              placeholder={copy.messagePlaceholder}
+              aria-invalid={fieldErrors.message ? true : undefined}
+              aria-describedby={
+                fieldErrors.message ? `${messageId}-error` : undefined
+              }
+              onInvalid={(event) => handleInvalid("message", event)}
+              onInput={(event) => clearFieldErrorWhenValid("message", event)}
+              className="w-full resize-y rounded-lg border border-[#64748B] bg-transparent px-4 py-3 text-white outline-none transition placeholder:text-[#94A3B8] focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/40"
             />
+            {fieldErrors.message && (
+              <p
+                id={`${messageId}-error`}
+                className="mt-2 text-sm text-[#FCA5A5]"
+              >
+                {fieldErrors.message}
+              </p>
+            )}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] transition font-medium shadow-lg shadow-blue-500/20"
+            className="w-full rounded-lg bg-[#2563EB] py-3 font-medium text-white shadow-lg shadow-blue-500/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B] disabled:cursor-wait disabled:opacity-70"
           >
-            {loading ? "Sending..." : "Send Message"}
+            {loading ? copy.sending : copy.sendMessage}
           </button>
 
-          {success && (
-            <p className="text-center text-sm text-[#3B82F6]">{success}</p>
+          <p
+            id={sendingStatusId}
+            role="status"
+            aria-live="polite"
+            className="sr-only"
+          >
+            {loading ? copy.sending : ""}
+          </p>
+
+          {submission && (
+            <p
+              role={submission.type === "error" ? "alert" : "status"}
+              aria-live={submission.type === "error" ? "assertive" : "polite"}
+              className={`text-center text-sm font-medium ${
+                submission.type === "error"
+                  ? "text-[#FCA5A5]"
+                  : "text-[#86EFAC]"
+              }`}
+            >
+              {submission.message}
+            </p>
           )}
         </motion.form>
       </div>

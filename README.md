@@ -1,93 +1,137 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio V2 — Issam Elghbali
 
-## Getting Started
+Portfolio multilingue construit avec Next.js, React et TypeScript. Le contenu public est disponible en anglais, français et arabe avec une vraie mise en page RTL. Le projet comprend dix études de cas, dix certifications, un formulaire EmailJS et un assistant portfolio relié à Groq côté serveur.
 
-First, run the development server:
+La description détaillée des choix techniques se trouve dans [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+
+## Démarrage local
+
+Installez les dépendances verrouillées :
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## AI Portfolio Assistant
-
-The portfolio includes a multilingual AI assistant available on every page. It answers questions in English, French, Modern Standard Arabic, and Moroccan Darija using only the documented portfolio content.
-
-### Setup
-
-Copy `.env.example` to `.env.local` and add a server-side Groq API key:
+Copiez `.env.example` vers `.env.local`, puis renseignez les valeurs nécessaires :
 
 ```env
-GROQ_API_KEY=your_key_here
+GROQ_API_KEY=
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_EMAILJS_SERVICE_ID=
+NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=
+NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=
 ```
 
-Never prefix this key with `NEXT_PUBLIC_`. Install and start the project normally:
+Lancez ensuite le serveur de développement :
 
 ```bash
-npm install
 npm run dev
 ```
 
-### Architecture
+Le site est accessible sur [http://localhost:3000](http://localhost:3000). La racine redirige vers [http://localhost:3000/en](http://localhost:3000/en).
 
-- `components/chatbot/` contains the floating widget, messages, input, and resource cards.
-- `app/api/chat/route.ts` validates requests and calls Groq from the server using the production `openai/gpt-oss-20b` model.
-- `lib/chatbot/` builds the controlled context, prompt, resource catalog, types, and validation.
-- `data/profile.ts` contains profile facts that are not already represented elsewhere.
-- Existing projects, certifications, skills, and journey entries are read directly from `data/` as the source of truth.
+`GROQ_API_KEY` est privée et ne doit jamais être préfixée par `NEXT_PUBLIC_`. Les variables EmailJS sont publiques par conception, car le formulaire s’exécute dans le navigateur.
 
-To update the assistant's knowledge, edit the relevant file in `data/`. New project and certification resources are derived automatically from their existing URLs and public assets. Add other verified resources to `lib/chatbot/resources.ts`.
+## Routes
 
-The current rate limiter is deliberately lightweight and process-local. Replace it with a shared store such as Redis before deploying across multiple production instances at scale.
+Pour chacune des locales `en`, `fr` et `ar` :
 
-The model uses Groq JSON Object Mode. The server validates the returned shape, retries once when JSON is invalid, and resolves resource IDs through the controlled local catalog. Groq free-tier limits may change; consult the Limits page in your Groq Console for the quota attached to your account.
+- `/[locale]` — accueil ;
+- `/[locale]/projects` — tous les projets ;
+- `/[locale]/projects/[slug]` — étude de cas ;
+- `/[locale]/certifications` — certifications ;
+- `/[locale]/social-card` — image Open Graph générée.
 
-### Fast path and language preference
+Les anciennes URL `/`, `/projects`, `/projects/[slug]` et `/certifications` redirigent de façon permanente vers leur équivalent anglais. L’API du chatbot reste disponible sur `POST /api/chat`. Le sitemap et les règles robots sont servis sur `/sitemap.xml` et `/robots.txt`.
 
-`lib/chatbot/intent-resolver.ts` handles greetings, CV, projects, certifications, skills, GitHub, LinkedIn, contact, and explicit language switches locally. These requests do not call Groq or consume the local LLM-request quota. Other questions receive a topic-filtered portfolio context before the Groq call.
+## Organisation du code
 
-An explicit request to continue in English, French, Arabic, or Moroccan Darija is kept in the widget state for the current page session. Darija detection supports Arabic script, Latin Arabizi, and common mixed French/Darija phrasing.
+- `app/[locale]/` contient les pages localisées, leur layout, les métadonnées et la 404.
+- `app/(redirect)/` conserve la compatibilité des URL historiques sans locale.
+- `assets/fonts/` contient les fontes locales et leurs licences, y compris les variantes statiques utilisées par les cartes sociales arabes.
+- `sections/` compose les grandes sections de l’accueil.
+- `components/` contient les composants partagés et les îlots interactifs.
+- `i18n/` définit les locales, les types, les helpers et les dictionnaires `en`, `fr`, `ar`.
+- `data/` contient les faits invariants partagés par le site et le chatbot.
+- `lib/localized-portfolio.ts` associe ces faits au contenu traduit.
+- `lib/site.ts` centralise l’origine publique, les canonical et les alternates.
+- `lib/chatbot/` contient le moteur existant du chatbot.
+- `public/` contient le CV, le profil, les captures de projets et les certificats.
+- `scripts/` contient les suites de régression HTTP du chatbot.
 
-### V3 knowledge and reasoning
+Les pages et le contenu statique restent des Server Components. Les fonctionnalités qui exigent le navigateur sont isolées dans des Client Components : navigation mobile, changement de langue, animations, formulaire, dialogue de certificat et interface du chatbot.
 
-The controlled knowledge base now includes verified facts from the public CV, domain metadata for projects, and relevance metadata for certifications. `portfolio-context.ts` selects the relevant domain and content for Backend, Data Science, education, project, certification, and comparison questions. Complex requests containing words such as projects or certifications bypass the simple-list fast path when they ask for a comparison, ranking, candidacy assessment, or explanation.
+## Modifier le contenu
 
-`grounded-reasoning.ts` guarantees evidence-based answers for key recruiter comparisons and selections when the small Groq model omits requested reasoning or returns invalid JSON. It never introduces facts outside the structured portfolio data.
+Les données invariantes restent dans :
 
-### V4 intent safety
+- `data/profile.ts` ;
+- `data/projects.ts` ;
+- `data/certifications.ts` ;
+- `data/skills.ts` ;
+- `data/journey.ts`.
 
-V4 analyzes response constraints and resolves named projects/certifications before the legacy list fast paths. Trusted deterministic responses protect against false premises, preserve the distinction between “not documented” and “false,” and support recruiter comparisons and conversational follow-ups without unnecessary Groq calls. Run `npm run test:chatbot-v4` to build the application and exercise the 20 regression scenarios plus the conversational test through `/api/chat`.
+Le contenu visible et SEO localisé se trouve dans :
 
-### V4.2 semantic routing
+- `i18n/dictionaries/en.ts` ;
+- `i18n/dictionaries/fr.ts` ;
+- `i18n/dictionaries/ar.ts`.
 
-Unknown formulations now pass through a small Groq semantic router before any portfolio generation. The router receives no full portfolio context and can select a deterministic local response, request a necessary clarification, or authorize grounded generation with a filtered context. Exact local commands and trusted anti-hallucination responses remain available during a Groq outage. Run `npm run test:chatbot-v4-2` for semantic, clarification, multilingual, grounding, and provider-outage regression coverage.
+Pour ajouter un projet ou une certification, mettez à jour la source `data/*`, les identifiants typés dans `i18n/types.ts` et les trois dictionnaires. Le compilateur TypeScript aide à détecter une traduction manquante. Les ressources du chatbot sont construites depuis les données officielles et leur catalogue contrôlé dans `lib/chatbot/resources.ts`.
 
-### V4.3 multi-intent planning
+Les textes techniques tels que les noms de bibliothèques ne doivent pas être traduits artificiellement. Dans une phrase arabe, conservez leur direction LTR avec les primitives bidi déjà utilisées par l’interface.
 
-Complex messages now use a compact semantic `RequestPlan` containing independent subrequests and shared constraints. The planner receives only the visitor message, a short conversation tail, and a language hint—never the portfolio catalog. Server-side resolvers then answer each part from verified `data/*`, compose the result, enforce exact/max counts and selection requirements, and keep resource cards consistent with the selected evidence. A deterministic catalog-backed plan preserves safe multi-part responses during provider quota or malformed JSON failures. Simple trusted and local requests retain their existing fast paths. Run `npm run test:chatbot-v4-3` for the multi-intent regression suite.
+## SEO et domaine de production
+
+Avant un build destiné à la production, définissez impérativement l’origine officielle :
+
+```env
+NEXT_PUBLIC_SITE_URL=https://votre-domaine.example
+```
+
+Cette valeur alimente les canonical, le sitemap, les données structurées et les URL sociales. En son absence, le code utilise `VERCEL_PROJECT_PRODUCTION_URL` si disponible, puis `http://localhost:3000`.
+
+Chaque locale possède des title/description, canonical, `hreflang`, Open Graph et Twitter Cards. Les pages émettent aussi du JSON-LD adapté : profil, listes et projets logiciels.
+
+## Assistant portfolio
+
+L’interface du chatbot est localisée pour la route courante. Le moteur accepte des réponses en anglais, français, arabe standard et darija, tout en se limitant aux informations documentées dans le portfolio et le CV.
+
+Architecture principale :
+
+- `components/chatbot/` — lanceur, dialogue, historique, saisie et ressources ;
+- `app/api/chat/route.ts` — validation, orchestration et appels Groq serveur ;
+- `lib/chatbot/` — langues, entités, contexte filtré, routeur sémantique, planification, composition, grounding et validation ;
+- `data/*` — faits vérifiés utilisés comme source de vérité.
+
+Le modèle configuré est `openai/gpt-oss-20b`. Les identifiants de ressources renvoyés par le modèle sont résolus via une whitelist locale. Des réponses déterministes et des fallbacks grounded couvrent plusieurs intentions et scénarios recruteur. Le rate limiter actuel est conservé en mémoire du processus ; remplacez-le par un stockage partagé avant un déploiement horizontal à grande échelle.
+
+## Commandes de validation
+
+Les commandes réellement déclarées dans `package.json` sont :
+
+```bash
+npm run lint
+npm run build
+npm run start
+npm run test:chatbot-v4
+npm run test:chatbot-v4-1
+npm run test:chatbot-v4-2
+npm run test:chatbot-v4-3
+npm run test:chatbot-new-projects
+npm run test:chatbot-source-scope
+npm run test:chatbot-compound
+```
+
+Chaque commande `test:chatbot-*` lance d’abord son propre build de production. Il n’existe pas actuellement de script `npm test` agrégateur. Cette section décrit les commandes disponibles ; elle ne signifie pas que leur dernière exécution a réussi.
+
+Pour une validation de livraison complète, ajoutez aux commandes automatisées une inspection navigateur des trois langues, du RTL, du clavier, des dialogues et des largeurs mobiles/tablettes/desktop.
+
+## Build et exécution de production
+
+```bash
+npm run build
+npm run start
+```
+
+Le domaine final, les identifiants EmailJS et la clé Groq doivent être configurés dans l’environnement de déploiement avant la validation finale.

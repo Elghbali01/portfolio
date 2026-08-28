@@ -1,15 +1,45 @@
 "use client";
 
-import { motion } from "framer-motion";
+import Image from "next/image";
+import { motion, useReducedMotion } from "framer-motion";
 import type { Certification } from "../data/certifications";
+
+export interface CertificationCardLabels {
+  previewCertificateAriaLabel: string;
+  verifyCertificate: string;
+  verifyCertificateAriaLabel: string;
+  viewOnLinkedIn: string;
+  viewOnLinkedInAriaLabel: string;
+  credentialUnavailable: string;
+}
+
+const DEFAULT_LABELS: CertificationCardLabels = {
+  previewCertificateAriaLabel: "Preview {title}",
+  verifyCertificate: "Verify Certificate",
+  verifyCertificateAriaLabel:
+    "Verify {title} certificate (opens in a new tab)",
+  viewOnLinkedIn: "View on LinkedIn",
+  viewOnLinkedInAriaLabel:
+    "View {title} on LinkedIn (opens in a new tab)",
+  credentialUnavailable: "Credential link unavailable",
+};
 
 interface CertificationCardProps {
   cert: Certification;
   index: number;
-  /** "preview" = homepage (no action button)  |  "full" = all-certifications page */
+  /** "preview" = homepage (no action button) | "full" = certifications page */
   variant: "preview" | "full";
-  /** Called when the user clicks the thumbnail (full page only) */
+  /** Called when the user activates the thumbnail (full page only). */
   onImageClick?: (cert: Certification) => void;
+  labels?: Partial<CertificationCardLabels>;
+  headingLevel?: "h2" | "h3";
+  imageAlt?: string;
+}
+
+function formatLabel(template: string, title: string) {
+  return template
+    .replace("{title}", title)
+    .replace("{certificate}", title);
 }
 
 export default function CertificationCard({
@@ -17,67 +47,92 @@ export default function CertificationCard({
   index,
   variant,
   onImageClick,
+  labels,
+  headingLevel = "h3",
+  imageAlt,
 }: CertificationCardProps) {
+  const copy: CertificationCardLabels = {
+    ...DEFAULT_LABELS,
+    ...labels,
+  };
+  const Heading = headingLevel;
+  const shouldReduceMotion = useReducedMotion();
+  const canOpenPreview = variant === "full" && Boolean(onImageClick);
+
+  const thumbnail = (
+    <Image
+      src={cert.image}
+      alt={canOpenPreview ? "" : (imageAlt ?? cert.title)}
+      fill
+      sizes={
+        variant === "preview"
+          ? "(min-width: 768px) 33vw, 100vw"
+          : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+      }
+      className="object-contain p-3 transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+    />
+  );
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
+    <motion.article
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
+      transition={
+        shouldReduceMotion
+          ? { duration: 0 }
+          : { duration: 0.6, delay: index * 0.1 }
+      }
       viewport={{ once: true }}
-      className="group bg-[#1E293B]/40 backdrop-blur-md border border-[#334155] rounded-xl
-                 overflow-hidden flex flex-col
-                 hover:border-[#3B82F6]/60 hover:shadow-lg hover:shadow-blue-500/10
-                 transition-all duration-300"
+      className="group flex flex-col overflow-hidden rounded-xl border border-[#475569] bg-[#1E293B]/40 backdrop-blur-md transition-all duration-300 hover:border-[#60A5FA]/70 hover:shadow-lg hover:shadow-blue-500/10"
     >
-      {/* ── Thumbnail ────────────────────────────────────────────────── */}
-      <div
-        className={`relative bg-[#0F172A]/60 flex items-center justify-center overflow-hidden
-                    ${variant === "full" ? "cursor-pointer" : ""}`}
-        style={{ aspectRatio: "4 / 3" }}
-        onClick={() => variant === "full" && onImageClick?.(cert)}
-      >
-        <img
-          src={cert.image}
-          alt={cert.title}
-          className="w-full h-full object-contain p-3
-                     transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
-      </div>
+      {canOpenPreview ? (
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          aria-label={formatLabel(
+            copy.previewCertificateAriaLabel,
+            cert.title,
+          )}
+          onClick={() => onImageClick?.(cert)}
+          className="relative aspect-[4/3] w-full cursor-pointer overflow-hidden bg-[#0F172A]/60 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#60A5FA]"
+        >
+          {thumbnail}
+        </button>
+      ) : (
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#0F172A]/60">
+          {thumbnail}
+        </div>
+      )}
 
-      {/* ── Body ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-col flex-1 p-5 gap-1">
-        {/* Title */}
-        <h3 className="text-[15px] font-semibold text-white leading-snug min-h-[2.6rem] line-clamp-2">
+      <div className="flex flex-1 flex-col gap-1 p-5 text-start">
+        <Heading className="min-h-[2.6rem] text-[15px] font-semibold leading-snug text-white">
           {cert.title}
-        </h3>
+        </Heading>
 
-        {/* Issuer */}
-        <p className="text-sm text-[#3B82F6] font-medium">{cert.issuer}</p>
+        <p className="text-sm font-medium text-[#60A5FA]">{cert.issuer}</p>
 
-        {/* Date */}
         {cert.date && (
-          <p className="text-xs text-[#94A3B8] mt-0.5">{cert.date}</p>
+          <p className="mt-0.5 text-xs text-[#94A3B8]">{cert.date}</p>
         )}
 
-        {/* Spacer to push the action to the bottom */}
         <div className="flex-1" />
 
-        {/* ── Action (full page only) ──────────────────────────────── */}
         {variant === "full" && (
-          <div className="mt-4">
+          <div data-chat-safe-zone className="mt-4">
             {cert.verificationUrl ? (
               <a
                 href={cert.verificationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Verify ${cert.title} certificate (opens in a new tab)`}
-                className="inline-flex items-center gap-2 w-full justify-center
-                           bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium
-                           px-4 py-2.5 rounded-lg transition-colors duration-300"
+                aria-label={formatLabel(
+                  copy.verifyCertificateAriaLabel,
+                  cert.title,
+                )}
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors duration-300 hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B]"
               >
                 <svg
-                  className="w-4 h-4"
+                  aria-hidden="true"
+                  className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -89,7 +144,7 @@ export default function CertificationCard({
                     d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
                   />
                 </svg>
-                Verify Certificate
+                {copy.verifyCertificate}
               </a>
             ) : cert.actionType === "external" ? (
               cert.externalUrl ? (
@@ -97,14 +152,15 @@ export default function CertificationCard({
                   href={cert.externalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`View ${cert.title} on LinkedIn (opens in a new tab)`}
-                  className="inline-flex items-center gap-2 w-full justify-center
-                             bg-[#3B82F6] hover:bg-[#2563EB] text-white text-sm font-medium
-                             px-4 py-2.5 rounded-lg transition-colors duration-300"
+                  aria-label={formatLabel(
+                    copy.viewOnLinkedInAriaLabel,
+                    cert.title,
+                  )}
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors duration-300 hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B]"
                 >
-                  {/* External-link icon */}
                   <svg
-                    className="w-4 h-4"
+                    aria-hidden="true"
+                    className="h-4 w-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -116,18 +172,18 @@ export default function CertificationCard({
                       d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
                     />
                   </svg>
-                  View on LinkedIn
+                  {copy.viewOnLinkedIn}
                 </a>
               ) : (
-                /* Disabled state when externalUrl is empty */
                 <button
+                  type="button"
                   disabled
-                  className="inline-flex items-center gap-2 w-full justify-center
-                             bg-[#334155] text-[#64748B] text-sm font-medium
-                             px-4 py-2.5 rounded-lg cursor-not-allowed"
+                  aria-label={copy.credentialUnavailable}
+                  className="inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-[#334155] px-4 py-2.5 text-sm font-medium text-[#94A3B8]"
                 >
                   <svg
-                    className="w-4 h-4"
+                    aria-hidden="true"
+                    className="h-4 w-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -139,13 +195,13 @@ export default function CertificationCard({
                       d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
                     />
                   </svg>
-                  View on LinkedIn
+                  {copy.viewOnLinkedIn}
                 </button>
               )
             ) : null}
           </div>
         )}
       </div>
-    </motion.div>
+    </motion.article>
   );
 }

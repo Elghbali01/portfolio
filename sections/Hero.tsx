@@ -1,135 +1,153 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
-import RotatingText from "../components/RotatingText";
-import { Github, Linkedin, Download } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Download, Github, Linkedin } from "lucide-react";
+import RotatingText from "@/components/RotatingText";
+import type { Locale } from "@/i18n/config";
 
-export default function Hero() {
+export interface HeroCopy {
+  eyebrow: string;
+  firstName: string;
+  lastName: string;
+  roles: string[];
+  descriptor: string;
+  viewProjects: string;
+  contact: string;
+  downloadCv: string;
+  imageAlt: string;
+  linkedinLabel: string;
+  githubLabel: string;
+}
+
+const defaultCopy: HeroCopy = {
+  eyebrow: "Hi, I’m",
+  firstName: "Issam",
+  lastName: "Elghbali",
+  roles: ["Full-Stack Developer", "Data Scientist", "Machine Learning Enthusiast"],
+  descriptor: "I build reliable software and data products grounded in real-world needs.",
+  viewProjects: "View projects",
+  contact: "Contact me",
+  downloadCv: "Download CV",
+  imageAlt: "Portrait of Issam Elghbali",
+  linkedinLabel: "Issam Elghbali on LinkedIn",
+  githubLabel: "Issam Elghbali on GitHub",
+};
+
+interface HeroProps {
+  locale?: Locale;
+  copy?: Partial<HeroCopy>;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  cvUrl?: string;
+}
+
+export default function Hero({
+  locale = "en",
+  copy: copyOverrides,
+  linkedinUrl = "https://www.linkedin.com/in/issam-elghbali-2937b6258/",
+  githubUrl = "https://github.com/Elghbali01",
+  cvUrl = "/cv-issam_elghbali.pdf",
+}: HeroProps) {
+  const copy = { ...defaultCopy, ...copyOverrides };
+  const isRtl = locale === "ar";
+  const shouldReduceMotion = useReducedMotion();
+  const entrance = shouldReduceMotion
+    ? undefined
+    : { opacity: 0, x: isRtl ? 48 : -48, y: -24 };
+
   return (
     <motion.section
       id="home"
-      initial={{ opacity: 0, x: -120, y: -120 }}
+      initial={entrance}
       animate={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ duration: 1.2, ease: "easeOut" }}
-      className="relative min-h-screen flex items-center justify-center text-white px-6 md:px-10 overflow-hidden"
+      transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: "easeOut" }}
+      className="relative flex min-h-[100svh] scroll-mt-24 items-center justify-center overflow-hidden px-6 pb-16 pt-24 text-white md:px-10 lg:py-28"
     >
-      {/* BACKGROUND */}
       <div className="absolute inset-0 -z-30 bg-gradient-to-br from-[#020617] via-[#0B1120] to-[#0F172A]" />
+      <div aria-hidden="true" className="absolute -start-52 -top-52 -z-20 h-[600px] w-[600px] rounded-full bg-blue-600 opacity-20 blur-[220px]" />
+      <div aria-hidden="true" className="absolute -bottom-52 -end-52 -z-20 h-[500px] w-[500px] rounded-full bg-indigo-500 opacity-20 blur-[200px]" />
 
-      {/* BLUE LIGHT EFFECT */}
-      <div className="absolute -z-20 top-[-200px] left-[-200px] w-[600px] h-[600px] bg-blue-600 opacity-20 blur-[220px] rounded-full" />
-
-      <div className="absolute -z-20 bottom-[-200px] right-[-200px] w-[500px] h-[500px] bg-indigo-500 opacity-20 blur-[200px] rounded-full" />
-
-      <div className="grid md:grid-cols-2 gap-14 md:gap-20 items-center max-w-6xl w-full">
-        {/* PHOTO SIDE */}
-        <div className="relative flex justify-center items-center">
-          <div className="absolute w-[350px] h-[350px] md:w-[600px] md:h-[600px] bg-[#3B82F6] rounded-full blur-[150px] md:blur-[220px] opacity-20" />
-
-          <div
-            className="absolute w-[260px] h-[260px] md:w-[420px] md:h-[420px] 
-              bg-gradient-to-br from-[#1D4ED8] to-[#3B82F6]
-              rounded-[60%_40%_50%_70%/60%_50%_70%_40%]
-              blur-sm opacity-70"
-          />
-
-          <div
-            className="absolute w-[240px] h-[240px] md:w-[380px] md:h-[380px]
-              rounded-[60%_40%_50%_70%/60%_50%_70%_40%]
-              border border-[#60A5FA]/40"
-          />
-
-          <div
-            className="relative w-[200px] h-[200px] md:w-[320px] md:h-[320px] 
-              rounded-full overflow-hidden border-4 border-[#0F172A] shadow-2xl"
-          >
+      <div dir="ltr" className="grid w-full max-w-6xl items-center gap-14 lg:grid-cols-2 lg:gap-16 xl:gap-20">
+        <div className="relative flex items-center justify-center">
+          <div aria-hidden="true" className="absolute h-[320px] w-[320px] rounded-full bg-[#3B82F6] opacity-20 blur-[140px] lg:h-[520px] lg:w-[520px] lg:blur-[200px]" />
+          <div aria-hidden="true" className="absolute h-[260px] w-[260px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] bg-gradient-to-br from-[#1D4ED8] to-[#3B82F6] opacity-70 blur-sm lg:h-[400px] lg:w-[400px]" />
+          <div aria-hidden="true" className="absolute h-[240px] w-[240px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] border border-[#60A5FA]/40 lg:h-[360px] lg:w-[360px]" />
+          <div className="relative h-52 w-52 overflow-hidden rounded-full border-4 border-[#0F172A] shadow-2xl sm:h-60 sm:w-60 lg:h-80 lg:w-80">
             <Image
-              src="/profile.jpg"
-              alt="Issam"
+              src="/profile.webp"
+              alt={copy.imageAlt}
               fill
+              priority
+              fetchPriority="high"
+              quality={82}
+              sizes="(min-width: 1024px) 320px, (min-width: 640px) 240px, 208px"
               className="object-cover"
             />
           </div>
         </div>
 
-        {/* TEXT SIDE */}
-        <div className="space-y-6 text-center md:text-left">
-          <p className="text-[#94A3B8] tracking-wide text-lg">Hi, I&apos;m</p>
+        <div
+          data-chat-safe-zone
+          dir={isRtl ? "rtl" : "ltr"}
+          className="space-y-5 text-center lg:text-start"
+        >
+          <p className="text-lg text-[#B7C3D4]">{copy.eyebrow}</p>
 
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold leading-tight">
-            Issam <span className="text-[#3B82F6]">Elghbali</span>
+          <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+            {copy.firstName} <span className="text-[#60A5FA]">{copy.lastName}</span>
           </h1>
 
-          <RotatingText />
+          <RotatingText
+            phrases={copy.roles}
+            locale={locale}
+            dir={isRtl ? "rtl" : "ltr"}
+          />
+          <p className="mx-auto max-w-xl text-base leading-relaxed text-[#B7C3D4] lg:mx-0">
+            {copy.descriptor}
+          </p>
 
-          {/* SOCIAL LINKS */}
-          <div className="flex justify-center md:justify-start gap-4 mt-4">
+          <div className="flex justify-center gap-4 pt-1 lg:justify-start">
             <a
-              href="https://www.linkedin.com/in/issam-elghbali-2937b6258/"
+              href={linkedinUrl}
               target="_blank"
-              className="w-11 h-11 flex items-center justify-center rounded-full border border-[#334155] hover:border-[#3B82F6] hover:text-[#3B82F6] transition"
+              rel="noopener noreferrer"
+              aria-label={copy.linkedinLabel}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#475569] transition hover:border-[#60A5FA] hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
             >
-              <Linkedin size={18} />
+              <Linkedin aria-hidden="true" size={18} />
             </a>
-
             <a
-              href="https://github.com/Elghbali01"
+              href={githubUrl}
               target="_blank"
-              className="w-11 h-11 flex items-center justify-center rounded-full border border-[#334155] hover:border-[#3B82F6] hover:text-[#3B82F6] transition"
+              rel="noopener noreferrer"
+              aria-label={copy.githubLabel}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#475569] transition hover:border-[#60A5FA] hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
             >
-              <Github size={18} />
+              <Github aria-hidden="true" size={18} />
             </a>
           </div>
 
-          {/* BUTTONS */}
-          <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 mt-8">
-            {/* PRIMARY BUTTON */}
-            <button
-              onClick={() =>
-                document
-                  .getElementById("projects")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-              className="w-full sm:w-auto px-7 py-3 rounded-lg font-medium 
-               bg-[#3B82F6] text-white
-               hover:bg-[#2563EB] 
-               transition-all duration-300
-               shadow-lg shadow-blue-500/20"
-            >
-              View Projects
-            </button>
-
-            {/* SECONDARY BUTTON */}
-            <button
-              onClick={() =>
-                document
-                  .getElementById("contact")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-              className="w-full sm:w-auto px-7 py-3 rounded-lg font-medium
-               border border-[#334155] text-gray-300
-               hover:border-[#3B82F6] hover:text-white
-               transition-all duration-300"
-            >
-              Contact Me
-            </button>
-
-            {/* DOWNLOAD CV */}
+          <div className="flex flex-col flex-wrap justify-center gap-3 pt-3 sm:flex-row lg:justify-start">
             <a
-              href="/cv-issam_elghbali.pdf"
-              download
-              className="w-full sm:w-auto px-7 py-3 rounded-lg font-medium
-               bg-white/5 text-gray-300
-               border border-white/10
-               backdrop-blur-md
-               hover:bg-white/10
-               hover:border-white/20
-               transition-all duration-300
-               flex items-center justify-center gap-2"
+              href={`/${locale}#projects`}
+              className="rounded-lg bg-[#2563EB] px-6 py-3 text-center font-medium text-white shadow-lg shadow-blue-500/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
             >
-              <Download size={18} />
-              Download CV
+              {copy.viewProjects}
+            </a>
+            <a
+              href={`/${locale}#contact`}
+              className="rounded-lg border border-[#475569] px-6 py-3 text-center font-medium text-[#E2E8F0] transition hover:border-[#60A5FA] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+            >
+              {copy.contact}
+            </a>
+            <a
+              href={cvUrl}
+              download
+              className="flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/5 px-6 py-3 text-center font-medium text-[#E2E8F0] backdrop-blur-md transition hover:border-white/30 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+            >
+              <Download aria-hidden="true" size={18} />
+              {copy.downloadCv}
             </a>
           </div>
         </div>

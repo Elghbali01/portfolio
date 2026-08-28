@@ -1,75 +1,103 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { projects, featuredProjects } from "../data/projects";
-import ProjectCard from "../components/ProjectCard";
+import DirectionalArrow from "@/components/DirectionalArrow";
+import ProjectCard, { type ProjectCardData, type ProjectCardLabels } from "@/components/ProjectCard";
+import Reveal from "@/components/Reveal";
+import { featuredProjects, projects as allProjects } from "@/data/projects";
+import type { Locale } from "@/i18n/config";
 
-export default function Projects() {
+export interface ProjectsCopy {
+  title: string;
+  highlightedTitle: string;
+  introduction: string;
+  viewAll: string;
+  card: ProjectCardLabels;
+}
+
+const defaultCopy: ProjectsCopy = {
+  title: "Featured",
+  highlightedTitle: "Projects",
+  introduction:
+    "A selection of projects spanning full-stack development, data products, and maintainable software architecture.",
+  viewAll: "View all projects",
+  card: {
+    githubRepository: "GitHub repository",
+    githubProfile: "GitHub profile",
+    viewDetails: "View details",
+    viewDetailsFor: "View project details for",
+    imageAlt: "Preview of",
+    technologiesLabel: "Technologies used",
+  },
+};
+
+function toCardData(project: (typeof allProjects)[number]): ProjectCardData {
+  return {
+    title: project.title,
+    slug: project.slug,
+    category: project.category,
+    shortDescription: project.shortDescription,
+    technologies: project.technologies,
+    github: project.github,
+    image: project.image,
+  };
+}
+
+interface ProjectsProps {
+  locale?: Locale;
+  copy?: Omit<Partial<ProjectsCopy>, "card"> & {
+    card?: Partial<ProjectCardLabels>;
+  };
+  projects?: ProjectCardData[];
+  totalCount?: number;
+  imageAlts?: Record<string, string>;
+}
+
+export default function Projects({
+  locale = "en",
+  copy: overrides,
+  projects = featuredProjects.slice(0, 2).map(toCardData),
+  totalCount = allProjects.length,
+  imageAlts = {},
+}: ProjectsProps) {
+  const copy: ProjectsCopy = {
+    ...defaultCopy,
+    ...overrides,
+    card: { ...defaultCopy.card, ...overrides?.card },
+  };
+
   return (
-    <section
-      id="projects"
-      className="relative min-h-screen px-6 md:px-10 py-24 text-white"
-    >
-      <div className="max-w-7xl mx-auto">
-        {/* TITLE */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-5xl font-bold">
-            Featured <span className="text-[#3B82F6]">Projects</span>
+    <section id="projects" className="relative min-h-screen scroll-mt-24 px-6 py-24 text-white md:px-10">
+      <div className="mx-auto max-w-7xl">
+        <Reveal className="mb-16 text-center">
+          <h2 className="text-3xl font-bold md:text-5xl">
+            {copy.title} <span className="text-[#60A5FA]">{copy.highlightedTitle}</span>
           </h2>
-          <p className="text-[#94A3B8] mt-4 max-w-2xl mx-auto">
-            A selection of projects showcasing full-stack development,
-            data-driven systems, and scalable architectures.
-          </p>
-        </motion.div>
+          <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-[#B7C3D4]">{copy.introduction}</p>
+        </Reveal>
 
-        {/* FEATURED GRID — 2 projects only */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-10">
-          {featuredProjects.slice(0, 2).map((project, index) => (
+        <div className="grid gap-10 lg:grid-cols-2">
+          {projects.map((project, index) => (
             <ProjectCard
               key={project.slug}
               project={project}
               index={index}
+              locale={locale}
+              labels={copy.card}
+              imageAlt={imageAlts[project.slug]}
             />
           ))}
         </div>
 
-        {/* VIEW ALL BUTTON */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
-          className="flex justify-center mt-12"
-        >
-          <Link
-            href="/projects"
-            className="inline-flex items-center gap-2 bg-transparent border border-[#3B82F6] text-[#3B82F6]
-                       hover:bg-[#3B82F6] hover:text-white text-sm font-medium
-                       px-7 py-3 rounded-lg transition-all duration-300"
-          >
-            View All Projects ({projects.length})
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
+        <Reveal delay={0.2} className="mt-12 flex justify-center">
+          <div data-chat-safe-zone>
+            <Link
+              href={`/${locale}/projects`}
+              className="inline-flex items-center gap-2 rounded-lg border border-[#60A5FA] px-7 py-3 text-sm font-medium text-[#93C5FD] transition-all duration-300 hover:bg-[#2563EB] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-              />
-            </svg>
-          </Link>
-        </motion.div>
+              {copy.viewAll} ({totalCount})
+              <DirectionalArrow locale={locale} direction="forward" />
+            </Link>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

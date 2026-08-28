@@ -1,11 +1,22 @@
+import type { Locale } from "@/i18n/config";
 import type { ChatUiMessage } from "@/lib/chatbot/types";
-import ChatResourceCard from "./ChatResourceCard";
+import ChatResourceCard, { type ChatResourceLabels } from "./ChatResourceCard";
 
 interface ChatMessageProps {
   message: ChatUiMessage;
+  locale?: Locale;
+  userLabel?: string;
+  assistantLabel?: string;
+  resourceLabels?: Partial<ChatResourceLabels>;
 }
 
-export default function ChatMessage({ message }: ChatMessageProps) {
+export default function ChatMessage({
+  message,
+  locale = "en",
+  userLabel = "You",
+  assistantLabel = "Assistant",
+  resourceLabels,
+}: ChatMessageProps) {
   const isUser = message.role === "user";
 
   return (
@@ -15,18 +26,19 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           dir="auto"
           className={`whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
             isUser
-              ? "rounded-br-md bg-[#3B82F6] text-white"
+              ? "rounded-ee-md bg-[#2563EB] text-white"
               : message.isError
-                ? "rounded-bl-md border border-red-400/30 bg-red-500/10 text-red-100"
-                : "rounded-bl-md border border-[#334155] bg-[#1E293B]/80 text-[#E2E8F0]"
+                ? "rounded-es-md border border-red-300/50 bg-red-500/10 text-red-100"
+                : "rounded-es-md border border-[#475569] bg-[#1E293B]/80 text-[#E2E8F0]"
           }`}
         >
+          <span className="sr-only">{isUser ? userLabel : assistantLabel}: </span>
           {message.content}
         </div>
         {message.resources && message.resources.length > 0 && (
           <div className="mt-2 grid gap-2">
             {message.resources.map((resource) => (
-              <ChatResourceCard key={resource.id} resource={resource} />
+              <ChatResourceCard key={resource.id} resource={resource} locale={locale} labels={resourceLabels} />
             ))}
           </div>
         )}

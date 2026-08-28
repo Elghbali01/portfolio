@@ -1,32 +1,272 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b1120;
+  --foreground: #f8fafc;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-body {
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   background: linear-gradient(135deg, #0b1120, #0f172a, #1e1b4b);
 }
-html {
-  scroll-behavior: smooth;
+
+html[dir="rtl"] body {
+  font-family: var(--font-noto-arabic), "Segoe UI", Tahoma, Arial, sans-serif;
+  line-height: 1.7;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Decorative background: two compositor-friendly transforms, no client JS. */
+.ambient-background {
+  contain: strict;
+  pointer-events: none;
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(96px);
+  opacity: 0.22;
+  transform: translate3d(0, 0, 0);
+}
+
+.ambient-orb-purple {
+  inset-block-start: 10%;
+  inset-inline-start: 8%;
+  width: clamp(18rem, 35vw, 31.25rem);
+  aspect-ratio: 1;
+  background: #9333ea;
+  animation: ambient-purple-drift 28s ease-in-out infinite alternate;
+}
+
+.ambient-orb-blue {
+  inset-block-end: 8%;
+  inset-inline-end: 8%;
+  width: clamp(16rem, 30vw, 25rem);
+  aspect-ratio: 1;
+  background: #2563eb;
+  animation: ambient-blue-drift 34s ease-in-out infinite alternate;
+}
+
+@keyframes ambient-purple-drift {
+  to {
+    transform: translate3d(18vw, -10vh, 0) scale(1.08);
+  }
+}
+
+@keyframes ambient-blue-drift {
+  to {
+    transform: translate3d(-14vw, 12vh, 0) scale(0.94);
+  }
+}
+
+/* Deterministic star field: replaces forty hydrated, randomly positioned nodes. */
+.skills-starfield::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  opacity: 0.32;
+  background-image:
+    radial-gradient(circle, rgb(255 255 255 / 55%) 1px, transparent 1.5px),
+    radial-gradient(circle, rgb(96 165 250 / 45%) 1px, transparent 1.5px);
+  background-position:
+    0 0,
+    29px 37px;
+  background-size:
+    73px 73px,
+    109px 109px;
+  mask-image: radial-gradient(ellipse at center, black 25%, transparent 88%);
+}
+
+.skills-brain-svg {
+  filter: drop-shadow(0 0 12px rgb(59 130 246 / 65%));
+}
+
+.skills-brain-ring {
+  animation: skills-brain-pulse 4s ease-in-out infinite;
+}
+
+.skills-brain-ring-delayed {
+  animation-delay: -2s;
+}
+
+@keyframes skills-brain-pulse {
+  50% {
+    opacity: 0.12;
+    transform: scale(1.18);
+  }
+}
+
+.skills-viewport {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline proximity;
+  scrollbar-color: rgb(59 130 246 / 60%) rgb(15 23 42 / 55%);
+  scrollbar-width: thin;
+}
+
+.skills-viewport:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 4px;
+  border-radius: 0.75rem;
+}
+
+.skills-viewport::-webkit-scrollbar {
+  height: 0.4rem;
+}
+
+.skills-viewport::-webkit-scrollbar-track {
+  background: rgb(15 23 42 / 55%);
+  border-radius: 9999px;
+}
+
+.skills-viewport::-webkit-scrollbar-thumb {
+  background: rgb(59 130 246 / 60%);
+  border-radius: 9999px;
+}
+
+.skills-track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  gap: 0.25rem;
+  padding: 0.5rem 0.25rem 1rem;
+  margin: 0;
+  list-style: none;
+}
+
+.skill-logo-shell::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--skill-color) 25%, transparent),
+    transparent 70%
+  );
+  transition: opacity 220ms ease;
+}
+
+.skill-logo,
+.skill-name {
+  transition:
+    color 220ms ease,
+    filter 220ms ease,
+    transform 220ms ease;
+}
+
+.skill-card:hover .skill-logo {
+  filter: drop-shadow(0 0 0.55rem var(--skill-color));
+  transform: translateY(-0.25rem) scale(1.08);
+}
+
+.skill-card:hover .skill-logo-shell::before {
+  opacity: 1;
+}
+
+.skill-card:hover .skill-name {
+  color: var(--skill-color);
+}
+
+/*
+ * One copy per skill is enough: on large screens the rail gently pans between
+ * its two ends. It pauses for pointer and keyboard interaction. Mobile remains
+ * a user-controlled, static horizontal list.
+ */
+@media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+  .skills-viewport {
+    container-type: inline-size;
+  }
+
+  .skills-track {
+    animation: skills-pan-ltr var(--skills-duration, 36s) linear infinite
+      alternate;
+    will-change: transform;
+  }
+
+  [dir="rtl"] .skills-track {
+    animation-name: skills-pan-rtl;
+  }
+
+  .skills-viewport:is(:hover, :focus, :focus-within) .skills-track {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes skills-pan-ltr {
+  to {
+    transform: translate3d(calc(-100% + 100cqi), 0, 0);
+  }
+}
+
+@keyframes skills-pan-rtl {
+  to {
+    transform: translate3d(calc(100% - 100cqi), 0, 0);
+  }
+}
+
+.typewriter-caret::after {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-inline-start: 0.25rem;
+  vertical-align: -0.12em;
+  content: "";
+  background: currentColor;
+  animation: typewriter-caret-blink 800ms steps(1, end) infinite;
+}
+
+@keyframes typewriter-caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+[dir="rtl"] .skills-kicker,
+[dir="rtl"] .skill-name {
+  letter-spacing: normal;
+}
+
+[dir="rtl"] .skills-kicker {
+  text-transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .ambient-orb,
+  .skills-track {
+    transform: none !important;
+  }
+
+  .typewriter-caret::after {
+    animation: none !important;
+  }
 }

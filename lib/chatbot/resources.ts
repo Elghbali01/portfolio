@@ -10,7 +10,7 @@ const projectResources: ChatResource[] = projects.flatMap((project) => {
       type: "project",
       title: project.title,
       description: `${project.category} · ${project.technologies.join(" · ")}`,
-      url: `/projects#${project.slug}`,
+      url: `/en/projects/${project.slug}`,
       image: project.image,
     },
   ];

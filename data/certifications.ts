@@ -119,7 +119,7 @@ export const certifications: Certification[] = [
     ...makePaths("The_Data_Science_Profession"),
     downloadImage: null,
     externalUrl: null,
-    verificationUrl: "http://coursera.org/account/accomplishments/verify/TSI91CN3RIBW",
+    verificationUrl: "https://www.coursera.org/account/accomplishments/verify/TSI91CN3RIBW",
     actionType: "download",
     featured: false,
   },

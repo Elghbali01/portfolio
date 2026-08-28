@@ -1,225 +1,245 @@
-# Architecture du portfolio
+# Architecture du portfolio V2
 
-Ce document décrit l'état actuel du projet et sert de référence avant l'ajout d'un chatbot.
+Ce document décrit l’architecture présente dans le dépôt. Il ne constitue pas un rapport de validation : le lint, le build, les régressions du chatbot et les contrôles visuels doivent être exécutés séparément avant une livraison.
 
-## 1. Vue d'ensemble
+## 1. Vue d’ensemble
 
-Le projet est un portfolio personnel construit avec :
+Le portfolio utilise :
 
-- Next.js 16.1.6 et son App Router ;
-- React 19.2.3 et TypeScript 5 en mode strict ;
-- Tailwind CSS 4 pour les styles ;
-- Framer Motion pour les animations ;
-- EmailJS pour l'envoi du formulaire de contact ;
-- Lucide React et React Icons pour les icônes.
+- Next.js 16.1.6 avec App Router ;
+- React 19.2.3 et TypeScript en mode strict ;
+- Tailwind CSS 4 pour la mise en forme ;
+- Framer Motion pour les îlots d’animation interactifs ;
+- EmailJS pour le formulaire de contact côté navigateur ;
+- Groq, exclusivement via une Route Handler serveur, pour les requêtes conversationnelles du chatbot ;
+- Lucide React pour les icônes d’interface.
 
-L'application utilise maintenant une Route Handler Next.js pour son assistant IA. Elle ne contient toujours ni backend séparé, ni base de données, ni système d'authentification.
+Il n’existe ni backend séparé, ni base de données, ni authentification. Le site public est disponible en anglais, français et arabe ; le chatbot sait en plus répondre en darija.
 
-## 2. Arborescence utile
+## 2. Routage public
+
+Les locales publiques sont déclarées dans `i18n/config.ts` : `en`, `fr` et `ar`. L’anglais est la locale par défaut.
+
+| URL | Implémentation | Rôle |
+|---|---|---|
+| `/` | `app/(redirect)/page.tsx` | Redirection permanente vers `/en` |
+| `/projects` | `app/(redirect)/projects/page.tsx` | Redirection permanente vers `/en/projects` |
+| `/projects/[slug]` | `app/(redirect)/projects/[slug]/page.tsx` | Redirection permanente vers le détail anglais correspondant |
+| `/certifications` | `app/(redirect)/certifications/page.tsx` | Redirection permanente vers `/en/certifications` |
+| `/[locale]` | `app/[locale]/page.tsx` | Accueil localisé |
+| `/[locale]/projects` | `app/[locale]/projects/page.tsx` | Liste localisée des projets |
+| `/[locale]/projects/[slug]` | `app/[locale]/projects/[slug]/page.tsx` | Étude de cas localisée d’un projet |
+| `/[locale]/certifications` | `app/[locale]/certifications/page.tsx` | Liste localisée et prévisualisation des certifications |
+| `/[locale]/social-card` | `app/[locale]/social-card/route.tsx` | Image Open Graph générée pour la locale |
+| `/api/chat` | `app/api/chat/route.ts` | Endpoint `POST` du chatbot |
+| `/sitemap.xml` | `app/sitemap.ts` | Sitemap des 39 URL localisées |
+| `/robots.txt` | `app/robots.ts` | Règles d’indexation et lien vers le sitemap |
+
+Le groupe `(redirect)` possède un layout racine minimal. Le segment `[locale]` possède le layout applicatif complet et valide la locale avant de produire `<html lang="…" dir="…">`. Une locale ou un slug inconnu déclenche `notFound()`. Les dix slugs projet sont combinés aux trois locales par `generateStaticParams()` sur les pages de détail.
+
+## 3. Arborescence fonctionnelle
 
 ```text
 portfolio/
-|-- app/                         # Routes et mise en page Next.js
-|   |-- layout.tsx               # Layout racine, polices et métadonnées SEO
-|   |-- page.tsx                 # Page d'accueil et assemblage des sections
-|   |-- globals.css              # Tailwind, couleurs et styles globaux
-|   |-- favicon.ico              # Icône du site
-|   |-- projects/
-|   |   `-- page.tsx             # Page contenant tous les projets
-|   `-- certifications/
-|       `-- page.tsx             # Page contenant toutes les certifications
-|   `-- api/chat/route.ts         # Endpoint serveur sécurisé du chatbot
-|-- components/                  # Composants réutilisables de l'interface
-|   |-- AnimatedBackground.tsx   # Arrière-plan animé partagé
-|   |-- CertificatePreviewModal.tsx # Fenêtre de prévisualisation d'un certificat
-|   |-- CertificationCard.tsx    # Carte de certification
-|   |-- Footer.tsx               # Pied de page
-|   |-- IntroAnimation.tsx       # Animation d'introduction
-|   |-- LoadingScreen.tsx        # Écran de chargement initial
-|   |-- Navbar.tsx               # Navigation principale
-|   |-- ProjectCard.tsx          # Carte de projet
-|   `-- RotatingText.tsx         # Texte animé de la section Hero
-|-- sections/                    # Grandes sections de la page d'accueil
-|   |-- Hero.tsx                 # Présentation principale
-|   |-- About.tsx                # Profil et spécialités
-|   |-- Projects.tsx             # Sélection des projets vedettes
-|   |-- Skills.tsx               # Compétences techniques
-|   |-- Certifications.tsx       # Certifications vedettes
-|   |-- Experience.tsx           # Parcours académique et professionnel
-|   `-- Contact.tsx              # Formulaire envoyé avec EmailJS
-|-- data/                        # Contenu structuré séparé de l'interface
-|   |-- projects.ts              # 9 projets et liste des projets vedettes
-|   |-- certifications.ts        # 11 certifications et liste vedette
-|   |-- skills.ts                # Compétences dev, data et IA/ML
-|   `-- journey.ts               # 4 étapes du parcours
-|-- public/                      # Fichiers accessibles directement par URL
-|   |-- profile.jpg              # Photo de profil
-|   |-- cv-issam_elghbali.pdf    # CV téléchargeable
-|   |-- *.png / *.svg            # Images des projets et icônes statiques
-|   |-- certificate-images/      # Aperçus des certificats
-|   `-- certificates/            # Certificats PDF ou image à ouvrir
-|-- lib/                         # Dossier vide, prévu pour la logique partagée
-|   `-- chatbot/                 # Contexte, prompt, ressources, types et validation
-|-- .env.local                   # Identifiants publics EmailJS, non versionnés
-|-- package.json                 # Dépendances et scripts npm
-|-- next.config.ts               # Configuration Next.js (actuellement minimale)
-|-- tsconfig.json                # Configuration TypeScript et alias @/*
-|-- postcss.config.mjs           # Intégration Tailwind/PostCSS
-|-- eslint.config.mjs            # Règles ESLint Next.js
-|-- README.md                    # Documentation initiale du projet
-`-- ARCHITECTURE.md              # Le présent document
+|-- app/
+|   |-- (redirect)/             # Compatibilité des anciennes URL sans locale
+|   |-- [locale]/
+|   |   |-- layout.tsx          # Document localisé, shell global et métadonnées de base
+|   |   |-- page.tsx            # Accueil
+|   |   |-- projects/           # Liste et dix études de cas
+|   |   |-- certifications/     # Galerie complète
+|   |   |-- social-card/        # Image sociale dynamique
+|   |   `-- not-found.tsx       # 404 localisée
+|   |-- api/chat/route.ts       # Orchestration serveur du chatbot
+|   |-- globals.css             # Tailwind, fond, animations CSS et reduced motion
+|   |-- sitemap.ts
+|   `-- robots.ts
+|-- assets/fonts/               # Geist, Noto Sans Arabic et licences locales
+|-- components/                 # Briques partagées et îlots interactifs
+|   |-- chatbot/                # Widget, saisie, messages et cartes de ressources
+|   |-- Breadcrumbs.tsx
+|   |-- LanguageSwitcher.tsx
+|   |-- ProjectCard.tsx
+|   |-- ProjectCaseStudy.tsx
+|   |-- CertificationGallery.tsx
+|   |-- CertificatePreviewModal.tsx
+|   `-- ...
+|-- sections/                   # Sections de l’accueil
+|   |-- Hero.tsx
+|   |-- About.tsx
+|   |-- Projects.tsx
+|   |-- Skills.tsx
+|   |-- Certifications.tsx
+|   |-- Experience.tsx
+|   `-- Contact.tsx
+|-- i18n/
+|   |-- config.ts               # Locales, autonymes, formats et directions
+|   |-- types.ts                # Contrat exhaustif des dictionnaires
+|   |-- get-dictionary.ts       # Chargement serveur par locale
+|   |-- helpers.ts              # Dates, nombres, chemins et études de cas
+|   `-- dictionaries/           # en.ts, fr.ts et ar.ts
+|-- data/                       # Sources structurées invariantes
+|   |-- profile.ts
+|   |-- projects.ts             # 10 projets
+|   |-- certifications.ts       # 10 certifications
+|   |-- skills.ts               # Compétences dev, data et IA/ML
+|   `-- journey.ts              # Parcours
+|-- lib/
+|   |-- localized-portfolio.ts  # Fusion données invariantes + dictionnaire
+|   |-- project-content.ts      # Normalisation sûre du contenu éditorial
+|   |-- site.ts                 # Origine, URL, canonical et metadata
+|   `-- chatbot/                # Pipeline IA et réponses déterministes existants
+|-- public/                     # Profil, CV, captures et certificats
+|-- scripts/                    # Régressions HTTP du chatbot
+|-- .env.example
+|-- next.config.ts
+`-- package.json
 ```
 
-Les dossiers `node_modules/` et `.next/` sont générés automatiquement. Ils ne font pas partie du code métier et ne doivent pas être modifiés manuellement. Le fichier `tsconfig.tsbuildinfo` est également un cache généré par TypeScript.
+`.next/`, `node_modules/` et les fichiers `*.tsbuildinfo` sont générés ; ils ne doivent pas être édités manuellement.
 
-## 3. Routes actuelles
+## 4. Modèle de contenu et i18n
 
-| URL | Fichier | Rôle |
+La V2 sépare les faits invariants de leur présentation localisée :
+
+```text
+data/*.ts ─────────────┐
+                      ├─> lib/localized-portfolio.ts ─> pages/sections/components
+i18n/dictionaries/*.ts┘
+```
+
+- `data/projects.ts`, `data/certifications.ts`, `data/skills.ts`, `data/journey.ts` et `data/profile.ts` restent les sources de vérité partagées avec le chatbot.
+- Les titres, descriptions, libellés, textes SEO et études de cas localisés vivent dans les trois dictionnaires.
+- `i18n/types.ts` rend la structure des dictionnaires exhaustive : un slug ou identifiant déclaré doit avoir son contenu dans chaque langue.
+- `getDictionary()` charge le dictionnaire demandé côté serveur.
+- `lib/localized-portfolio.ts` associe les traductions aux données de base sans dupliquer ni remplacer la donnée métier.
+- `toRenderableCaseStudy()` et `ProjectCaseStudy` transforment le contenu structuré en titres, paragraphes et listes, sans injection de HTML provenant des données.
+
+Le sélecteur de langue utilise de vrais liens et conserve le chemin localisé ; après hydratation, il conserve aussi la query string et le hash. La direction arabe est posée sur le document entier. Les valeurs techniques LTR peuvent être isolées avec `bdi` ou `dir="ltr"` dans un contexte arabe.
+
+La darija est une langue de réponse du chatbot, pas une quatrième route publique.
+
+## 5. Frontières Server/Client
+
+Les pages de route, le layout localisé, le footer, le fond décoratif, `About`, `Projects`, `Skills` et `Certifications` sont des Server Components par défaut. Ils chargent les dictionnaires et préparent des props limitées avant de rendre l’interface.
+
+Les Client Components sont réservés aux comportements qui ont besoin du navigateur ou d’un état React :
+
+- navbar responsive et sélecteur de langue ;
+- Hero et texte rotatif ;
+- animations de révélation et cartes animées ;
+- formulaire EmailJS ;
+- timeline animée ;
+- galerie et dialogue de certificat ;
+- interface complète du chatbot ;
+- 404 localisée qui lit le paramètre courant.
+
+Cette frontière empêche notamment d’envoyer le moteur Groq ou les données serveur sensibles dans le bundle client. `GROQ_API_KEY` n’est lu que dans `/api/chat`.
+
+## 6. Shell, UX, responsive et accessibilité
+
+`app/[locale]/layout.tsx` monte sur toutes les pages localisées :
+
+- le lien d’évitement ;
+- l’arrière-plan décoratif ;
+- la navigation et le sélecteur de langue ;
+- le contenu de la route ;
+- le footer ;
+- le chatbot localisé.
+
+La navigation repose sur des liens avec hashes réels. Les principaux points de rupture retardent les compositions multi-colonnes à `lg` lorsque la place est insuffisante sur tablette. La timeline réserve une colonne à son axe. Les propriétés logiques CSS (`start`, `end`, `ms`, `me`) assurent le miroir RTL.
+
+Les comportements interactifs incluent des noms accessibles, des focus visibles et des cibles tactiles dimensionnées. Le dialogue de certificat et le chatbot modal mobile gèrent Escape, le focus, sa restitution et l’inertage de l’arrière-plan. Le formulaire possède des labels, une validation associée aux champs et des régions de statut. Ces choix améliorent l’accessibilité, sans constituer à eux seuls une déclaration de conformité WCAG.
+
+Les animations CSS et Framer Motion respectent `prefers-reduced-motion`. Le rail de compétences reste contrôlable au défilement sur mobile et se met en pause lors d’une interaction sur grand écran.
+
+## 7. Images et performance
+
+- Geist et Noto Sans Arabic sont servis localement ; les cartes sociales arabes utilisent deux fontes TTF statiques compatibles avec le moteur OG.
+- Les images de profil, projets et certificats utilisent `next/image` avec des attributs `sizes` adaptés.
+- L’image du Hero porte la priorité de chargement ; les cartes hors écran restent différées.
+- Le fond ambiant et le champ d’étoiles de Skills sont produits en CSS, sans calcul aléatoire côté client.
+- Skills rend une seule occurrence des 91 compétences au lieu de cloner plusieurs fois chaque liste.
+- `next.config.ts` autorise AVIF/WebP, configure les qualités employées et un cache minimal de 30 jours pour l’optimiseur d’images.
+- La politique globale `prefers-reduced-motion` neutralise les mouvements continus lorsque l’utilisateur le demande.
+
+Ces décisions décrivent l’implémentation ; les métriques Core Web Vitals doivent être mesurées sur un build de production et sur le déploiement réel.
+
+## 8. SEO
+
+`lib/site.ts` centralise l’origine publique et construit les métadonnées localisées :
+
+- title et description par type de page, et par projet ;
+- canonical auto-référent ;
+- alternates `hreflang` pour `en`, `fr`, `ar` et `x-default` ;
+- Open Graph et Twitter Card ;
+- image sociale localisée au format 1200 × 630.
+
+Les pages ajoutent des données structurées JSON-LD : `ProfilePage`/`Person` pour l’accueil, `ItemList` pour les listes et `SoftwareSourceCode` pour les études de cas. `sitemap.ts` émet les 13 chemins publics dans les trois langues avec leurs alternates. `robots.ts` autorise le contenu public et exclut `/api/`.
+
+L’origine suit cet ordre :
+
+1. `NEXT_PUBLIC_SITE_URL` ;
+2. `VERCEL_PROJECT_PRODUCTION_URL` lorsque Vercel la fournit ;
+3. `http://localhost:3000` en développement.
+
+`NEXT_PUBLIC_SITE_URL` doit donc contenir le domaine officiel avant le build de production, faute de quoi canonical, sitemap et données structurées peuvent pointer vers une origine incorrecte.
+
+## 9. Architecture du chatbot
+
+La refonte V2 conserve le moteur existant dans `app/api/chat/route.ts` et `lib/chatbot/*`. Elle localise son interface, améliore son comportement responsive et accessible, et adapte les liens de ressources projet aux routes localisées. Elle ne remplace ni le fournisseur, ni le modèle, ni les règles de grounding.
+
+Flux simplifié :
+
+```text
+ChatWidget
+   -> POST /api/chat
+      -> validation + détection de langue
+      -> routeur sémantique / réponses déterministes / plan multi-intent
+      -> contexte portfolio filtré si une génération est nécessaire
+      -> Groq openai/gpt-oss-20b
+      -> validation JSON + ressources locales whitelistées
+   -> réponse et cartes de ressources localisées
+```
+
+Le pipeline actuel contient notamment :
+
+- normalisation conversationnelle et résolution prudente des entités ;
+- réponses fiables construites depuis `data/*` ;
+- routeur sémantique sans catalogue portfolio complet ;
+- planification et composition de demandes multiples ;
+- fallback grounded pour plusieurs scénarios recruteur ;
+- validation du format de réponse et des identifiants de ressources ;
+- limitation de débit en mémoire du processus.
+
+La limite en mémoire convient à une instance simple, mais doit être remplacée par un stockage partagé pour un déploiement distribué. Les conversations ne sont pas persistées. Toute évolution du pipeline doit être couverte par les scripts de régression existants.
+
+## 10. Variables d’environnement
+
+| Variable | Exposition | Usage |
 |---|---|---|
-| `/` | `app/page.tsx` | Page principale composée de toutes les sections |
-| `/projects` | `app/projects/page.tsx` | Liste complète des projets |
-| `/certifications` | `app/certifications/page.tsx` | Liste complète et aperçu des certifications |
+| `GROQ_API_KEY` | Serveur uniquement | Route `/api/chat` |
+| `NEXT_PUBLIC_SITE_URL` | Publique | Origine des canonical, sitemap, JSON-LD et cartes sociales |
+| `NEXT_PUBLIC_EMAILJS_SERVICE_ID` | Publique | Formulaire de contact |
+| `NEXT_PUBLIC_EMAILJS_TEMPLATE_ID` | Publique | Formulaire de contact |
+| `NEXT_PUBLIC_EMAILJS_PUBLIC_KEY` | Publique | Formulaire de contact |
 
-La page d'accueil affiche les éléments dans cet ordre : arrière-plan, barre de navigation, Hero, About, Projects, Skills, Certifications, Experience, Contact et Footer. Un écran de chargement est affiché une seule fois par session grâce à `sessionStorage`.
+Les identifiants EmailJS sont nécessairement accessibles au navigateur. La clé Groq ne doit jamais recevoir le préfixe `NEXT_PUBLIC_`.
 
-## 4. Organisation et flux des données
+## 11. Commandes disponibles
 
-```text
-data/*.ts
-   |
-   v
-sections/*.tsx ou app/*/page.tsx
-   |
-   v
-components/*.tsx
-   |
-   v
-Interface affichée dans le navigateur
-```
-
-- `data/projects.ts` alimente la section des projets, la page `/projects` et `ProjectCard`.
-- `data/certifications.ts` alimente la section des certifications, la page `/certifications`, `CertificationCard` et `CertificatePreviewModal`.
-- `data/skills.ts` alimente directement la section `Skills`.
-- `data/journey.ts` alimente la section `Experience`.
-- Les images référencées dans ces données sont servies depuis `public/`.
-- Le formulaire `Contact` appelle directement EmailJS depuis le navigateur avec les variables `NEXT_PUBLIC_EMAILJS_SERVICE_ID`, `NEXT_PUBLIC_EMAILJS_TEMPLATE_ID` et `NEXT_PUBLIC_EMAILJS_PUBLIC_KEY`.
-
-La majorité des pages et composants sont des Client Components (`"use client"`) parce qu'ils utilisent des animations, des événements, le stockage de session ou un état React. `app/layout.tsx` reste un Server Component et fournit les métadonnées globales.
-
-## 5. Limites actuelles importantes
-
-- Aucun stockage persistant : les conversations ne peuvent pas encore être sauvegardées.
-- Les variables EmailJS commencent par `NEXT_PUBLIC_` et sont donc volontairement visibles côté navigateur. Une future clé d'API d'IA ne doit jamais utiliser ce préfixe.
-- La limite de requêtes est stockée en mémoire du processus et devra être remplacée par un stockage partagé pour un déploiement distribué à grande échelle.
-
-## 6. Architecture du chatbot
-
-L'intégration ajoute les éléments suivants :
-
-```text
-app/
-`-- api/
-    `-- chat/
-        `-- route.ts             # Endpoint serveur : validation et appel au modèle
-components/
-`-- chatbot/
-    |-- ChatWidget.tsx           # Bouton flottant et fenêtre du chat
-    |-- ChatMessages.tsx         # Historique visuel des messages
-    `-- ChatInput.tsx            # Saisie et envoi
-lib/
-`-- chatbot/
-    |-- portfolio-context.ts     # Contexte fiable extrait du portfolio
-    |-- prompts.ts               # Instructions système du chatbot
-    `-- types.ts                 # Types Message, Request et Response
-```
-
-Flux recommandé :
-
-```text
-Visiteur -> ChatWidget -> POST /api/chat -> fournisseur IA
-                              |
-                              `-> contexte contrôlé du portfolio
-```
-
-Principes à respecter lors de l'implémentation :
-
-1. Garder la clé Groq dans la variable serveur `GROQ_API_KEY`, sans `NEXT_PUBLIC_`.
-2. Effectuer l'appel au modèle uniquement dans `app/api/chat/route.ts`.
-3. Donner au modèle un contexte construit depuis les données réelles du portfolio pour limiter les réponses inventées.
-4. Valider la taille et la forme des messages reçus par l'API.
-5. Ajouter une limite de requêtes avant la mise en production pour contrôler les abus et les coûts.
-6. Monter `ChatWidget` dans `app/layout.tsx` si le chatbot doit être disponible sur toutes les pages, ou dans `app/page.tsx` s'il doit rester limité à l'accueil.
-
-## 7. Scripts disponibles
-
-| Commande | Utilité |
+| Commande | Effet déclaré dans `package.json` |
 |---|---|
-| `npm run dev` | Lance le serveur de développement |
-| `npm run build` | Produit et vérifie la version de production |
-| `npm run start` | Lance la version déjà compilée |
-| `npm run lint` | Analyse le code avec ESLint |
+| `npm run dev` | Lance Next.js en développement |
+| `npm run build` | Produit le build de production |
+| `npm run start` | Sert un build existant |
+| `npm run lint` | Lance ESLint |
+| `npm run test:chatbot-v4` | Build puis régression V4 |
+| `npm run test:chatbot-v4-1` | Build puis régression V4.1 |
+| `npm run test:chatbot-v4-2` | Build puis régression V4.2 |
+| `npm run test:chatbot-v4-3` | Build puis régression V4.3 |
+| `npm run test:chatbot-new-projects` | Build puis scénarios des nouveaux projets |
+| `npm run test:chatbot-source-scope` | Build puis contrôle du périmètre des sources |
+| `npm run test:chatbot-compound` | Build puis scénarios composés |
 
-## 8. Résumé pour la prochaine étape
-
-Le projet possède une séparation simple et saine : `app/` définit les routes, `sections/` compose l'accueil, `components/` contient les briques réutilisables, `data/` contient le contenu et `public/` les ressources. Le chatbot devra ajouter une petite couche serveur sécurisée et un composant d'interface, sans modifier cette organisation principale.
-
-## 9. Fournisseur IA actuel
-
-Le chatbot appelle Groq exclusivement côté serveur avec le modèle de production `openai/gpt-oss-20b`. La clé privée est fournie par `GROQ_API_KEY` et ne doit jamais être préfixée par `NEXT_PUBLIC_`.
-
-Le modèle utilise JSON Object Mode. La route valide strictement `answer`, `language` et `resourceIds`, retente une seule fois une sortie invalide, puis transforme uniquement les identifiants connus en ressources locales vérifiées. Le rate limiting, la limitation de l'historique et les protections contre les hallucinations et prompt injections restent actifs.
-
-## 10. Fast path V2
-
-Avant le rate limiter et l'appel Groq, `lib/chatbot/intent-resolver.ts` normalise le message et reconnaît les salutations, CV, certifications, projets, compétences, GitHub, LinkedIn, contact et changements explicites de langue. `local-responses.ts` construit alors une réponse structurée directement depuis `data/` et le catalogue de ressources. Ces réponses sont instantanées et ne consomment aucun quota Groq.
-
-Les requêtes réellement conversationnelles passent encore par Groq. `portfolio-context.ts` sélectionne les sections utiles selon la question afin de ne pas envoyer systématiquement tous les projets, certifications et compétences. Le frontend conserve une préférence linguistique explicite pendant la conversation et affiche un badge animé lorsqu'une réponse arrive pendant que le widget est fermé, avec respect de `prefers-reduced-motion`.
-
-## 11. Knowledge Base V3
-
-La V3 structure les faits vérifiés du CV public dans `data/profile.ts`, ajoute des métadonnées de domaine et de valeur recruteur dans `data/projects.ts`, et des métadonnées de domaine et pertinence dans `data/certifications.ts`. Le contexte dynamique distingue Backend, Data Science, éducation, projet précis, certification et comparaison.
-
-Les demandes complexes ne passent plus par le fast path de simple liste. Groq reçoit des exigences explicites de conclusion, comparaison, sélection et justification. `lib/chatbot/grounded-reasoning.ts` fournit une synthèse contrôlée pour les scénarios recruteur importants si le modèle 8B omet les preuves ou renvoie un JSON invalide.
-
-## 12. Routeur V4
-
-`query-analysis.ts` extrait les contraintes de sortie et les indices de suivi conversationnel. `entity-resolver.ts` valide les projets et certifications nommés avec des alias prudents. `v4-responses.ts` traite avant les listes génériques les scénarios sûrs : entité précise, fausse prémisse, fait non documenté, preuves croisées, contraintes exactes et langues arabe/Darija. Les synthèses recruteur déjà contrôlées sont maintenant retournées avant Groq afin d'éviter un appel inutile. Groq reste utilisé pour les questions portfolio valides non couvertes, avec un timeout de 15 secondes et aucun retry implicite du SDK ; un seul retry applicatif demeure réservé au JSON invalide.
-
-## 13. Semantic Router V4.2
-
-```text
-User
-  ↓
-Trusted protections + Local Safe Fast Path
-  ↓ unknown
-Semantic Router Groq (message + 2 derniers messages, sans portfolio)
-  ├── LOCAL ───────────→ réponse déterministe depuis data/
-  ├── CLARIFICATION ───→ question courte à l'utilisateur
-  └── REASONING
-         ↓
-    Portfolio Context filtré
-         ↓
-      Groq #2
-         ↓
-    JSON Validator + grounded override/fallback
-         ↓
-    Ressources whitelistées
-```
-
-`lib/chatbot/semantic-router.ts` ne répond jamais à la question et ne reçoit aucune donnée métier complète. Il retourne un JSON strict comprenant langue, intention, confiance, domaine, entité, route et motif éventuel de clarification. Une classification simple déclenche `local-responses.ts` sans second appel. Une ambiguïté indispensable déclenche une clarification. Seule une vraie synthèse utilise le contexte filtré puis la génération grounded.
-
-## 14. Planification multi-intent V4.3
-
-Les requêtes simples conservent le flux `trusted/local -> réponse`. Les formulations sémantiques simples conservent `semantic-router -> local/grounded -> validation -> réponse`. Une requête composée suit désormais :
-
-`message -> request-plan.ts -> RequestPlan -> résolution indépendante -> response-composer.ts -> validation -> réponse`.
-
-Le `RequestPlan` contient une langue, jusqu'à six `SubRequest`, les contraintes globales (`exactCount`, `maxCount`, concision, mode de réponse, séparation et ordre de conclusion), une confiance et un éventuel besoin de clarification. Chaque sous-demande porte une intention, un domaine, une entité, une cardinalité et les besoins d'explication, preuve ou sélection.
-
-Le planificateur Groq utilise un prompt compact, JSON Object Mode, température 0, un historique limité à deux messages tronqués et aucun contexte portfolio. Il comprend la structure mais n'établit aucun fait. Les résolveurs serveur utilisent exclusivement les catalogues officiels pour les projets, certifications, technologies, études et expérience. Les assertions utilisateur restent des faits à vérifier.
-
-Le compositeur exige que chaque sous-demande soit résolue. Le validateur vérifie les cardinalités, la sélection finale et la cohérence du nombre de cartes projet. Les identifiants passent encore par la whitelist de `resources.ts`. Si le plan sémantique est indisponible ou invalide, un plan déterministe fondé sur l'analyse des contraintes et les entités officielles permet de conserver une réponse sûre sans transformer l'utilisateur ou l'historique en source de vérité.
-
-Politique mixte hors périmètre : seule la partie externe est signalée comme hors périmètre ; toute sous-demande légitime sur le portfolio est néanmoins résolue et incluse dans la même réponse.
-
-Le rate limit compte un message utilisateur une seule fois, même lorsqu'il entraîne deux appels fournisseur. Les latences `routerLatencyMs`, `generationLatencyMs` et `totalLatencyMs` sont consignées uniquement dans les logs serveur. En cas de panne du routeur, les protections trusted, les fast paths exacts et les réponses grounded déjà disponibles restent fonctionnels.
+Il n’existe pas de script agrégateur `test` dans `package.json`. Chaque script `test:chatbot-*` relance actuellement `npm run build` avant sa suite.
