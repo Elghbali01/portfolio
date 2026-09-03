@@ -143,6 +143,9 @@ export type PortfolioDictionary = {
     download: string;
     notAvailable: string;
   };
+  loader: {
+    tagline: string;
+  };
   navigation: {
     ariaLabel: string;
     brandLabel: string;

@@ -18,6 +18,9 @@ const en = {
     download: "Download",
     notAvailable: "Not available",
   },
+  loader: {
+    tagline: "Engineering Ideas into Digital Reality…",
+  },
   navigation: {
     ariaLabel: "Primary navigation",
     brandLabel: "Issam Elghbali — go to the homepage",

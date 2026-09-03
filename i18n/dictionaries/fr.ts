@@ -18,6 +18,9 @@ const fr = {
     download: "Télécharger",
     notAvailable: "Indisponible",
   },
+  loader: {
+    tagline: "Transformer les idées en réalité numérique…",
+  },
   navigation: {
     ariaLabel: "Navigation principale",
     brandLabel: "Issam Elghbali — aller à l’accueil",

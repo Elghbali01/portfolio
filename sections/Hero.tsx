@@ -68,7 +68,10 @@ export default function Hero({
       <div aria-hidden="true" className="absolute -start-52 -top-52 -z-20 h-[600px] w-[600px] rounded-full bg-blue-600 opacity-20 blur-[220px]" />
       <div aria-hidden="true" className="absolute -bottom-52 -end-52 -z-20 h-[500px] w-[500px] rounded-full bg-indigo-500 opacity-20 blur-[200px]" />
 
-      <div dir="ltr" className="grid w-full max-w-6xl items-center gap-14 lg:grid-cols-2 lg:gap-16 xl:gap-20">
+      <div
+        dir="ltr"
+        className="grid w-full max-w-6xl items-center gap-14 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-16"
+      >
         <div className="relative flex items-center justify-center">
           <div aria-hidden="true" className="absolute h-[320px] w-[320px] rounded-full bg-[#3B82F6] opacity-20 blur-[140px] lg:h-[520px] lg:w-[520px] lg:blur-[200px]" />
           <div aria-hidden="true" className="absolute h-[260px] w-[260px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] bg-gradient-to-br from-[#1D4ED8] to-[#3B82F6] opacity-70 blur-sm lg:h-[400px] lg:w-[400px]" />
@@ -90,7 +93,7 @@ export default function Hero({
         <div
           data-chat-safe-zone
           dir={isRtl ? "rtl" : "ltr"}
-          className="space-y-5 text-center lg:text-start"
+          className="min-w-0 space-y-5 text-center lg:text-start"
         >
           <p className="text-lg text-[#B7C3D4]">{copy.eyebrow}</p>
 
@@ -128,7 +131,7 @@ export default function Hero({
             </a>
           </div>
 
-          <div className="flex flex-col flex-wrap justify-center gap-3 pt-3 sm:flex-row lg:justify-start">
+          <div className="flex flex-col flex-wrap justify-center gap-3 pt-3 sm:flex-row md:gap-2 lg:justify-start">
             <a
               href={`/${locale}#projects`}
               className="rounded-lg bg-[#2563EB] px-6 py-3 text-center font-medium text-white shadow-lg shadow-blue-500/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"

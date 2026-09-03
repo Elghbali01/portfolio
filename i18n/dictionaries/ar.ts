@@ -18,6 +18,9 @@ const ar = {
     download: "تنزيل",
     notAvailable: "غير متاح",
   },
+  loader: {
+    tagline: "تحويل الأفكار إلى واقع رقمي…",
+  },
   navigation: {
     ariaLabel: "التنقل الرئيسي",
     brandLabel: "عصام الغبالي — الانتقال إلى الصفحة الرئيسية",
