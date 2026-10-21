@@ -82,6 +82,7 @@ export default function Contact({ labels, dir }: ContactProps) {
   const sendEmail = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!formRef.current) return;
+    if (loading) return;
 
     if (!formRef.current.checkValidity()) {
       const firstInvalidField =
@@ -226,6 +227,7 @@ export default function Contact({ labels, dir }: ContactProps) {
               type="text"
               name="user_name"
               required
+              maxLength={120}
               autoComplete="name"
               placeholder={copy.namePlaceholder}
               aria-invalid={fieldErrors.name ? true : undefined}
@@ -258,6 +260,7 @@ export default function Contact({ labels, dir }: ContactProps) {
               autoComplete="email"
               inputMode="email"
               dir="ltr"
+              maxLength={254}
               placeholder={copy.emailPlaceholder}
               aria-invalid={fieldErrors.email ? true : undefined}
               aria-describedby={
@@ -288,6 +291,7 @@ export default function Contact({ labels, dir }: ContactProps) {
               id={messageId}
               name="message"
               required
+              maxLength={4_000}
               rows={5}
               autoComplete="off"
               placeholder={copy.messagePlaceholder}

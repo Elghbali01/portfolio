@@ -2,15 +2,62 @@ import type { Metadata } from "next";
 import type { Locale } from "@/i18n/config";
 import { defaultLocale, locales } from "@/i18n/config";
 
-const publicSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-const vercelProductionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-const configuredSiteUrl =
-  publicSiteUrl ||
-  (vercelProductionUrl
-    ? `https://${vercelProductionUrl}`
-    : "http://localhost:3000");
+const LOCAL_SITE_URL = "http://localhost:3000";
 
-export const siteUrl = new URL(configuredSiteUrl);
+function normalizeConfiguredUrl(value: string, source: string): URL {
+  const candidate = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+  let url: URL;
+  try {
+    url = new URL(candidate);
+  } catch {
+    throw new Error(`${source} must be a valid http(s) URL.`);
+  }
+
+  if (!/^https?:$/.test(url.protocol) || url.username || url.password || url.search || url.hash || url.pathname !== "/") {
+    throw new Error(`${source} must contain only an http(s) origin without credentials, path, query or hash.`);
+  }
+  return url;
+}
+
+function isLocalOrigin(url: URL): boolean {
+  return url.hostname === "localhost" || url.hostname === "127.0.0.1" || url.hostname === "::1";
+}
+
+function resolveSiteUrl(): URL {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const vercelEnvironment = process.env.VERCEL_ENV?.trim();
+  const previewUrl = process.env.VERCEL_URL?.trim();
+  const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+
+  let configuredValue = explicit;
+  let configuredSource = "NEXT_PUBLIC_SITE_URL";
+
+  if (!configuredValue && vercelEnvironment === "preview") {
+    configuredValue = previewUrl;
+    configuredSource = "VERCEL_URL";
+  }
+  if (!configuredValue && vercelEnvironment === "production") {
+    configuredValue = productionUrl;
+    configuredSource = "VERCEL_PROJECT_PRODUCTION_URL";
+  }
+
+  if (!configuredValue) {
+    if (process.env.NODE_ENV !== "production" && !vercelEnvironment) {
+      return new URL(LOCAL_SITE_URL);
+    }
+    throw new Error(
+      "Public site origin is not configured. Set NEXT_PUBLIC_SITE_URL, or provide the appropriate Vercel URL for this deployment.",
+    );
+  }
+
+  const url = normalizeConfiguredUrl(configuredValue, configuredSource);
+  if ((process.env.NODE_ENV === "production" || Boolean(vercelEnvironment)) && isLocalOrigin(url)) {
+    throw new Error(`${configuredSource} cannot use localhost as a public origin in production or preview.`);
+  }
+  return url;
+}
+
+export const siteUrl = resolveSiteUrl();
 export const siteName = "Issam Elghbali — Portfolio";
 
 export const openGraphLocales: Record<Locale, string> = {

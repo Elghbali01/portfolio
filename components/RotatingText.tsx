@@ -97,7 +97,7 @@ export default function RotatingText({
 
   return (
     <div className="min-h-8 overflow-visible text-blue-400">
-      <span className="sr-only">{usablePhrases[0]}</span>
+      <span className="sr-only">{usablePhrases.join(", ")}</span>
       <bdi
         dir={dir}
         aria-hidden="true"

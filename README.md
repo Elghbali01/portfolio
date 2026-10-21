@@ -89,7 +89,7 @@ Avant un build destiné à la production, définissez impérativement l’origin
 NEXT_PUBLIC_SITE_URL=https://votre-domaine.example
 ```
 
-Cette valeur alimente les canonical, le sitemap, les données structurées et les URL sociales. En son absence, le code utilise `VERCEL_PROJECT_PRODUCTION_URL` si disponible, puis `http://localhost:3000`.
+Cette valeur alimente les canonical, le sitemap, les données structurées et les URL sociales. En développement local, `http://localhost:3000` reste autorisé. Un build ou une preview hébergée sans origine publique explicite échoue avec une erreur exploitable ; une URL localhost n’est jamais acceptée comme origine publique.
 
 Chaque locale possède des title/description, canonical, `hreflang`, Open Graph et Twitter Cards. Les pages émettent aussi du JSON-LD adapté : profil, listes et projets logiciels.
 
@@ -104,7 +104,7 @@ Architecture principale :
 - `lib/chatbot/` — langues, entités, contexte filtré, routeur sémantique, planification, composition, grounding et validation ;
 - `data/*` — faits vérifiés utilisés comme source de vérité.
 
-Le modèle configuré est `openai/gpt-oss-20b`. Les identifiants de ressources renvoyés par le modèle sont résolus via une whitelist locale. Des réponses déterministes et des fallbacks grounded couvrent plusieurs intentions et scénarios recruteur. Le rate limiter actuel est conservé en mémoire du processus ; remplacez-le par un stockage partagé avant un déploiement horizontal à grande échelle.
+Le modèle configuré est `openai/gpt-oss-20b`. Les identifiants de ressources renvoyés par le modèle sont résolus via une whitelist locale. Des réponses déterministes et des fallbacks grounded couvrent plusieurs intentions et scénarios recruteur. Le rate limiter local est conservé en mémoire du processus. En production Vercel, configurez `CHAT_TRUSTED_IP_HEADER=x-real-ip` ; Vercel réécrit cet en-tête avec l’IP publique du client. `GROQ_BASE_URL` n’est utilisable que pour le mock local avec `GROQ_MOCK_MODE=1` et est ignoré sur Vercel. Pour une protection globale multi-instance, ajoutez ensuite une limitation edge ou un stockage partagé fourni par l’hébergeur.
 
 ## Commandes de validation
 

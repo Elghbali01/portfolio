@@ -5,19 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Suspense, useEffect, useRef, useState } from "react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import type { Locale } from "@/i18n/config";
-
-const sectionIds = [
-  "home",
-  "about",
-  "projects",
-  "skills",
-  "certifications",
-  "experience",
-  "contact",
-] as const;
-
-export type SectionId = (typeof sectionIds)[number];
+import { sectionIds, type Locale, type SectionId } from "@/i18n";
 
 export interface NavbarLabels {
   navigation: string;

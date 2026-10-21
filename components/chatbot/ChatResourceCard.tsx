@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ExternalLink, FileText, Github } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { ChatResource } from "@/lib/chatbot/types";
@@ -35,16 +36,11 @@ export default function ChatResourceCard({ resource, locale = "en", labels }: Ch
   const href = localizeInternalUrl(resource.url, locale);
   const isExternal = /^https?:\/\//.test(href);
   const opensNewTab = isExternal || resource.type === "pdf" || resource.type === "certificate";
+  const isInternalNavigation = href.startsWith("/") && !opensNewTab;
   const Icon = resource.type === "github" ? Github : resource.type === "pdf" ? FileText : ExternalLink;
 
-  return (
-    <a
-      href={href}
-      target={opensNewTab ? "_blank" : undefined}
-      rel={opensNewTab ? "noopener noreferrer" : undefined}
-      aria-label={opensNewTab ? `${copy[resource.type]}: ${resource.title} (${copy.opensNewTab})` : undefined}
-      className="group flex gap-3 overflow-hidden rounded-xl border border-[#475569] bg-[#0F172A]/80 p-3 transition hover:border-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
-    >
+  const cardContent = (
+    <>
       {resource.image && (
         <div className="relative h-14 w-16 shrink-0 overflow-hidden rounded-lg bg-[#020617]">
           <Image src={resource.image} alt="" fill sizes="64px" className="object-cover" />
@@ -60,6 +56,24 @@ export default function ChatResourceCard({ resource, locale = "en", labels }: Ch
           {copy[resource.type]} <Icon aria-hidden="true" size={11} />
         </span>
       </div>
+    </>
+  );
+
+  const className = "group flex gap-3 overflow-hidden rounded-xl border border-[#475569] bg-[#0F172A]/80 p-3 transition hover:border-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]";
+
+  if (isInternalNavigation) {
+    return <Link href={href} className={className}>{cardContent}</Link>;
+  }
+
+  return (
+    <a
+      href={href}
+      target={opensNewTab ? "_blank" : undefined}
+      rel={opensNewTab ? "noopener noreferrer" : undefined}
+      aria-label={opensNewTab ? `${copy[resource.type]}: ${resource.title} (${copy.opensNewTab})` : undefined}
+      className={className}
+    >
+      {cardContent}
     </a>
   );
 }

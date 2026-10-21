@@ -1,9 +1,23 @@
 import http from "node:http";
 
 const port = Number(process.env.MOCK_GROQ_PORT ?? 3240);
+const mode = process.env.MOCK_GROQ_MODE ?? "success";
+let requestCount = 0;
 const server = http.createServer(async (request, response) => {
+  if (request.method === "GET" && request.url === "/__mock-groq/status") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify({ requestCount }));
+    return;
+  }
   if (request.method !== "POST" || !request.url?.endsWith("/chat/completions")) {
     response.writeHead(404).end();
+    return;
+  }
+  requestCount += 1;
+  if (mode === "timeout") return;
+  if (mode === "error") {
+    response.writeHead(502, { "content-type": "application/json" });
+    response.end(JSON.stringify({ error: { message: "Mock provider failure" } }));
     return;
   }
   const authorization = request.headers.authorization ?? "";
@@ -22,7 +36,14 @@ const server = http.createServer(async (request, response) => {
   if (system.includes("tiny semantic router")) {
     content = JSON.stringify({ language, intent: "PORTFOLIO_QUESTION", confidence: 1, domain: "general", entityType: null, entityName: null, sourceScope: /\b(?:cv|resume)\b/i.test(latest) ? "cv" : "both", responseType: "direct", followUpUseful: false, route: "REASONING", clarificationReason: null });
   } else if (system.includes("compact request planner")) {
-    content = "{}";
+    content = JSON.stringify({
+      language,
+      subRequests: [{ id: "r1", intent: "DOMAIN_COMPARISON", domain: "general", entityType: null, entityName: null, requestedCount: null, requiresExplanation: true, requiresEvidence: true, requiresSelection: true, scope: "portfolio" }],
+      globalConstraints: { exactCount: null, maxCount: null, concise: true, answerMode: "normal", separateItems: false, conclusionFirst: true },
+      confidence: 1,
+      clarificationNeeded: false,
+      clarificationReason: null,
+    });
   } else {
     content = JSON.stringify({ answer: language === "fr" ? "Réponse structurée locale simulée." : language === "ar" ? "إجابة محلية منظمة ومحاكاة." : "Simulated local structured response.", language, resourceIds: [] });
   }

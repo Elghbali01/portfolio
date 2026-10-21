@@ -265,7 +265,7 @@ export const dataSkills: Skill[] = [
   {
     name: "Pydantic",
     color: "#E92063",
-    iconUrl: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pydantic/pydantic-original.svg",
+    iconUrl: "https://cdn.simpleicons.org/pydantic/E92063",
   },
   {
     name: "Uvicorn",

@@ -60,7 +60,14 @@ export function formatLocalizedDate(
     throw new RangeError(`Invalid date value: ${String(value)}`);
   }
 
-  return new Intl.DateTimeFormat(localeConfig[locale].intlLocale, options).format(date);
+  const dateOnlyString = typeof value === "string" && (
+    /^\d{4}-\d{2}-\d{2}$/.test(value) ||
+    /^[A-Za-z]+ \d{1,2}, \d{4}$/.test(value)
+  );
+  const dateOptions = dateOnlyString
+    ? { ...options, timeZone: "UTC" }
+    : options;
+  return new Intl.DateTimeFormat(localeConfig[locale].intlLocale, dateOptions).format(date);
 }
 
 export function formatLocalizedNumber(

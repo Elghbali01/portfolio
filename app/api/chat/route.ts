@@ -14,12 +14,10 @@ import { composeRequestPlan, validateComposedResponse } from "@/lib/chatbot/resp
 import type { ChatLanguage, ChatResponse } from "@/lib/chatbot/types";
 import { validateChatRequest } from "@/lib/chatbot/validation";
 import { GROQ_MODEL } from "@/lib/chatbot/model";
+import { readJsonBody } from "@/lib/chatbot/request-body";
+import { hasTrustedRateLimitSource, isChatRateLimited } from "@/lib/chatbot/rate-limit";
 
 export const runtime = "nodejs";
-
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REQUESTS = 60;
-const requestLog = new Map<string, number[]>();
 
 const supportedLanguages: ChatLanguage[] = ["en", "fr", "ar", "darija"];
 const semanticLocalIntents: Partial<Record<SemanticIntent, LocalIntent>> = {
@@ -45,28 +43,6 @@ function outOfScopeResponse(language: ChatLanguage): ChatResponse {
     darija: "نقدر نجاوب غير على الأسئلة على Issam انطلاقاً من الـ portfolio والـ CV الموثقين ديالو.",
   };
   return { answer: answers[language], language, resources: [] };
-}
-
-function isRateLimited(identifier: string): boolean {
-  const now = Date.now();
-  const recent = (requestLog.get(identifier) ?? []).filter(
-    (timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS,
-  );
-  if (recent.length >= RATE_LIMIT_MAX_REQUESTS) {
-    requestLog.set(identifier, recent);
-    return true;
-  }
-  recent.push(now);
-  requestLog.set(identifier, recent);
-
-  if (requestLog.size > 500) {
-    for (const [key, timestamps] of requestLog) {
-      if (timestamps.every((timestamp) => now - timestamp >= RATE_LIMIT_WINDOW_MS)) {
-        requestLog.delete(key);
-      }
-    }
-  }
-  return false;
 }
 
 function errorResponse(message: string, status: number) {
@@ -140,18 +116,47 @@ function getProviderStatus(error: unknown): number | undefined {
   return typeof error.status === "number" ? error.status : undefined;
 }
 
-export async function POST(request: NextRequest) {
-  const identifier =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anonymous";
+function getProviderTimeout(defaultValue: number): number {
+  const configured = Number(process.env.GROQ_TIMEOUT_MS);
+  return Number.isInteger(configured) && configured >= 50 && configured <= 60_000
+    ? configured
+    : defaultValue;
+}
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return errorResponse("The request body must be valid JSON.", 400);
+function getMockGroqBaseUrl(): string | undefined {
+  const configured = process.env.GROQ_BASE_URL?.trim();
+  const isHostedVercel = process.env.VERCEL === "1" || Boolean(process.env.VERCEL_ENV);
+
+  if (!configured || isHostedVercel || process.env.GROQ_MOCK_MODE !== "1") {
+    return undefined;
   }
 
-  const validation = validateChatRequest(body);
+  return configured;
+}
+
+function createGroqClient(timeout: number): Groq {
+  const baseUrl = getMockGroqBaseUrl();
+
+  return new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+    ...(baseUrl ? { baseURL: baseUrl } : {}),
+    timeout: getProviderTimeout(timeout),
+    maxRetries: 0,
+  });
+}
+
+export async function POST(request: NextRequest) {
+  const bodyResult = await readJsonBody(request);
+  if (!bodyResult.ok) {
+    return errorResponse(
+      bodyResult.reason === "too-large"
+        ? "The request body is too large."
+        : "The request body must be valid JSON.",
+      bodyResult.reason === "too-large" ? 413 : 400,
+    );
+  }
+
+  const validation = validateChatRequest(bodyResult.value);
   if (!validation.ok) {
     return errorResponse(validation.error, 400);
   }
@@ -160,21 +165,15 @@ export async function POST(request: NextRequest) {
     validation.data.message,
     validation.data.preferredLanguage,
   );
-  // Every configured request is first interpreted by Groq. Deterministic
-  // responses remain safe fallbacks when the provider is unavailable.
-  let providerRateCounted = false;
-  let client: Groq | null = null;
-  let semanticPreflight: SemanticRouterResult | null = null;
-  if (process.env.GROQ_API_KEY) {
-    if (isRateLimited(identifier)) return errorResponse(localizedError("local-limit", language), 429);
-    providerRateCounted = true;
-    client = new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 8_000, maxRetries: 0 });
-    try {
-      semanticPreflight = await routeSemantically(client, validation.data.message, validation.data.history, validation.data.preferredLanguage);
-    } catch (error) {
-      console.error("Semantic preflight failed:", error instanceof Error ? error.message : "Unknown error");
-    }
+
+  if (!hasTrustedRateLimitSource(request)) {
+    return errorResponse(localizedError("configuration", language), 503);
   }
+  if (isChatRateLimited(request)) {
+    return errorResponse(localizedError("local-limit", language), 429);
+  }
+
+  let client: Groq | null = null;
   if (validation.data.history.length === 0 && /^(?:parle moi de|tell me about|talk about) (?:son|his) (?:projet|project)$/i.test(validation.data.message.trim())) {
     return NextResponse.json(clarificationResponse(language), { headers: { "x-chat-source": "semantic-clarification" } });
   }
@@ -215,12 +214,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (requiresRequestPlan) {
-    if (!providerRateCounted && isRateLimited(identifier)) return errorResponse(localizedError("local-limit", language), 429);
-    providerRateCounted = true;
     let semanticPlan: RequestPlan | null = null;
     let plannerLatencyMs = 0;
     if (process.env.GROQ_API_KEY) {
-      client = new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 8_000, maxRetries: 0 });
+      client ??= createGroqClient(8_000);
       try {
         const planStartedAt = performance.now();
         semanticPlan = await buildRequestPlan(client, validation.data.message, validation.data.history, validation.data.preferredLanguage);
@@ -234,12 +231,11 @@ export async function POST(request: NextRequest) {
       }
     }
     const fallbackPlan = compoundRequest ? null : buildDeterministicFallbackPlan(validation.data.message, language);
-    const compoundPlan = compoundRequest && (semanticPreflight || semanticPlan)
+    const compoundPlan = compoundRequest && semanticPlan
       ? buildCompoundRequestPlan(validation.data.message, language)
       : null;
     console.info("Request plan summary", {
       compoundRequest,
-      groqRouterSucceeded: Boolean(semanticPreflight),
       groqPlannerSucceeded: Boolean(semanticPlan),
       semanticSubRequests: semanticPlan?.subRequests.map(({ intent, domain, scope }) => ({ intent, domain, scope })) ?? [],
       compoundAspects: compoundPlan?.requiredAspects ?? [],
@@ -270,19 +266,15 @@ export async function POST(request: NextRequest) {
     } : undefined);
   }
   const groundedReasoning = buildGroundedReasoning(validation.data.message, language);
-  if (!providerRateCounted && isRateLimited(identifier)) {
-    return errorResponse(localizedError("local-limit", language), 429);
-  }
-
   if (!process.env.GROQ_API_KEY) {
     console.error("Chat API configuration error: GROQ_API_KEY is missing.");
     return errorResponse(localizedError("configuration", language), 503);
   }
 
-  client ??= new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 8_000, maxRetries: 0 });
+  client ??= createGroqClient(8_000);
   const totalStartedAt = performance.now();
   const routerStartedAt = performance.now();
-  let semanticRoute: SemanticRouterResult | null = semanticPreflight;
+  let semanticRoute: SemanticRouterResult | null = null;
   if (!semanticRoute) try {
     semanticRoute = await routeSemantically(client, validation.data.message, validation.data.history, validation.data.preferredLanguage);
   } catch (error) {
@@ -369,7 +361,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const generationClient = new Groq({ apiKey: process.env.GROQ_API_KEY, timeout: 15_000, maxRetries: 0 });
+  const generationClient = createGroqClient(15_000);
   const context = buildPortfolioContext(validation.data.message);
   const conversation = validation.data.history.map((message) => ({
     role: message.role,
