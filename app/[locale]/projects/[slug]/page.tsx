@@ -75,7 +75,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   if (!isProfileLink) projectJsonLd.codeRepository = project.github;
 
   return (
-    <main id="main-content" tabIndex={-1} className="relative min-h-screen px-6 pb-16 pt-28 text-white md:px-10">
+    <main id="main-content" tabIndex={-1} className="relative min-h-screen px-6 pb-16 pt-28 text-content-primary md:px-10">
       <JsonLd data={projectJsonLd} />
       <article className="relative z-10 mx-auto max-w-6xl">
         <Breadcrumbs
@@ -88,8 +88,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           ]}
         />
 
-        <div className="overflow-hidden rounded-2xl border border-[#475569] bg-[#1E293B]/50 shadow-xl backdrop-blur-md">
-          <div className="relative aspect-[16/9] overflow-hidden bg-[#020617]">
+        <div className="overflow-hidden rounded-2xl border border-outline-default bg-surface-elevated/50 shadow-xl backdrop-blur-md">
+          <div className="relative aspect-[16/9] overflow-hidden bg-surface-inset">
             <Image
               src={project.image}
               alt={project.imageAlt}
@@ -101,9 +101,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
 
           <div className="p-6 md:p-10 lg:p-12">
-            <p className="mb-3 text-sm font-medium text-[#93C5FD]">{project.category}</p>
+            <p className="mb-3 text-sm font-medium text-accent-soft">{project.category}</p>
             <h1 className="text-3xl font-bold leading-tight md:text-5xl">{project.title}</h1>
-            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-[#B7C3D4]">
+            <p className="mt-5 max-w-3xl text-lg leading-relaxed text-content-secondary">
               {project.shortDescription}
             </p>
 
@@ -113,7 +113,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </h2>
               <ul className="flex flex-wrap gap-2">
                 {project.technologies.map((technology) => (
-                  <li key={technology} className="rounded-full border border-[#526176] bg-[#0F172A] px-3 py-1 text-xs text-[#D4DCE8]">
+                  <li key={technology} className="rounded-full border border-outline-default bg-surface px-3 py-1 text-xs text-content-strong">
                     <bdi dir="ltr">{technology}</bdi>
                   </li>
                 ))}
@@ -133,14 +133,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 href={project.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-3 font-medium text-white transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-action px-5 py-3 font-medium text-on-action transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
               >
                 {isProfileLink ? dictionary.projects.detail.githubProfile : dictionary.projects.detail.githubRepository}
                 <span aria-hidden="true">↗</span>
               </a>
               <Link
                 href={`/${locale}/projects`}
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-[#526176] px-5 py-3 font-medium text-[#D4DCE8] transition hover:border-[#60A5FA] hover:text-[#93C5FD] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-outline-default px-5 py-3 font-medium text-content-strong transition hover:border-accent hover:text-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
               >
                 <DirectionalArrow locale={locale} direction="back" />
                 {dictionary.projects.detail.backToProjects}

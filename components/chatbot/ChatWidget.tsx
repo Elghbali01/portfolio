@@ -280,17 +280,17 @@ export default function ChatWidget({ locale = "en", labels }: ChatWidgetProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.97 }}
             transition={{ duration: shouldReduceMotion ? 0 : 0.18 }}
-            className="mb-3 flex h-[min(680px,calc(100dvh-6rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-[#475569] bg-[#0B1120]/98 text-white shadow-2xl shadow-black/50 backdrop-blur-xl sm:w-[400px]"
+            className="mb-3 flex h-[min(680px,calc(100dvh-6rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-outline-default bg-canvas/98 text-content-primary shadow-2xl shadow-black/50 backdrop-blur-xl sm:w-[400px]"
           >
-            <header className="flex items-center justify-between border-b border-[#475569] bg-[#1E293B]/60 px-4 py-3">
+            <header className="flex items-center justify-between border-b border-outline-default bg-surface-elevated/60 px-4 py-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#3B82F6]/15 text-[#93C5FD]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/15 text-accent-soft">
                   <Bot aria-hidden="true" size={19} />
                 </div>
                 <div>
                   <h2 className="text-sm font-semibold">{copy.title}</h2>
-                  <p className="flex items-center gap-1 text-[11px] text-[#B7C3D4]">
-                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {copy.status}
+                  <p className="flex items-center gap-1 text-[11px] text-content-secondary">
+                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-state-success" /> {copy.status}
                   </p>
                 </div>
               </div>
@@ -299,21 +299,21 @@ export default function ChatWidget({ locale = "en", labels }: ChatWidgetProps) {
                 type="button"
                 onClick={() => setIsOpen(false)}
                 aria-label={copy.close}
-                className="flex h-11 w-11 items-center justify-center rounded-lg text-[#B7C3D4] transition hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+                className="flex h-11 w-11 items-center justify-center rounded-lg text-content-secondary transition hover:bg-content-primary/5 hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
               >
                 <X aria-hidden="true" size={19} />
               </button>
             </header>
 
             {messages.length === 1 && (
-              <div className="flex flex-wrap gap-2 border-b border-[#475569]/70 px-4 py-3">
+              <div className="flex flex-wrap gap-2 border-b border-outline-default/70 px-4 py-3">
                 {copy.suggestions.map((suggestion) => (
                   <button
                     key={suggestion}
                     type="button"
                     onClick={() => sendMessage(suggestion)}
                     disabled={loading}
-                    className="rounded-full border border-[#526176] bg-[#1E293B]/50 px-3 py-2 text-start text-[11px] text-[#D4DCE8] transition hover:border-[#60A5FA] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+                    className="rounded-full border border-outline-default bg-surface-elevated/50 px-3 py-2 text-start text-[11px] text-content-strong transition hover:border-accent hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                   >
                     {suggestion}
                   </button>
@@ -348,15 +348,15 @@ export default function ChatWidget({ locale = "en", labels }: ChatWidgetProps) {
         aria-hidden={hideLauncher ? "true" : undefined}
         tabIndex={hideLauncher ? -1 : 0}
         disabled={isMobile && isOpen}
-        className={`relative ms-auto flex h-14 min-w-14 items-center justify-center gap-2 rounded-2xl border border-[#93C5FD]/60 bg-gradient-to-r from-[#1D4ED8] to-[#2563EB] px-3 text-sm font-semibold text-white shadow-xl shadow-blue-500/25 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD] focus-visible:ring-offset-2 focus-visible:ring-offset-[#020617] sm:px-4 ${
+        className={`relative ms-auto flex h-14 min-w-14 items-center justify-center gap-2 rounded-2xl border border-accent-soft/60 bg-gradient-to-r from-action-hover to-action px-3 text-sm font-semibold text-on-action shadow-xl shadow-glow-primary/25 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-inset sm:px-4 ${
           hideLauncher ? "pointer-events-none opacity-0" : "opacity-100"
         }`}
       >
         {isOpen ? <X aria-hidden="true" size={20} /> : <MessageCircle aria-hidden="true" size={20} />}
         {!isOpen && <span className="hidden sm:inline">{copy.launcher}</span>}
-        {!isOpen && <Sparkles aria-hidden="true" size={14} className="hidden text-blue-100 sm:block" />}
+        {!isOpen && <Sparkles aria-hidden="true" size={14} className="hidden text-accent-soft sm:block" />}
         {!isOpen && unreadCount > 0 && (
-          <span aria-hidden="true" className="absolute -end-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full border-2 border-[#020617] bg-red-700 px-1 text-[10px] font-bold text-white">
+          <span aria-hidden="true" className="absolute -end-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full border-2 border-surface-inset bg-state-error-strong px-1 text-[10px] font-bold text-content-primary">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}

@@ -45,18 +45,18 @@ export default function About({ copy: overrides, rtl = false }: AboutProps) {
   return (
     <section
       id="about"
-      className="relative flex min-h-screen scroll-mt-24 items-center justify-center px-6 py-20 text-white md:px-10"
+      className="relative flex min-h-screen scroll-mt-24 items-center justify-center px-6 py-20 text-content-primary md:px-10"
     >
       <div className="w-full max-w-6xl">
         <Reveal className="mb-16 text-center">
           <h2 className="text-3xl font-bold md:text-5xl">
-            {copy.title} <span className="text-[#60A5FA]">{copy.highlightedTitle}</span>
+            {copy.title} <span className="text-accent">{copy.highlightedTitle}</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-3xl leading-relaxed text-[#B7C3D4]">{copy.summary}</p>
+          <p className="mx-auto mt-4 max-w-3xl leading-relaxed text-content-secondary">{copy.summary}</p>
         </Reveal>
 
         <div className="grid items-center gap-14 lg:grid-cols-2">
-          <Reveal from="start" rtl={rtl} className="space-y-6 text-start leading-relaxed text-[#D4DCE8]">
+          <Reveal from="start" rtl={rtl} className="space-y-6 text-start leading-relaxed text-content-strong">
             {copy.paragraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
@@ -66,10 +66,10 @@ export default function About({ copy: overrides, rtl = false }: AboutProps) {
             {copy.cards.map((item) => (
               <article
                 key={item.title}
-                className="rounded-xl border border-[#475569] bg-[#1E293B]/40 p-6 backdrop-blur-md transition-all duration-300 hover:border-[#60A5FA] hover:shadow-lg hover:shadow-blue-500/10"
+                className="rounded-xl border border-outline-default bg-surface-elevated/40 p-6 backdrop-blur-md transition-all duration-300 hover:border-accent hover:shadow-lg hover:shadow-glow-primary/10"
               >
-                <h3 className="mb-2 text-lg font-semibold text-[#60A5FA]">{item.title}</h3>
-                <p className="text-sm leading-relaxed text-[#B7C3D4]">{item.description}</p>
+                <h3 className="mb-2 text-lg font-semibold text-accent">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-content-secondary">{item.description}</p>
               </article>
             ))}
           </Reveal>

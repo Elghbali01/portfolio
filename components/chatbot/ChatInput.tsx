@@ -43,8 +43,8 @@ export default function ChatInput({ loading, onSend, labels }: ChatInputProps) {
   };
 
   return (
-    <div className="border-t border-[#475569] bg-[#0B1120]/95 p-3">
-      <div className="flex items-end gap-2 rounded-xl border border-[#526176] bg-[#020617]/60 p-2 focus-within:border-[#60A5FA]">
+    <div className="border-t border-outline-default bg-canvas/95 p-3">
+      <div className="flex items-end gap-2 rounded-xl border border-outline-default bg-surface-inset/60 p-2 focus-within:border-accent">
         <textarea
           value={value}
           onChange={(event) => setValue(event.target.value)}
@@ -55,19 +55,19 @@ export default function ChatInput({ loading, onSend, labels }: ChatInputProps) {
           disabled={loading}
           placeholder={copy.placeholder}
           aria-label={copy.inputLabel}
-          className="max-h-24 min-h-11 flex-1 resize-none bg-transparent px-2 py-2 text-sm text-white outline-none placeholder:text-[#8FA0B8]"
+          className="max-h-24 min-h-11 flex-1 resize-none bg-transparent px-2 py-2 text-sm text-content-primary outline-none placeholder:text-content-subtle"
         />
         <button
           type="button"
           onClick={submit}
           disabled={loading || !value.trim()}
           aria-label={copy.send}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#2563EB] text-white transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-action text-on-action transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Send aria-hidden="true" size={17} />
         </button>
       </div>
-      <p className="mt-1.5 text-center text-[11px] text-[#A8B6CA]">{copy.disclaimer}</p>
+      <p className="mt-1.5 text-center text-[11px] text-content-muted">{copy.disclaimer}</p>
     </div>
   );
 }

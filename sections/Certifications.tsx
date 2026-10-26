@@ -51,13 +51,13 @@ export default function Certifications({
   };
 
   return (
-    <section id="certifications" className="relative flex min-h-screen scroll-mt-24 flex-col items-center justify-center px-6 py-24 text-white md:px-10">
+    <section id="certifications" className="relative flex min-h-screen scroll-mt-24 flex-col items-center justify-center px-6 py-24 text-content-primary md:px-10">
       <div className="w-full max-w-6xl">
         <Reveal className="mb-16 text-center">
           <h2 className="text-3xl font-bold md:text-5xl">
-            {copy.title} <span className="text-[#60A5FA]">{copy.highlightedTitle}</span>
+            {copy.title} <span className="text-accent">{copy.highlightedTitle}</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-[#B7C3D4]">{copy.introduction}</p>
+          <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-content-secondary">{copy.introduction}</p>
         </Reveal>
 
         <div className="grid gap-8 lg:grid-cols-3">
@@ -77,7 +77,7 @@ export default function Certifications({
           <div data-chat-safe-zone>
             <Link
               href={`/${locale}/certifications`}
-              className="inline-flex items-center gap-2 rounded-lg border border-[#60A5FA] px-7 py-3 text-sm font-medium text-[#93C5FD] transition-all duration-300 hover:bg-[#2563EB] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+              className="inline-flex items-center gap-2 rounded-lg border border-accent px-7 py-3 text-sm font-medium text-accent-soft transition-all duration-300 hover:bg-action hover:text-on-action focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               {copy.viewAll} ({totalCount})
               <DirectionalArrow locale={locale} direction="forward" />

@@ -155,7 +155,7 @@ export default function Contact({ labels, dir }: ContactProps) {
     <section
       id="contact"
       dir={dir}
-      className="relative flex min-h-screen scroll-mt-24 items-center justify-center px-6 py-24 text-white md:px-10"
+      className="relative flex min-h-screen scroll-mt-24 items-center justify-center px-6 py-24 text-content-primary md:px-10"
     >
       <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
         <motion.div
@@ -166,16 +166,16 @@ export default function Contact({ labels, dir }: ContactProps) {
         >
           <h2 className="text-3xl font-bold md:text-5xl">
             {copy.heading}{" "}
-            <span className="text-[#60A5FA]">{copy.headingHighlight}</span>
+            <span className="text-accent">{copy.headingHighlight}</span>
           </h2>
 
-          <p className="leading-relaxed text-[#CBD5E1]">{copy.description}</p>
+          <p className="leading-relaxed text-content-secondary">{copy.description}</p>
 
           <div data-chat-safe-zone className="mt-6 flex gap-4">
             <a
               href="mailto:elghbaliissam1@gmail.com"
               aria-label={copy.emailLinkAriaLabel}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#64748B] transition hover:border-[#60A5FA] hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1120]"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
             >
               <Mail aria-hidden="true" size={18} />
             </a>
@@ -185,7 +185,7 @@ export default function Contact({ labels, dir }: ContactProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={copy.linkedInLinkAriaLabel}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#64748B] transition hover:border-[#60A5FA] hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1120]"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
             >
               <Linkedin aria-hidden="true" size={18} />
             </a>
@@ -195,7 +195,7 @@ export default function Contact({ labels, dir }: ContactProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={copy.githubLinkAriaLabel}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#64748B] transition hover:border-[#60A5FA] hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B1120]"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
             >
               <Github aria-hidden="true" size={18} />
             </a>
@@ -213,12 +213,12 @@ export default function Contact({ labels, dir }: ContactProps) {
           aria-label={copy.formAriaLabel}
           aria-busy={loading}
           aria-describedby={loading ? sendingStatusId : undefined}
-          className="space-y-6 rounded-xl border border-[#64748B] bg-[#1E293B]/50 p-6 backdrop-blur-md sm:p-8"
+          className="space-y-6 rounded-xl border border-outline-strong bg-surface-elevated/50 p-6 backdrop-blur-md sm:p-8"
         >
           <div>
             <label
               htmlFor={nameId}
-              className="mb-2 block text-sm font-medium text-[#E2E8F0]"
+              className="mb-2 block text-sm font-medium text-content-strong"
             >
               {copy.nameLabel} <span aria-hidden="true">*</span>
             </label>
@@ -236,10 +236,10 @@ export default function Contact({ labels, dir }: ContactProps) {
               }
               onInvalid={(event) => handleInvalid("name", event)}
               onInput={(event) => clearFieldErrorWhenValid("name", event)}
-              className="w-full rounded-lg border border-[#64748B] bg-transparent px-4 py-3 text-white outline-none transition placeholder:text-[#94A3B8] focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/40"
+              className="w-full rounded-lg border border-outline-strong bg-transparent px-4 py-3 text-content-primary outline-none transition placeholder:text-content-subtle focus:border-accent focus:ring-2 focus:ring-accent/40"
             />
             {fieldErrors.name && (
-              <p id={`${nameId}-error`} className="mt-2 text-sm text-[#FCA5A5]">
+              <p id={`${nameId}-error`} className="mt-2 text-sm text-state-error">
                 {fieldErrors.name}
               </p>
             )}
@@ -248,7 +248,7 @@ export default function Contact({ labels, dir }: ContactProps) {
           <div>
             <label
               htmlFor={emailId}
-              className="mb-2 block text-sm font-medium text-[#E2E8F0]"
+              className="mb-2 block text-sm font-medium text-content-strong"
             >
               {copy.emailLabel} <span aria-hidden="true">*</span>
             </label>
@@ -268,12 +268,12 @@ export default function Contact({ labels, dir }: ContactProps) {
               }
               onInvalid={(event) => handleInvalid("email", event)}
               onInput={(event) => clearFieldErrorWhenValid("email", event)}
-              className="w-full rounded-lg border border-[#64748B] bg-transparent px-4 py-3 text-start text-white outline-none transition placeholder:text-[#94A3B8] focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/40"
+              className="w-full rounded-lg border border-outline-strong bg-transparent px-4 py-3 text-start text-content-primary outline-none transition placeholder:text-content-subtle focus:border-accent focus:ring-2 focus:ring-accent/40"
             />
             {fieldErrors.email && (
               <p
                 id={`${emailId}-error`}
-                className="mt-2 text-sm text-[#FCA5A5]"
+                className="mt-2 text-sm text-state-error"
               >
                 {fieldErrors.email}
               </p>
@@ -283,7 +283,7 @@ export default function Contact({ labels, dir }: ContactProps) {
           <div>
             <label
               htmlFor={messageId}
-              className="mb-2 block text-sm font-medium text-[#E2E8F0]"
+              className="mb-2 block text-sm font-medium text-content-strong"
             >
               {copy.messageLabel} <span aria-hidden="true">*</span>
             </label>
@@ -301,12 +301,12 @@ export default function Contact({ labels, dir }: ContactProps) {
               }
               onInvalid={(event) => handleInvalid("message", event)}
               onInput={(event) => clearFieldErrorWhenValid("message", event)}
-              className="w-full resize-y rounded-lg border border-[#64748B] bg-transparent px-4 py-3 text-white outline-none transition placeholder:text-[#94A3B8] focus:border-[#60A5FA] focus:ring-2 focus:ring-[#60A5FA]/40"
+              className="w-full resize-y rounded-lg border border-outline-strong bg-transparent px-4 py-3 text-content-primary outline-none transition placeholder:text-content-subtle focus:border-accent focus:ring-2 focus:ring-accent/40"
             />
             {fieldErrors.message && (
               <p
                 id={`${messageId}-error`}
-                className="mt-2 text-sm text-[#FCA5A5]"
+                className="mt-2 text-sm text-state-error"
               >
                 {fieldErrors.message}
               </p>
@@ -316,7 +316,7 @@ export default function Contact({ labels, dir }: ContactProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-[#2563EB] py-3 font-medium text-white shadow-lg shadow-blue-500/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B] disabled:cursor-wait disabled:opacity-70"
+            className="w-full rounded-lg bg-action py-3 font-medium text-on-action shadow-lg shadow-glow-primary/20 transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated disabled:cursor-wait disabled:opacity-70"
           >
             {loading ? copy.sending : copy.sendMessage}
           </button>
@@ -336,8 +336,8 @@ export default function Contact({ labels, dir }: ContactProps) {
               aria-live={submission.type === "error" ? "assertive" : "polite"}
               className={`text-center text-sm font-medium ${
                 submission.type === "error"
-                  ? "text-[#FCA5A5]"
-                  : "text-[#86EFAC]"
+                  ? "text-state-error"
+                  : "text-state-success"
               }`}
             >
               {submission.message}

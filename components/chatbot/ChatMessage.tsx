@@ -26,10 +26,10 @@ export default function ChatMessage({
           dir="auto"
           className={`whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
             isUser
-              ? "rounded-ee-md bg-[#2563EB] text-white"
+              ? "rounded-ee-md bg-action text-on-action"
               : message.isError
-                ? "rounded-es-md border border-red-300/50 bg-red-500/10 text-red-100"
-                : "rounded-es-md border border-[#475569] bg-[#1E293B]/80 text-[#E2E8F0]"
+                ? "rounded-es-md border border-state-error/50 bg-state-error/10 text-state-error"
+                : "rounded-es-md border border-outline-default bg-surface-elevated/80 text-content-strong"
           }`}
         >
           <span className="sr-only">{isUser ? userLabel : assistantLabel}: </span>

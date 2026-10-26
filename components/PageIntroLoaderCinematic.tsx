@@ -125,9 +125,9 @@ export default function PageIntroLoaderCinematic({
       const folioRect = measureRange(folioText, 0, folioText.textContent?.length ?? 0);
       const letters: PortfolioLetter3DPosition[] = [];
 
-      for (const [node, text, color] of [
-        [portText, "Port", "#FFFFFF"],
-        [folioText, "folio", "#60A5FA"],
+      for (const [node, text, color, accent] of [
+        [portText, "Port", "var(--theme-content-primary)", false],
+        [folioText, "folio", "var(--theme-accent)", true],
       ] as const) {
         Array.from(text).forEach((glyph, index) => {
           const rect = measureRange(node, index, index + 1);
@@ -136,6 +136,7 @@ export default function PageIntroLoaderCinematic({
             left: (rect.left - wordRect.left) / scale,
             top: (rect.top - wordRect.top) / scale,
             color,
+            accent,
           });
         });
       }
@@ -169,7 +170,7 @@ export default function PageIntroLoaderCinematic({
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        background: "linear-gradient(135deg, #020617 0%, #0B1120 55%, #111827 100%)",
+        background: "linear-gradient(135deg, var(--theme-gradient-start) 0%, var(--theme-gradient-middle) 55%, var(--theme-gradient-end) 100%)",
         pointerEvents: phase === "reveal" ? "none" : "auto",
       }}
     >
@@ -204,8 +205,8 @@ export default function PageIntroLoaderCinematic({
             viewBox="0 0 180 180"
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
           >
-            <circle cx="90" cy="90" r="78" fill="none" stroke="rgba(96, 165, 250, 0.16)" strokeWidth="1" />
-            <circle cx="90" cy="90" r="71" fill="none" stroke="rgba(148, 163, 184, 0.28)" strokeWidth="3" />
+            <circle cx="90" cy="90" r="78" fill="none" stroke="color-mix(in srgb, var(--theme-accent) 16%, transparent)" strokeWidth="1" />
+            <circle cx="90" cy="90" r="71" fill="none" stroke="color-mix(in srgb, var(--theme-content-subtle) 28%, transparent)" strokeWidth="3" />
             <circle
               cx="90"
               cy="90"
@@ -217,19 +218,19 @@ export default function PageIntroLoaderCinematic({
               strokeDasharray={CIRCUMFERENCE}
               strokeDashoffset={CIRCUMFERENCE * (1 - progress / 100)}
               transform="rotate(-90 90 90)"
-              style={{ filter: "drop-shadow(0 0 8px rgba(96, 165, 250, 0.55))" }}
+              style={{ filter: "drop-shadow(0 0 8px color-mix(in srgb, var(--theme-accent) 55%, transparent))" }}
             />
             <defs>
               <linearGradient id="loader-gradient" x1="20" y1="20" x2="160" y2="160" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#60A5FA" />
-                <stop offset="1" stopColor="#8B5CF6" />
+                <stop stopColor="var(--theme-accent)" />
+                <stop offset="1" stopColor="var(--theme-glow-secondary)" />
               </linearGradient>
             </defs>
           </svg>
 
           <span
             style={{
-              color: "#F8FAFC",
+              color: "var(--theme-content-primary)",
               fontFamily: "var(--font-geist-sans), Arial, sans-serif",
               fontSize: "1.875rem",
               fontWeight: 650,
@@ -250,7 +251,7 @@ export default function PageIntroLoaderCinematic({
             width: "min(82vw, 30rem)",
             minHeight: "2.75rem",
             margin: "1.25rem 1rem 0",
-            color: "#60A5FA",
+            color: "var(--theme-accent)",
             fontFamily: "var(--font-geist-sans), Arial, sans-serif",
             fontSize: "0.875rem",
             lineHeight: 1.6,
@@ -344,7 +345,7 @@ export default function PageIntroLoaderCinematic({
                     position: "absolute",
                     top: 0,
                     left: logoGeometry.folioLeft,
-                    color: "#60A5FA",
+                    color: "var(--theme-accent)",
                     fontSize: INTRO_LOGO_SIZE,
                     whiteSpace: "nowrap",
                     willChange: "transform, opacity",

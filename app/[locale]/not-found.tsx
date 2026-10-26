@@ -34,22 +34,22 @@ export default function LocalizedNotFound() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="flex min-h-screen items-center justify-center px-6 pb-16 pt-28 text-white"
+      className="flex min-h-screen items-center justify-center px-6 pb-16 pt-28 text-content-primary"
     >
       <div className="max-w-xl text-center">
-        <p className="text-7xl font-bold text-[#60A5FA]">404</p>
+        <p className="text-7xl font-bold text-accent">404</p>
         <h1 className="mt-6 text-3xl font-bold md:text-5xl">{text.title}</h1>
-        <p className="mt-4 leading-relaxed text-[#B7C3D4]">{text.description}</p>
+        <p className="mt-4 leading-relaxed text-content-secondary">{text.description}</p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <Link
             href={`/${locale}`}
-            className="rounded-lg bg-[#2563EB] px-5 py-3 font-medium text-white transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+            className="rounded-lg bg-action px-5 py-3 font-medium text-on-action transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             {text.home}
           </Link>
           <Link
             href={`/${locale}/projects`}
-            className="rounded-lg border border-[#526176] px-5 py-3 font-medium text-[#D4DCE8] transition hover:border-[#60A5FA] hover:text-[#93C5FD] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+            className="rounded-lg border border-outline-default px-5 py-3 font-medium text-content-strong transition hover:border-accent hover:text-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             {text.projects}
           </Link>

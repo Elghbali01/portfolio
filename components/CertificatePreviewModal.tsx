@@ -198,7 +198,7 @@ export default function CertificatePreviewModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={transition}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-surface-inset/75 backdrop-blur-sm p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -214,17 +214,17 @@ export default function CertificatePreviewModal({
         initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={transition}
-        className="relative flex h-[min(90dvh,48rem)] max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[#475569] bg-[#1E293B] text-start shadow-2xl"
+        className="relative flex h-[min(90dvh,48rem)] max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-outline-default bg-surface-elevated text-start shadow-2xl"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-[#475569] px-4 py-4 sm:px-6">
+        <div className="flex items-start justify-between gap-4 border-b border-outline-default px-4 py-4 sm:px-6">
           <div className="min-w-0">
             <h2
               id={titleId}
-              className="text-lg font-semibold leading-snug text-white"
+              className="text-lg font-semibold leading-snug text-content-primary"
             >
               {cert.title}
             </h2>
-            <p id={issuerId} className="mt-1 text-sm text-[#60A5FA]">
+            <p id={issuerId} className="mt-1 text-sm text-accent">
               {cert.issuer}
             </p>
           </div>
@@ -233,7 +233,7 @@ export default function CertificatePreviewModal({
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#64748B] bg-[#0F172A] text-[#CBD5E1] transition-colors duration-200 hover:border-[#60A5FA] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B]"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-outline-strong bg-surface text-content-secondary transition-colors duration-200 hover:border-accent hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated"
             aria-label={copy.closePreview}
           >
             <svg
@@ -253,7 +253,7 @@ export default function CertificatePreviewModal({
           </button>
         </div>
 
-        <div className="relative min-h-0 flex-1 bg-[#0F172A]/60">
+        <div className="relative min-h-0 flex-1 bg-surface/60">
           <Image
             src={cert.image}
             alt={
@@ -265,7 +265,7 @@ export default function CertificatePreviewModal({
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[#475569] px-4 py-4 sm:px-6">
+        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-outline-default px-4 py-4 sm:px-6">
           {cert.verificationUrl && (
             <a
               href={cert.verificationUrl}
@@ -275,7 +275,7 @@ export default function CertificatePreviewModal({
                 copy.verifyCertificateAriaLabel,
                 cert.title,
               )}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-medium text-white transition-colors duration-300 hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B]"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-action px-5 py-2.5 text-sm font-medium text-on-action transition-colors duration-300 hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated"
             >
               <svg
                 aria-hidden="true"
@@ -306,7 +306,7 @@ export default function CertificatePreviewModal({
                   copy.viewOnLinkedInAriaLabel,
                   cert.title,
                 )}
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-medium text-white transition-colors duration-300 hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B]"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-action px-5 py-2.5 text-sm font-medium text-on-action transition-colors duration-300 hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated"
               >
                 <svg
                   aria-hidden="true"
@@ -329,7 +329,7 @@ export default function CertificatePreviewModal({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-11 rounded-lg border border-[#64748B] px-5 py-2.5 text-sm font-medium text-[#CBD5E1] transition-colors duration-200 hover:border-[#60A5FA] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B]"
+            className="min-h-11 rounded-lg border border-outline-strong px-5 py-2.5 text-sm font-medium text-content-secondary transition-colors duration-200 hover:border-accent hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated"
           >
             {copy.close}
           </button>

@@ -96,7 +96,7 @@ export default function RotatingText({
     : graphemes.slice(0, visibleCount).join("");
 
   return (
-    <div className="min-h-8 overflow-visible text-blue-400">
+    <div className="min-h-8 overflow-visible text-accent">
       <span className="sr-only">{usablePhrases.join(", ")}</span>
       <bdi
         dir={dir}

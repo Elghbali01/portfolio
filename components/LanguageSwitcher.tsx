@@ -50,10 +50,10 @@ export default function LanguageSwitcher({
   return (
     <div
       role="group"
-      className="flex items-center gap-1 rounded-xl border border-[#475569] bg-[#0B1120]/80 p-1"
+      className="flex items-center gap-1 rounded-xl border border-outline-default bg-canvas/80 p-1"
       aria-label={label}
     >
-      <Languages aria-hidden="true" size={15} className="mx-1 text-[#93C5FD]" />
+      <Languages aria-hidden="true" size={15} className="mx-1 text-accent-soft" />
       {locales.map((candidate) => {
         const path = replaceLocale(pathname, candidate);
         const href = `${path}${query ? `?${query}` : ""}${hash}`;
@@ -67,10 +67,10 @@ export default function LanguageSwitcher({
             dir={candidate === "ar" ? "rtl" : "ltr"}
             aria-current={candidate === locale ? "page" : undefined}
             onClick={onNavigate}
-            className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD] ${
+            className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
               candidate === locale
-                ? "bg-[#2563EB] text-white"
-                : "text-[#CBD5E1] hover:bg-white/10 hover:text-white"
+                ? "bg-action text-on-action"
+                : "text-content-secondary hover:bg-content-primary/10 hover:text-content-primary"
             }`}
           >
             {autonyms[candidate]}

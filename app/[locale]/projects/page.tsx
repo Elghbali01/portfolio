@@ -53,7 +53,7 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
   };
 
   return (
-    <main id="main-content" tabIndex={-1} className="relative min-h-screen px-6 pb-16 pt-28 text-white md:px-10">
+    <main id="main-content" tabIndex={-1} className="relative min-h-screen px-6 pb-16 pt-28 text-content-primary md:px-10">
       <JsonLd data={itemListJsonLd} />
       <div className="relative z-10 mx-auto max-w-7xl">
         <Breadcrumbs
@@ -68,12 +68,12 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
         <Reveal className="mb-16 text-center">
           <h1 className="text-3xl font-bold md:text-5xl">
             {dictionary.projects.listing.titleLead}{" "}
-            <span className="text-[#60A5FA]">{dictionary.projects.listing.titleAccent}</span>
+            <span className="text-accent">{dictionary.projects.listing.titleAccent}</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-[#B7C3D4]">
+          <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-content-secondary">
             {dictionary.projects.listing.description}
           </p>
-          <p className="mt-3 text-sm text-[#A8B6CA]">
+          <p className="mt-3 text-sm text-content-muted">
             {formatCount(projects.length, locale, dictionary.projects.listing.count)}
           </p>
         </Reveal>
@@ -101,7 +101,7 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
         <div data-chat-safe-zone className="mt-16 flex justify-center">
           <Link
             href={`/${locale}#projects`}
-            className="inline-flex items-center gap-2 rounded-lg border border-[#526176] px-7 py-3 text-sm font-medium text-[#D4DCE8] transition hover:border-[#60A5FA] hover:text-[#93C5FD] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+            className="inline-flex items-center gap-2 rounded-lg border border-outline-default px-7 py-3 text-sm font-medium text-content-strong transition hover:border-accent hover:text-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             <DirectionalArrow locale={locale} direction="back" />
             {dictionary.projects.listing.backToPortfolio}

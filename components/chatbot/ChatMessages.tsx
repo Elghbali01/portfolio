@@ -35,7 +35,7 @@ export default function ChatMessages({
   return (
     <div
       role="log"
-      className="flex-1 space-y-4 overflow-y-auto px-4 py-5 [scrollbar-color:#475569_transparent]"
+      className="flex-1 space-y-4 overflow-y-auto px-4 py-5 [scrollbar-color:var(--theme-outline-default)_transparent]"
       aria-live="polite"
       aria-busy={loading}
     >
@@ -51,12 +51,12 @@ export default function ChatMessages({
       ))}
       {loading && (
         <div className="flex justify-start" role="status" aria-label={thinkingLabel}>
-          <div className="flex items-center gap-1 rounded-2xl rounded-es-md border border-[#475569] bg-[#1E293B]/80 px-4 py-3">
+          <div className="flex items-center gap-1 rounded-2xl rounded-es-md border border-outline-default bg-surface-elevated/80 px-4 py-3">
             {[0, 1, 2].map((dot) => (
               <span
                 key={dot}
                 aria-hidden="true"
-                className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#60A5FA] motion-reduce:animate-none"
+                className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent motion-reduce:animate-none"
                 style={{ animationDelay: `${dot * 150}ms` }}
               />
             ))}

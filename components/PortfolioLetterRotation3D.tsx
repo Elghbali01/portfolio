@@ -15,6 +15,7 @@ export interface PortfolioLetter3DPosition {
   left: number;
   top: number;
   color: string;
+  accent: boolean;
 }
 
 interface PortfolioLetterRotation3DProps {
@@ -25,10 +26,10 @@ interface PortfolioLetterRotation3DProps {
   onComplete: () => void;
 }
 
-function getSideColors(color: string) {
-  return color.toUpperCase() === "#60A5FA"
-    ? { near: "#93C5FD", far: "#2563EB" }
-    : { near: "#E2E8F0", far: "#64748B" };
+function getSideColors(accent: boolean) {
+  return accent
+    ? { near: "var(--theme-accent-soft)", far: "var(--theme-action)" }
+    : { near: "var(--theme-content-strong)", far: "var(--theme-outline-strong)" };
 }
 
 export default function PortfolioLetterRotation3D({
@@ -53,8 +54,8 @@ export default function PortfolioLetterRotation3D({
         pointerEvents: "none",
       }}
     >
-      {letters.map(({ glyph, left, top, color }, letterIndex) => {
-        const sideColors = getSideColors(color);
+      {letters.map(({ glyph, left, top, color, accent }, letterIndex) => {
+        const sideColors = getSideColors(accent);
 
         return (
           <motion.span

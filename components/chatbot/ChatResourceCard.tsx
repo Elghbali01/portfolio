@@ -42,24 +42,24 @@ export default function ChatResourceCard({ resource, locale = "en", labels }: Ch
   const cardContent = (
     <>
       {resource.image && (
-        <div className="relative h-14 w-16 shrink-0 overflow-hidden rounded-lg bg-[#020617]">
+        <div className="relative h-14 w-16 shrink-0 overflow-hidden rounded-lg bg-surface-inset">
           <Image src={resource.image} alt="" fill sizes="64px" className="object-cover" />
         </div>
       )}
       <div className="min-w-0 flex-1 text-start">
-        <p className="text-[10px] font-semibold text-[#93C5FD]">{copy[resource.type]}</p>
-        <p className="truncate text-xs font-medium text-white" dir="auto">{resource.title}</p>
+        <p className="text-[10px] font-semibold text-accent-soft">{copy[resource.type]}</p>
+        <p className="truncate text-xs font-medium text-content-primary" dir="auto">{resource.title}</p>
         {resource.description && (
-          <p className="mt-0.5 line-clamp-2 text-[11px] text-[#B7C3D4]" dir="auto">{resource.description}</p>
+          <p className="mt-0.5 line-clamp-2 text-[11px] text-content-secondary" dir="auto">{resource.description}</p>
         )}
-        <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-[#93C5FD]">
+        <span className="mt-1 inline-flex items-center gap-1 text-[11px] text-accent-soft">
           {copy[resource.type]} <Icon aria-hidden="true" size={11} />
         </span>
       </div>
     </>
   );
 
-  const className = "group flex gap-3 overflow-hidden rounded-xl border border-[#475569] bg-[#0F172A]/80 p-3 transition hover:border-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]";
+  const className = "group flex gap-3 overflow-hidden rounded-xl border border-outline-default bg-surface/80 p-3 transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus";
 
   if (isInternalNavigation) {
     return <Link href={href} className={className}>{cardContent}</Link>;

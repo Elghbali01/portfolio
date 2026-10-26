@@ -42,6 +42,16 @@ const ar = {
     currentLanguage: "اللغة الحالية",
     changeLanguage: "تغيير اللغة",
   },
+  themeSwitcher: {
+    label: "لوحة الألوان",
+    themes: {
+      "original-blue": "الأزرق الأصلي",
+      "royal-violet": "البنفسجي الملكي",
+      "emerald-tech": "الزمرد التقني",
+      "midnight-gold": "ذهبي منتصف الليل",
+      "crimson-night": "ليلة قرمزية",
+    },
+  },
   hero: {
     greeting: "مرحبًا، أنا",
     name: "عصام الغبالي",

@@ -7,6 +7,8 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useIntroSequence } from "@/components/IntroSequence";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PortfolioWordmark from "@/components/PortfolioWordmark";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
+import type { ThemeId } from "@/lib/theme";
 import { sectionIds, type Locale, type SectionId } from "@/i18n";
 
 export interface NavbarLabels {
@@ -14,6 +16,8 @@ export interface NavbarLabels {
   openMenu: string;
   closeMenu: string;
   languageSwitcher: string;
+  themeSwitcher: string;
+  themes: Record<ThemeId, string>;
   sections: Record<SectionId, string>;
 }
 
@@ -22,6 +26,14 @@ const defaultLabels: NavbarLabels = {
   openMenu: "Open navigation menu",
   closeMenu: "Close navigation menu",
   languageSwitcher: "Choose language",
+  themeSwitcher: "Color palette",
+  themes: {
+    "original-blue": "Original Blue",
+    "royal-violet": "Royal Violet",
+    "emerald-tech": "Emerald Tech",
+    "midnight-gold": "Midnight Gold",
+    "crimson-night": "Crimson Night",
+  },
   sections: {
     home: "Home",
     about: "About",
@@ -36,7 +48,10 @@ const defaultLabels: NavbarLabels = {
 interface NavbarProps {
   visible?: boolean;
   locale?: Locale;
-  labels?: Partial<NavbarLabels> & { sections?: Partial<NavbarLabels["sections"]> };
+  labels?: Partial<NavbarLabels> & {
+    sections?: Partial<NavbarLabels["sections"]>;
+    themes?: Partial<NavbarLabels["themes"]>;
+  };
 }
 
 export default function Navbar({ visible = true, locale = "en", labels }: NavbarProps) {
@@ -44,6 +59,7 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
     ...defaultLabels,
     ...labels,
     sections: { ...defaultLabels.sections, ...labels?.sections },
+    themes: { ...defaultLabels.themes, ...labels?.themes },
   };
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -94,11 +110,11 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
       transition={{ duration: reduceMotion ? 0 : 0.4 }}
       className={`fixed inset-x-0 top-0 z-50 w-full transition-all duration-300 ${
         scrolled || menuOpen
-          ? "border-b border-[#334155] bg-[#0B1120]/95 backdrop-blur-xl"
+          ? "border-b border-outline-subtle bg-canvas/95 backdrop-blur-xl"
           : "bg-transparent"
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-6 py-4 text-white md:px-10">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-6 py-4 text-content-primary md:px-10">
         <div data-portfolio-logo-target className="inline-flex items-center">
           <motion.div
             initial={reduceMotion ? false : { x: locale === "ar" ? 24 : -24, opacity: 0 }}
@@ -111,7 +127,7 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
           >
             <Link
               href={homePath}
-              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               <PortfolioWordmark />
             </Link>
@@ -124,7 +140,7 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
           transition={{ duration: reduceMotion ? 0 : 0.25, ease: "easeOut" }}
           className="hidden items-center gap-4 xl:flex"
         >
-          <div className="flex items-center gap-5 text-sm text-[#B7C3D4]">
+          <div className="flex items-center gap-5 text-sm text-content-secondary">
             {sectionIds.map((item, index) => (
               <motion.div
                 key={item}
@@ -138,10 +154,10 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
               >
                 <Link
                   href={sectionLink(item)}
-                  className="group relative rounded-sm py-2 transition-colors duration-300 hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+                  className="group relative rounded-sm py-2 transition-colors duration-300 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                 >
                   {copy.sections[item]}
-                  <span className="absolute -bottom-0.5 start-0 h-0.5 w-0 bg-[#60A5FA] transition-all duration-300 group-hover:w-full group-focus-visible:w-full" />
+                  <span className="absolute -bottom-0.5 start-0 h-0.5 w-0 bg-accent transition-all duration-300 group-hover:w-full group-focus-visible:w-full" />
                 </Link>
               </motion.div>
             ))}
@@ -154,10 +170,12 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
               duration: reduceMotion ? 0 : 0.34,
               ease: "easeOut",
             }}
+            className="flex items-center gap-3"
           >
             <Suspense fallback={null}>
               <LanguageSwitcher locale={locale} label={copy.languageSwitcher} />
             </Suspense>
+            <ThemeSwitcher label={copy.themeSwitcher} themes={copy.themes} />
           </motion.div>
         </motion.div>
 
@@ -174,7 +192,7 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
             aria-label={menuOpen ? copy.closeMenu : copy.openMenu}
             aria-expanded={menuOpen}
             aria-controls="mobile-navigation"
-            className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#475569] text-white transition hover:border-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+            className="flex h-11 w-11 items-center justify-center rounded-lg border border-outline-default text-content-primary transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             {menuOpen ? <X aria-hidden="true" size={21} /> : <Menu aria-hidden="true" size={21} />}
           </button>
@@ -189,27 +207,30 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -12 }}
             transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-            className="max-h-[calc(100dvh-4.75rem)] overflow-y-auto border-t border-[#334155] bg-[#0B1120] xl:hidden"
+            className="max-h-[calc(100dvh-4.75rem)] overflow-y-auto border-t border-outline-subtle bg-canvas xl:hidden"
           >
-            <div className="flex flex-col px-6 py-4 text-[#CBD5E1] md:px-10">
+            <div className="flex flex-col px-6 py-4 text-content-secondary md:px-10">
               {sectionIds.map((item) => (
                 <Link
                   key={item}
                   href={sectionLink(item)}
                   onClick={() => setMenuOpen(false)}
-                  className="rounded-lg px-3 py-3 text-lg transition hover:bg-white/5 hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+                  className="rounded-lg px-3 py-3 text-lg transition hover:bg-content-primary/5 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
                 >
                   {copy.sections[item]}
                 </Link>
               ))}
-              <div className="mt-3 border-t border-[#334155] pt-4">
-                <Suspense fallback={null}>
-                  <LanguageSwitcher
-                    locale={locale}
-                    label={copy.languageSwitcher}
-                    onNavigate={() => setMenuOpen(false)}
-                  />
-                </Suspense>
+              <div className="mt-3 border-t border-outline-subtle pt-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <Suspense fallback={null}>
+                    <LanguageSwitcher
+                      locale={locale}
+                      label={copy.languageSwitcher}
+                      onNavigate={() => setMenuOpen(false)}
+                    />
+                  </Suspense>
+                  <ThemeSwitcher label={copy.themeSwitcher} themes={copy.themes} />
+                </div>
               </div>
             </div>
           </motion.div>

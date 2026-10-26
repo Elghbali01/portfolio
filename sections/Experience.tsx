@@ -50,14 +50,14 @@ export default function Experience({
       id="experience"
       dir={dir}
       aria-labelledby={headingId}
-      className="relative flex min-h-screen scroll-mt-24 flex-col items-center justify-center px-6 py-24 text-white md:px-10"
+      className="relative flex min-h-screen scroll-mt-24 flex-col items-center justify-center px-6 py-24 text-content-primary md:px-10"
     >
       <div className="mb-16 text-center">
         <h2 id={headingId} className="text-3xl font-bold md:text-5xl">
           {copy.heading}{" "}
-          <span className="text-[#60A5FA]">{copy.headingHighlight}</span>
+          <span className="text-accent">{copy.headingHighlight}</span>
         </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-[#CBD5E1]">
+        <p className="mx-auto mt-4 max-w-2xl text-content-secondary">
           {copy.description}
         </p>
       </div>
@@ -65,7 +65,7 @@ export default function Experience({
       <div className="relative w-full max-w-5xl">
         <span
           aria-hidden="true"
-          className="absolute bottom-6 top-6 w-0.5 bg-[#475569] [inset-inline-start:0.625rem] lg:[inset-inline-start:50%]"
+          className="absolute bottom-6 top-6 w-0.5 bg-outline-default [inset-inline-start:0.625rem] lg:[inset-inline-start:50%]"
         />
 
         <ol aria-label={copy.timelineLabel} className="space-y-8 lg:space-y-10">
@@ -84,13 +84,13 @@ export default function Experience({
               >
                 <span
                   aria-hidden="true"
-                  className="relative z-10 col-start-1 row-start-1 mt-6 h-4 w-4 justify-self-center rounded-full border-4 border-[#0B1120] bg-[#3B82F6] lg:col-start-2"
+                  className="relative z-10 col-start-1 row-start-1 mt-6 h-4 w-4 justify-self-center rounded-full border-4 border-canvas bg-accent lg:col-start-2"
                 />
 
                 <article
-                  className={`relative z-[1] col-start-2 row-start-1 w-full rounded-xl border border-[#475569] bg-[#1E293B]/50 p-6 text-start backdrop-blur-md lg:col-span-1 ${cardColumn}`}
+                  className={`relative z-[1] col-start-2 row-start-1 w-full rounded-xl border border-outline-default bg-surface-elevated/50 p-6 text-start backdrop-blur-md lg:col-span-1 ${cardColumn}`}
                 >
-                  <p className="text-sm font-medium text-[#60A5FA]">
+                  <p className="text-sm font-medium text-accent">
                     {item.typeLabel ? (
                       <span className="sr-only">{item.typeLabel}: </span>
                     ) : null}
@@ -101,7 +101,7 @@ export default function Experience({
                     {item.title}
                   </h3>
 
-                  <p className="mb-2 text-xs leading-relaxed text-[#E2E8F0]">
+                  <p className="mb-2 text-xs leading-relaxed text-content-strong">
                     <bdi>{item.institution}</bdi>
                     <span aria-hidden="true"> · </span>
                     <bdi>{item.location}</bdi>
@@ -113,7 +113,7 @@ export default function Experience({
                     ) : null}
                   </p>
 
-                  <p className="text-sm leading-relaxed text-[#CBD5E1]">
+                  <p className="text-sm leading-relaxed text-content-secondary">
                     {item.description}
                   </p>
                 </article>

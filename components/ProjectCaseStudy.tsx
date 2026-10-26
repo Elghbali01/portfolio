@@ -79,7 +79,7 @@ function ContentBlocks({
       return (
         <ul
           key={key}
-          className="list-disc space-y-2 ps-6 marker:text-[#60A5FA]"
+          className="list-disc space-y-2 ps-6 marker:text-accent"
         >
           {block.items.map((item, itemIndex) => (
             <li key={`${key}-item-${itemIndex}`}>
@@ -131,7 +131,7 @@ export default function ProjectCaseStudy({
     <div
       lang={resolvedLang}
       dir={resolvedDir}
-      className={`mx-auto max-w-3xl space-y-10 text-start text-[#CBD5E1] leading-8 ${className}`.trim()}
+      className={`mx-auto max-w-3xl space-y-10 text-start text-content-secondary leading-8 ${className}`.trim()}
     >
       {parsedContent.introduction && parsedContent.introduction.length > 0 && (
         <div className="space-y-4">
@@ -151,7 +151,7 @@ export default function ProjectCaseStudy({
           <section key={sectionKey} className="space-y-4">
             <h2
               id={section.id}
-              className="scroll-mt-28 text-2xl font-bold leading-tight text-white md:text-3xl"
+              className="scroll-mt-28 text-2xl font-bold leading-tight text-content-primary md:text-3xl"
             >
               {renderTextWithBidiIsolation(section.heading, technologyTerms, rtl)}
             </h2>
@@ -170,11 +170,11 @@ export default function ProjectCaseStudy({
               return (
                 <section
                   key={subsectionKey}
-                  className="space-y-3 border-s-2 border-[#334155] ps-4 md:ps-6"
+                  className="space-y-3 border-s-2 border-outline-subtle ps-4 md:ps-6"
                 >
                   <h3
                     id={subsection.id}
-                    className="scroll-mt-28 text-xl font-semibold leading-tight text-white md:text-2xl"
+                    className="scroll-mt-28 text-xl font-semibold leading-tight text-content-primary md:text-2xl"
                   >
                     {renderTextWithBidiIsolation(
                       subsection.heading,

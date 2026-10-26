@@ -1,4 +1,5 @@
 import type { Locale, TextDirection } from "./config";
+import type { ThemeId } from "../lib/theme";
 
 export const sectionIds = [
   "home",
@@ -158,6 +159,10 @@ export type PortfolioDictionary = {
     label: string;
     currentLanguage: string;
     changeLanguage: string;
+  };
+  themeSwitcher: {
+    label: string;
+    themes: Record<ThemeId, string>;
   };
   hero: {
     greeting: string;

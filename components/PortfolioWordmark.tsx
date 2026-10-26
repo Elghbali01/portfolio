@@ -1,7 +1,7 @@
 import { forwardRef, type HTMLAttributes } from "react";
 
-export const PORTFOLIO_WORDMARK_TYPOGRAPHY_CLASS = "text-2xl font-bold tracking-wide text-white";
-export const PORTFOLIO_WORDMARK_ACCENT_CLASS = "text-[#60A5FA]";
+export const PORTFOLIO_WORDMARK_TYPOGRAPHY_CLASS = "text-2xl font-bold tracking-wide text-content-primary";
+export const PORTFOLIO_WORDMARK_ACCENT_CLASS = "text-accent";
 
 type PortfolioWordmarkProps = HTMLAttributes<HTMLSpanElement>;
 

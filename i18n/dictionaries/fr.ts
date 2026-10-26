@@ -42,6 +42,16 @@ const fr = {
     currentLanguage: "Langue actuelle",
     changeLanguage: "Changer de langue",
   },
+  themeSwitcher: {
+    label: "Palette de couleurs",
+    themes: {
+      "original-blue": "Bleu original",
+      "royal-violet": "Violet royal",
+      "emerald-tech": "Émeraude tech",
+      "midnight-gold": "Or de minuit",
+      "crimson-night": "Nuit cramoisie",
+    },
+  },
   hero: {
     greeting: "Bonjour, je suis",
     name: "Issam Elghbali",

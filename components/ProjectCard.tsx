@@ -60,9 +60,9 @@ export default function ProjectCard({
       transition={{ delay: shouldReduceMotion ? 0 : Math.min(index * 0.08, 0.32) }}
       viewport={{ once: true, amount: 0.1 }}
       whileHover={shouldReduceMotion ? undefined : { y: -4 }}
-      className="scroll-mt-28 overflow-hidden rounded-xl border border-[#475569] bg-[#1E293B]/50 shadow-xl backdrop-blur-md transition hover:border-[#60A5FA]"
+      className="scroll-mt-28 overflow-hidden rounded-xl border border-outline-default bg-surface-elevated/50 shadow-xl backdrop-blur-md transition hover:border-accent"
     >
-      <div className="relative aspect-[16/9] overflow-hidden bg-[#0F172A]">
+      <div className="relative aspect-[16/9] overflow-hidden bg-surface">
         <Image
           src={project.image}
           alt={imageAlt ?? `${copy.imageAlt} ${project.title}`}
@@ -74,18 +74,18 @@ export default function ProjectCard({
       </div>
 
       <div className="space-y-4 p-6">
-        <p className="text-sm font-medium text-[#93C5FD]">{project.category}</p>
-        <Heading className="text-xl font-semibold text-white">{project.title}</Heading>
-        <p className="text-sm leading-relaxed text-[#B7C3D4]">{project.shortDescription}</p>
+        <p className="text-sm font-medium text-accent-soft">{project.category}</p>
+        <Heading className="text-xl font-semibold text-content-primary">{project.title}</Heading>
+        <p className="text-sm leading-relaxed text-content-secondary">{project.shortDescription}</p>
 
         <ul className="flex flex-wrap gap-2" aria-label={copy.technologiesLabel}>
           {project.technologies.map((technology) => (
             <li
               key={technology}
-              className="group relative overflow-hidden rounded-full border border-[#475569] bg-[#0F172A] px-3 py-1 text-xs"
+              className="group relative overflow-hidden rounded-full border border-outline-default bg-surface px-3 py-1 text-xs"
             >
-              <span aria-hidden="true" className="absolute inset-0 origin-start scale-x-0 bg-[#94A3B8]/25 transition-transform duration-300 ease-out group-hover:scale-x-100" />
-              <bdi className="relative z-10 text-[#D4DCE8] transition-colors group-hover:text-white">
+              <span aria-hidden="true" className="absolute inset-0 origin-start scale-x-0 bg-content-subtle/25 transition-transform duration-300 ease-out group-hover:scale-x-100" />
+              <bdi className="relative z-10 text-content-strong transition-colors group-hover:text-content-primary">
                 {technology}
               </bdi>
             </li>
@@ -97,7 +97,7 @@ export default function ProjectCard({
             href={project.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-sm py-2 text-sm font-medium text-[#93C5FD] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+            className="rounded-sm py-2 text-sm font-medium text-accent-soft hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             {isProfileLink ? copy.githubProfile : copy.githubRepository}
             <span aria-hidden="true"> ↗</span>
@@ -108,7 +108,7 @@ export default function ProjectCard({
             aria-label={copy.viewDetailsFor.includes("{project}")
               ? copy.viewDetailsFor.replace("{project}", project.title)
               : `${copy.viewDetailsFor} ${project.title}`}
-            className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+            className="rounded-lg bg-action px-4 py-2 text-sm font-medium text-on-action transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             {copy.viewDetails}
           </Link>

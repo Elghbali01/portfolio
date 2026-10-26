@@ -83,7 +83,7 @@ export default function CertificationCard({
           : { duration: 0.6, delay: index * 0.1 }
       }
       viewport={{ once: true }}
-      className="group flex flex-col overflow-hidden rounded-xl border border-[#475569] bg-[#1E293B]/40 backdrop-blur-md transition-all duration-300 hover:border-[#60A5FA]/70 hover:shadow-lg hover:shadow-blue-500/10"
+      className="group flex flex-col overflow-hidden rounded-xl border border-outline-default bg-surface-elevated/40 backdrop-blur-md transition-all duration-300 hover:border-accent/70 hover:shadow-lg hover:shadow-glow-primary/10"
     >
       {canOpenPreview ? (
         <button
@@ -94,25 +94,25 @@ export default function CertificationCard({
             cert.title,
           )}
           onClick={() => onImageClick?.(cert)}
-          className="relative aspect-[4/3] w-full cursor-pointer overflow-hidden bg-[#0F172A]/60 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#60A5FA]"
+          className="relative aspect-[4/3] w-full cursor-pointer overflow-hidden bg-surface/60 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
         >
           {thumbnail}
         </button>
       ) : (
-        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#0F172A]/60">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface/60">
           {thumbnail}
         </div>
       )}
 
       <div className="flex flex-1 flex-col gap-1 p-5 text-start">
-        <Heading className="min-h-[2.6rem] text-[15px] font-semibold leading-snug text-white">
+        <Heading className="min-h-[2.6rem] text-[15px] font-semibold leading-snug text-content-primary">
           {cert.title}
         </Heading>
 
-        <p className="text-sm font-medium text-[#60A5FA]">{cert.issuer}</p>
+        <p className="text-sm font-medium text-accent">{cert.issuer}</p>
 
         {cert.date && (
-          <p className="mt-0.5 text-xs text-[#94A3B8]">{cert.date}</p>
+          <p className="mt-0.5 text-xs text-content-subtle">{cert.date}</p>
         )}
 
         <div className="flex-1" />
@@ -128,7 +128,7 @@ export default function CertificationCard({
                   copy.verifyCertificateAriaLabel,
                   cert.title,
                 )}
-                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors duration-300 hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B]"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-action px-4 py-2.5 text-sm font-medium text-on-action transition-colors duration-300 hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated"
               >
                 <svg
                   aria-hidden="true"
@@ -156,7 +156,7 @@ export default function CertificationCard({
                     copy.viewOnLinkedInAriaLabel,
                     cert.title,
                   )}
-                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white transition-colors duration-300 hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#60A5FA] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B]"
+                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-action px-4 py-2.5 text-sm font-medium text-on-action transition-colors duration-300 hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated"
                 >
                   <svg
                     aria-hidden="true"
@@ -179,7 +179,7 @@ export default function CertificationCard({
                   type="button"
                   disabled
                   aria-label={copy.credentialUnavailable}
-                  className="inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-[#334155] px-4 py-2.5 text-sm font-medium text-[#94A3B8]"
+                  className="inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-outline-subtle px-4 py-2.5 text-sm font-medium text-content-subtle"
                 >
                   <svg
                     aria-hidden="true"

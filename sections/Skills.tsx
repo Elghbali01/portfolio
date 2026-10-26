@@ -57,7 +57,7 @@ function TechLogo({ skill }: { skill: Skill }) {
           unoptimized
         />
       </div>
-      <span className="skill-name text-center text-xs font-medium leading-snug tracking-wide text-[#A8B5C7]">
+      <span className="skill-name text-center text-xs font-medium leading-snug tracking-wide text-content-muted">
         {skill.name}
       </span>
     </li>
@@ -69,7 +69,7 @@ function SkillRail({ skills, label }: { skills: Skill[]; label: string }) {
 
   return (
     <div className="w-full">
-      <p className="skills-kicker mb-4 ps-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#CBD5E1]">
+      <p className="skills-kicker mb-4 ps-1 text-xs font-semibold uppercase tracking-[0.2em] text-content-secondary">
         {label}
       </p>
 
@@ -112,10 +112,10 @@ function GlowBrain() {
       className="skills-brain relative flex h-40 w-40 items-center justify-center md:h-52 md:w-52"
       aria-hidden="true"
     >
-      <div className="absolute inset-0 scale-125 rounded-full bg-[#3B82F6] opacity-10 blur-3xl" />
-      <div className="absolute inset-0 rounded-full bg-cyan-400 opacity-5 blur-2xl" />
-      <div className="skills-brain-ring absolute inset-0 rounded-full border border-[#3B82F6]/20" />
-      <div className="skills-brain-ring skills-brain-ring-delayed absolute inset-0 rounded-full border border-cyan-400/10" />
+      <div className="absolute inset-0 scale-125 rounded-full bg-glow-primary opacity-10 blur-3xl" />
+      <div className="absolute inset-0 rounded-full bg-glow-tertiary opacity-5 blur-2xl" />
+      <div className="skills-brain-ring absolute inset-0 rounded-full border border-glow-primary/20" />
+      <div className="skills-brain-ring skills-brain-ring-delayed absolute inset-0 rounded-full border border-glow-tertiary/10" />
 
       <svg
         viewBox="0 0 100 100"
@@ -125,14 +125,14 @@ function GlowBrain() {
         <path
           d="M50 18 C 36 18 24 28 24 42 C 24 50 27 56 32 60 C 30 63 30 68 33 71 C 31 75 33 80 38 81 C 40 85 44 87 50 87"
           fill="none"
-          stroke="#3B82F6"
+          stroke="var(--theme-glow-primary)"
           strokeWidth="2.5"
           strokeLinecap="round"
         />
         <path
           d="M50 18 C 64 18 76 28 76 42 C 76 50 73 56 68 60 C 70 63 70 68 67 71 C 69 75 67 80 62 81 C 60 85 56 87 50 87"
           fill="none"
-          stroke="#60A5FA"
+          stroke="var(--theme-accent)"
           strokeWidth="2.5"
           strokeLinecap="round"
         />
@@ -141,23 +141,23 @@ function GlowBrain() {
           y1="18"
           x2="50"
           y2="87"
-          stroke="#1D4ED8"
+          stroke="var(--theme-action-hover)"
           strokeWidth="1.5"
           strokeDasharray="4 3"
         />
-        <path d="M34 38 C 38 36 42 40 40 44" fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
-        <path d="M30 52 C 35 50 38 54 36 58" fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
-        <path d="M37 64 C 41 62 43 66 41 69" fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
-        <path d="M66 38 C 62 36 58 40 60 44" fill="none" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
-        <path d="M70 52 C 65 50 62 54 64 58" fill="none" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
-        <path d="M63 64 C 59 62 57 66 59 69" fill="none" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+        <path d="M34 38 C 38 36 42 40 40 44" fill="none" stroke="var(--theme-glow-primary)" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+        <path d="M30 52 C 35 50 38 54 36 58" fill="none" stroke="var(--theme-glow-primary)" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+        <path d="M37 64 C 41 62 43 66 41 69" fill="none" stroke="var(--theme-glow-primary)" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+        <path d="M66 38 C 62 36 58 40 60 44" fill="none" stroke="var(--theme-accent)" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+        <path d="M70 52 C 65 50 62 54 64 58" fill="none" stroke="var(--theme-accent)" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
+        <path d="M63 64 C 59 62 57 66 59 69" fill="none" stroke="var(--theme-accent)" strokeWidth="1.5" strokeLinecap="round" opacity="0.7" />
         {nodes.map(([cx, cy], index) => (
           <circle
             key={`${cx}-${cy}`}
             cx={cx}
             cy={cy}
             r="2"
-            fill={index % 2 === 0 ? "#3B82F6" : "#60A5FA"}
+            fill={index % 2 === 0 ? "var(--theme-glow-primary)" : "var(--theme-accent)"}
           />
         ))}
       </svg>
@@ -169,14 +169,14 @@ export default function Skills({ content = defaultContent }: SkillsProps) {
   return (
     <section
       id="skills"
-      className="skills-starfield relative flex min-h-screen scroll-mt-24 flex-col items-center justify-center overflow-hidden px-6 py-24 text-white md:px-10"
+      className="skills-starfield relative flex min-h-screen scroll-mt-24 flex-col items-center justify-center overflow-hidden px-6 py-24 text-content-primary md:px-10"
     >
       <div className="relative z-10 flex w-full max-w-6xl flex-col gap-16 lg:gap-20">
         <div className="text-center">
           <h2 className="text-3xl font-bold md:text-5xl">
-            {content.title} <span className="text-[#3B82F6]">{content.titleAccent}</span>
+            {content.title} <span className="text-accent">{content.titleAccent}</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-[#A8B5C7]">
+          <p className="mx-auto mt-4 max-w-2xl text-content-muted">
             {content.introduction}
           </p>
         </div>
@@ -184,18 +184,18 @@ export default function Skills({ content = defaultContent }: SkillsProps) {
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_auto_1fr] lg:gap-12">
           <div className="flex flex-col items-center gap-4 text-center lg:items-start lg:text-start">
             <div className="flex items-center gap-3">
-              <span className="bg-gradient-to-r from-[#818CF8] to-[#3B82F6] bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl">
+              <span className="bg-gradient-to-r from-accent-secondary to-accent bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl">
                 {content.developerTitle}
               </span>
-              <span className="text-2xl text-[#3B82F6]" aria-hidden="true">
+              <span className="text-2xl text-accent" aria-hidden="true">
                 ⟨/⟩
               </span>
             </div>
-            <p className="max-w-sm text-sm leading-relaxed text-[#A8B5C7] md:text-base">
+            <p className="max-w-sm text-sm leading-relaxed text-content-muted md:text-base">
               {content.developerDescription}
             </p>
             <div className="mt-1 flex gap-2" aria-hidden="true">
-              {["#3B82F6", "#818CF8", "#60A5FA"].map((color) => (
+              {["var(--theme-glow-primary)", "var(--theme-accent-secondary)", "var(--theme-accent)"].map((color) => (
                 <span key={color} className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
               ))}
             </div>
@@ -207,11 +207,11 @@ export default function Skills({ content = defaultContent }: SkillsProps) {
 
           <div className="flex flex-col items-center gap-4 text-center lg:items-end lg:text-end">
             <div className="flex items-center gap-3">
-              <span className="bg-gradient-to-r from-[#06B6D4] to-[#7C3AED] bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl">
+              <span className="bg-gradient-to-r from-glow-tertiary to-glow-secondary bg-clip-text text-3xl font-extrabold text-transparent md:text-4xl">
                 {content.dataTitle}
               </span>
               <svg
-                className="h-7 w-7 text-[#06B6D4]"
+                className="h-7 w-7 text-glow-tertiary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -224,11 +224,11 @@ export default function Skills({ content = defaultContent }: SkillsProps) {
                 <circle cx={20} cy={6} r={1.5} fill="currentColor" />
               </svg>
             </div>
-            <p className="max-w-sm text-sm leading-relaxed text-[#A8B5C7] md:text-base">
+            <p className="max-w-sm text-sm leading-relaxed text-content-muted md:text-base">
               {content.dataDescription}
             </p>
             <div className="mt-1 flex gap-2" aria-hidden="true">
-              {["#06B6D4", "#7C3AED", "#0EA5E9"].map((color) => (
+              {["var(--theme-glow-tertiary)", "var(--theme-glow-secondary)", "var(--theme-accent-secondary)"].map((color) => (
                 <span key={color} className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
               ))}
             </div>
@@ -236,11 +236,11 @@ export default function Skills({ content = defaultContent }: SkillsProps) {
         </div>
 
         <div className="relative flex items-center gap-4">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#3B82F6]/40 to-transparent" />
-          <span className="skills-kicker text-xs font-semibold uppercase tracking-widest text-[#CBD5E1]">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+          <span className="skills-kicker text-xs font-semibold uppercase tracking-widest text-content-secondary">
             {content.technologiesLabel}
           </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[#3B82F6]/40 to-transparent" />
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
         </div>
 
         <div className="flex flex-col gap-10 lg:gap-12">

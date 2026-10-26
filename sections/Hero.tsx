@@ -74,11 +74,11 @@ export default function Hero({
       initial={reduceMotion || !intro.active ? false : { opacity: 0 }}
       animate={{ opacity: revealStarted ? 1 : 0 }}
       transition={{ duration: reduceMotion ? 0 : 0.42, ease: "easeOut" }}
-      className="relative flex min-h-[100svh] scroll-mt-24 items-center justify-center overflow-hidden px-6 pb-16 pt-24 text-white md:px-10 lg:py-28"
+      className="relative flex min-h-[100svh] scroll-mt-24 items-center justify-center overflow-hidden px-6 pb-16 pt-24 text-content-primary md:px-10 lg:py-28"
     >
-      <div className="absolute inset-0 -z-30 bg-gradient-to-br from-[#020617] via-[#0B1120] to-[#0F172A]" />
-      <div aria-hidden="true" className="absolute -start-52 -top-52 -z-20 h-[600px] w-[600px] rounded-full bg-blue-600 opacity-20 blur-[220px]" />
-      <div aria-hidden="true" className="absolute -bottom-52 -end-52 -z-20 h-[500px] w-[500px] rounded-full bg-indigo-500 opacity-20 blur-[200px]" />
+      <div className="absolute inset-0 -z-30 bg-gradient-to-br from-gradient-start via-gradient-middle to-surface" />
+      <div aria-hidden="true" className="absolute -start-52 -top-52 -z-20 h-[600px] w-[600px] rounded-full bg-glow-primary opacity-20 blur-[220px]" />
+      <div aria-hidden="true" className="absolute -bottom-52 -end-52 -z-20 h-[500px] w-[500px] rounded-full bg-glow-secondary opacity-20 blur-[200px]" />
 
       <div
         dir="ltr"
@@ -99,10 +99,10 @@ export default function Hero({
           }}
           className="relative flex items-center justify-center"
         >
-          <div aria-hidden="true" className="absolute h-[320px] w-[320px] rounded-full bg-[#3B82F6] opacity-20 blur-[140px] lg:h-[520px] lg:w-[520px] lg:blur-[200px]" />
-          <div aria-hidden="true" className="absolute h-[260px] w-[260px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] bg-gradient-to-br from-[#1D4ED8] to-[#3B82F6] opacity-70 blur-sm lg:h-[400px] lg:w-[400px]" />
-          <div aria-hidden="true" className="absolute h-[240px] w-[240px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] border border-[#60A5FA]/40 lg:h-[360px] lg:w-[360px]" />
-          <div className="relative h-52 w-52 overflow-hidden rounded-full border-4 border-[#0F172A] shadow-2xl sm:h-60 sm:w-60 lg:h-80 lg:w-80">
+          <div aria-hidden="true" className="absolute h-[320px] w-[320px] rounded-full bg-glow-primary opacity-20 blur-[140px] lg:h-[520px] lg:w-[520px] lg:blur-[200px]" />
+          <div aria-hidden="true" className="absolute h-[260px] w-[260px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] bg-gradient-to-br from-action to-glow-primary opacity-70 blur-sm lg:h-[400px] lg:w-[400px]" />
+          <div aria-hidden="true" className="absolute h-[240px] w-[240px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] border border-accent/40 lg:h-[360px] lg:w-[360px]" />
+          <div className="relative h-52 w-52 overflow-hidden rounded-full border-4 border-surface shadow-2xl sm:h-60 sm:w-60 lg:h-80 lg:w-80">
             <Image
               src="/profile.webp"
               alt={copy.imageAlt}
@@ -137,7 +137,7 @@ export default function Hero({
             initial={reduceMotion || !intro.active ? false : { opacity: 0, y: 8 }}
             animate={revealStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
             transition={{ duration: reduceMotion ? 0 : 0.32, delay: reduceMotion ? 0 : revealStarted ? 0.08 : 0, ease: "easeOut" }}
-            className="text-lg text-[#B7C3D4]"
+            className="text-lg text-content-secondary"
           >
             {copy.eyebrow}
           </motion.p>
@@ -148,7 +148,7 @@ export default function Hero({
             transition={{ duration: reduceMotion ? 0 : 0.38, delay: reduceMotion ? 0 : revealStarted ? 0.14 : 0, ease: "easeOut" }}
             className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
           >
-            {copy.firstName} <span className="text-[#60A5FA]">{copy.lastName}</span>
+            {copy.firstName} <span className="text-accent">{copy.lastName}</span>
           </motion.h1>
 
           <motion.div
@@ -166,7 +166,7 @@ export default function Hero({
             initial={reduceMotion || !intro.active ? false : { opacity: 0, y: 8 }}
             animate={revealStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
             transition={{ duration: reduceMotion ? 0 : 0.36, delay: reduceMotion ? 0 : revealStarted ? 0.3 : 0, ease: "easeOut" }}
-            className="mx-auto max-w-xl text-base leading-relaxed text-[#B7C3D4] lg:mx-0"
+            className="mx-auto max-w-xl text-base leading-relaxed text-content-secondary lg:mx-0"
           >
             {copy.descriptor}
           </motion.p>
@@ -182,7 +182,7 @@ export default function Hero({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={copy.linkedinLabel}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#475569] transition hover:border-[#60A5FA] hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-outline-default transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               <Linkedin aria-hidden="true" size={18} />
             </a>
@@ -191,7 +191,7 @@ export default function Hero({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={copy.githubLabel}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-[#475569] transition hover:border-[#60A5FA] hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-outline-default transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               <Github aria-hidden="true" size={18} />
             </a>
@@ -205,20 +205,20 @@ export default function Hero({
           >
             <a
               href={`/${locale}#projects`}
-              className="rounded-lg bg-[#2563EB] px-6 py-3 text-center font-medium text-white shadow-lg shadow-blue-500/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+              className="rounded-lg bg-action px-6 py-3 text-center font-medium text-on-action shadow-lg shadow-glow-primary/20 transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               {copy.viewProjects}
             </a>
             <a
               href={`/${locale}#contact`}
-              className="rounded-lg border border-[#475569] px-6 py-3 text-center font-medium text-[#E2E8F0] transition hover:border-[#60A5FA] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+              className="rounded-lg border border-outline-default px-6 py-3 text-center font-medium text-content-strong transition hover:border-accent hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               {copy.contact}
             </a>
             <a
               href={cvUrl}
               download
-              className="flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/5 px-6 py-3 text-center font-medium text-[#E2E8F0] backdrop-blur-md transition hover:border-white/30 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+              className="flex items-center justify-center gap-2 rounded-lg border border-content-primary/20 bg-content-primary/5 px-6 py-3 text-center font-medium text-content-strong backdrop-blur-md transition hover:border-content-primary/30 hover:bg-content-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               <Download aria-hidden="true" size={18} />
               {copy.downloadCv}
