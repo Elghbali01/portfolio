@@ -4,7 +4,9 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { useIntroSequence } from "@/components/IntroSequence";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import PortfolioWordmark from "@/components/PortfolioWordmark";
 import { sectionIds, type Locale, type SectionId } from "@/i18n";
 
 export interface NavbarLabels {
@@ -47,6 +49,11 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const shouldReduceMotion = useReducedMotion();
+  const intro = useIntroSequence();
+  const reduceMotion = shouldReduceMotion === true || intro.reducedMotion;
+  const brandVisible = visible && (!intro.active || intro.phase === "complete");
+  const navigationVisible =
+    visible && (!intro.active || intro.phase === "moving" || intro.phase === "reveal" || intro.phase === "complete");
   const homePath = `/${locale}`;
 
   useEffect(() => {
@@ -82,9 +89,9 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
   return (
     <motion.nav
       aria-label={copy.navigation}
-      initial={shouldReduceMotion ? false : { opacity: 0 }}
+      initial={reduceMotion ? false : { opacity: 0 }}
       animate={visible ? { opacity: 1 } : { opacity: 0 }}
-      transition={{ duration: shouldReduceMotion ? 0 : 0.4 }}
+      transition={{ duration: reduceMotion ? 0 : 0.4 }}
       className={`fixed inset-x-0 top-0 z-50 w-full transition-all duration-300 ${
         scrolled || menuOpen
           ? "border-b border-[#334155] bg-[#0B1120]/95 backdrop-blur-xl"
@@ -92,43 +99,74 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-6 py-4 text-white md:px-10">
-        <motion.div
-          initial={shouldReduceMotion ? false : { x: locale === "ar" ? 24 : -24, opacity: 0 }}
-          animate={visible ? { x: 0, opacity: 1 } : {}}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.5 }}
-        >
-          <Link
-            href={homePath}
-            className="rounded-sm text-2xl font-bold tracking-wide focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+        <div data-portfolio-logo-target className="inline-flex items-center">
+          <motion.div
+            initial={reduceMotion ? false : { x: locale === "ar" ? 24 : -24, opacity: 0 }}
+            animate={{
+              x: brandVisible ? 0 : locale === "ar" ? 24 : -24,
+              opacity: brandVisible ? 1 : 0,
+            }}
+            transition={{ duration: reduceMotion ? 0 : brandVisible ? 0.24 : 0.5, ease: "easeOut" }}
+            className="inline-flex"
           >
-            Port<span className="text-[#60A5FA]">folio</span>
-          </Link>
-        </motion.div>
+            <Link
+              href={homePath}
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+            >
+              <PortfolioWordmark />
+            </Link>
+          </motion.div>
+        </div>
 
         <motion.div
-          initial={shouldReduceMotion ? false : { opacity: 0, y: -8 }}
-          animate={visible ? { opacity: 1, y: 0 } : {}}
-          transition={{ delay: shouldReduceMotion ? 0 : 0.2, duration: shouldReduceMotion ? 0 : 0.4 }}
+          initial={false}
+          animate={navigationVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
+          transition={{ duration: reduceMotion ? 0 : 0.25, ease: "easeOut" }}
           className="hidden items-center gap-4 xl:flex"
         >
           <div className="flex items-center gap-5 text-sm text-[#B7C3D4]">
-            {sectionIds.map((item) => (
-              <Link
+            {sectionIds.map((item, index) => (
+              <motion.div
                 key={item}
-                href={sectionLink(item)}
-                className="group relative rounded-sm py-2 transition-colors duration-300 hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+                initial={reduceMotion ? false : { opacity: 0, y: -8 }}
+                animate={navigationVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
+                transition={{
+                  delay: navigationVisible && !reduceMotion ? 0.1 + index * 0.07 : 0,
+                  duration: reduceMotion ? 0 : 0.34,
+                  ease: "easeOut",
+                }}
               >
-                {copy.sections[item]}
-                <span className="absolute -bottom-0.5 start-0 h-0.5 w-0 bg-[#60A5FA] transition-all duration-300 group-hover:w-full group-focus-visible:w-full" />
-              </Link>
+                <Link
+                  href={sectionLink(item)}
+                  className="group relative rounded-sm py-2 transition-colors duration-300 hover:text-[#60A5FA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
+                >
+                  {copy.sections[item]}
+                  <span className="absolute -bottom-0.5 start-0 h-0.5 w-0 bg-[#60A5FA] transition-all duration-300 group-hover:w-full group-focus-visible:w-full" />
+                </Link>
+              </motion.div>
             ))}
           </div>
-          <Suspense fallback={null}>
-            <LanguageSwitcher locale={locale} label={copy.languageSwitcher} />
-          </Suspense>
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: -8 }}
+            animate={navigationVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
+            transition={{
+              delay: navigationVisible && !reduceMotion ? 0.1 + sectionIds.length * 0.07 : 0,
+              duration: reduceMotion ? 0 : 0.34,
+              ease: "easeOut",
+            }}
+          >
+            <Suspense fallback={null}>
+              <LanguageSwitcher locale={locale} label={copy.languageSwitcher} />
+            </Suspense>
+          </motion.div>
         </motion.div>
 
-        <div className="flex items-center xl:hidden">
+        <motion.div
+          initial={false}
+          animate={navigationVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: locale === "ar" ? 16 : -16 }}
+          transition={{ duration: reduceMotion ? 0 : 0.3, ease: "easeOut" }}
+          className="flex items-center xl:hidden"
+        >
           <button
             ref={triggerRef}
             type="button"
@@ -140,7 +178,7 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
           >
             {menuOpen ? <X aria-hidden="true" size={21} /> : <Menu aria-hidden="true" size={21} />}
           </button>
-        </div>
+        </motion.div>
       </div>
 
       <AnimatePresence>

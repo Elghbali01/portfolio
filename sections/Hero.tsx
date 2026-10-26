@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Download, Github, Linkedin } from "lucide-react";
+import { useIntroSequence } from "@/components/IntroSequence";
 import RotatingText from "@/components/RotatingText";
 import type { Locale } from "@/i18n/config";
 
@@ -34,6 +35,15 @@ const defaultCopy: HeroCopy = {
   githubLabel: "Issam Elghbali on GitHub",
 };
 
+interface RevealOrigin {
+  x: number;
+  y: number;
+  scale: number;
+}
+
+const DEFAULT_PHOTO_ORIGIN: RevealOrigin = { x: -48, y: -26, scale: 0.82 };
+const DEFAULT_COPY_ORIGIN: RevealOrigin = { x: 34, y: -14, scale: 0.96 };
+
 interface HeroProps {
   locale?: Locale;
   copy?: Partial<HeroCopy>;
@@ -52,16 +62,18 @@ export default function Hero({
   const copy = { ...defaultCopy, ...copyOverrides };
   const isRtl = locale === "ar";
   const shouldReduceMotion = useReducedMotion();
-  const entrance = shouldReduceMotion
-    ? undefined
-    : { opacity: 0, x: isRtl ? 48 : -48, y: -24 };
+  const intro = useIntroSequence();
+  const reduceMotion = shouldReduceMotion === true || intro.reducedMotion;
+  const revealStarted = intro.revealStarted;
+  const photoOrigin = intro.heroOrigins?.photo ?? DEFAULT_PHOTO_ORIGIN;
+  const copyOrigin = intro.heroOrigins?.copy ?? DEFAULT_COPY_ORIGIN;
 
   return (
     <motion.section
       id="home"
-      initial={entrance}
-      animate={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: "easeOut" }}
+      initial={reduceMotion || !intro.active ? false : { opacity: 0 }}
+      animate={{ opacity: revealStarted ? 1 : 0 }}
+      transition={{ duration: reduceMotion ? 0 : 0.42, ease: "easeOut" }}
       className="relative flex min-h-[100svh] scroll-mt-24 items-center justify-center overflow-hidden px-6 pb-16 pt-24 text-white md:px-10 lg:py-28"
     >
       <div className="absolute inset-0 -z-30 bg-gradient-to-br from-[#020617] via-[#0B1120] to-[#0F172A]" />
@@ -72,7 +84,21 @@ export default function Hero({
         dir="ltr"
         className="grid w-full max-w-6xl items-center gap-14 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-16"
       >
-        <div className="relative flex items-center justify-center">
+        <motion.div
+          data-intro-hero-photo
+          initial={reduceMotion || !intro.active ? false : { opacity: 0, scale: photoOrigin.scale, x: photoOrigin.x, y: photoOrigin.y, filter: "blur(10px)" }}
+          animate={
+            revealStarted
+              ? { opacity: 1, scale: 1, x: 0, y: 0, filter: "blur(0px)" }
+              : { opacity: 0, scale: photoOrigin.scale, x: photoOrigin.x, y: photoOrigin.y, filter: "blur(10px)" }
+          }
+          transition={{
+            duration: reduceMotion ? 0 : revealStarted ? 0.9 : 0,
+            delay: reduceMotion ? 0 : revealStarted ? 0.04 : 0,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="relative flex items-center justify-center"
+        >
           <div aria-hidden="true" className="absolute h-[320px] w-[320px] rounded-full bg-[#3B82F6] opacity-20 blur-[140px] lg:h-[520px] lg:w-[520px] lg:blur-[200px]" />
           <div aria-hidden="true" className="absolute h-[260px] w-[260px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] bg-gradient-to-br from-[#1D4ED8] to-[#3B82F6] opacity-70 blur-sm lg:h-[400px] lg:w-[400px]" />
           <div aria-hidden="true" className="absolute h-[240px] w-[240px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] border border-[#60A5FA]/40 lg:h-[360px] lg:w-[360px]" />
@@ -88,29 +114,69 @@ export default function Hero({
               className="object-cover"
             />
           </div>
-        </div>
+        </motion.div>
 
-        <div
+        <motion.div
           data-chat-safe-zone
+          data-intro-hero-copy
           dir={isRtl ? "rtl" : "ltr"}
+          initial={reduceMotion || !intro.active ? false : { opacity: 0, scale: copyOrigin.scale, x: copyOrigin.x, y: copyOrigin.y, filter: "blur(6px)" }}
+          animate={
+            revealStarted
+              ? { opacity: 1, scale: 1, x: 0, y: 0, filter: "blur(0px)" }
+              : { opacity: 0, scale: copyOrigin.scale, x: copyOrigin.x, y: copyOrigin.y, filter: "blur(6px)" }
+          }
+          transition={{
+            duration: reduceMotion ? 0 : revealStarted ? 0.76 : 0,
+            delay: reduceMotion ? 0 : revealStarted ? 0.14 : 0,
+            ease: [0.22, 1, 0.36, 1],
+          }}
           className="min-w-0 space-y-5 text-center lg:text-start"
         >
-          <p className="text-lg text-[#B7C3D4]">{copy.eyebrow}</p>
+          <motion.p
+            initial={reduceMotion || !intro.active ? false : { opacity: 0, y: 8 }}
+            animate={revealStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+            transition={{ duration: reduceMotion ? 0 : 0.32, delay: reduceMotion ? 0 : revealStarted ? 0.08 : 0, ease: "easeOut" }}
+            className="text-lg text-[#B7C3D4]"
+          >
+            {copy.eyebrow}
+          </motion.p>
 
-          <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+          <motion.h1
+            initial={reduceMotion || !intro.active ? false : { opacity: 0, y: 10 }}
+            animate={revealStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+            transition={{ duration: reduceMotion ? 0 : 0.38, delay: reduceMotion ? 0 : revealStarted ? 0.14 : 0, ease: "easeOut" }}
+            className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
+          >
             {copy.firstName} <span className="text-[#60A5FA]">{copy.lastName}</span>
-          </h1>
+          </motion.h1>
 
-          <RotatingText
-            phrases={copy.roles}
-            locale={locale}
-            dir={isRtl ? "rtl" : "ltr"}
-          />
-          <p className="mx-auto max-w-xl text-base leading-relaxed text-[#B7C3D4] lg:mx-0">
+          <motion.div
+            initial={reduceMotion || !intro.active ? false : { opacity: 0, y: 8 }}
+            animate={revealStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+            transition={{ duration: reduceMotion ? 0 : 0.34, delay: reduceMotion ? 0 : revealStarted ? 0.22 : 0, ease: "easeOut" }}
+          >
+            <RotatingText
+              phrases={copy.roles}
+              locale={locale}
+              dir={isRtl ? "rtl" : "ltr"}
+            />
+          </motion.div>
+          <motion.p
+            initial={reduceMotion || !intro.active ? false : { opacity: 0, y: 8 }}
+            animate={revealStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+            transition={{ duration: reduceMotion ? 0 : 0.36, delay: reduceMotion ? 0 : revealStarted ? 0.3 : 0, ease: "easeOut" }}
+            className="mx-auto max-w-xl text-base leading-relaxed text-[#B7C3D4] lg:mx-0"
+          >
             {copy.descriptor}
-          </p>
+          </motion.p>
 
-          <div className="flex justify-center gap-4 pt-1 lg:justify-start">
+          <motion.div
+            initial={reduceMotion || !intro.active ? false : { opacity: 0, y: 12 }}
+            animate={revealStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+            transition={{ duration: reduceMotion ? 0 : 0.5, delay: reduceMotion ? 0 : revealStarted ? 0.4 : 0, ease: "easeOut" }}
+            className="flex justify-center gap-4 pt-1 lg:justify-start"
+          >
             <a
               href={linkedinUrl}
               target="_blank"
@@ -129,9 +195,14 @@ export default function Hero({
             >
               <Github aria-hidden="true" size={18} />
             </a>
-          </div>
+          </motion.div>
 
-          <div className="flex flex-col flex-wrap justify-center gap-3 pt-3 sm:flex-row md:gap-2 lg:justify-start">
+          <motion.div
+            initial={reduceMotion || !intro.active ? false : { opacity: 0, y: 16 }}
+            animate={revealStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: reduceMotion ? 0 : 0.56, delay: reduceMotion ? 0 : revealStarted ? 0.52 : 0, ease: "easeOut" }}
+            className="flex flex-col flex-wrap justify-center gap-3 pt-3 sm:flex-row md:gap-2 lg:justify-start"
+          >
             <a
               href={`/${locale}#projects`}
               className="rounded-lg bg-[#2563EB] px-6 py-3 text-center font-medium text-white shadow-lg shadow-blue-500/20 transition hover:bg-[#1D4ED8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#93C5FD]"
@@ -152,8 +223,8 @@ export default function Hero({
               <Download aria-hidden="true" size={18} />
               {copy.downloadCv}
             </a>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </motion.section>
   );

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import JsonLd from "@/components/JsonLd";
-import PageIntroLoader from "@/components/PageIntroLoader";
 import { certificationIds, getDictionary, getDirection, isLocale, projectSlugs, type Locale } from "@/i18n";
 import {
   getLocalizedFeaturedCertifications,
@@ -83,7 +82,6 @@ export default async function HomePage({ params }: HomePageProps) {
 
   return (
     <main id="main-content" tabIndex={-1} className="relative overflow-hidden" aria-label={dictionary.accessibility.mainContentLabel}>
-      <PageIntroLoader key={locale} phrase={dictionary.loader.tagline} direction={dir} />
       <JsonLd data={profilePageJsonLd} />
       <Hero
         locale={locale}

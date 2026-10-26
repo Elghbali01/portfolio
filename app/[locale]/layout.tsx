@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { notFound } from "next/navigation";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import Footer from "@/components/Footer";
+import IntroSequenceProvider from "@/components/IntroSequence";
 import Navbar from "@/components/Navbar";
 import ChatWidget from "@/components/chatbot/ChatWidget";
 import { getDictionary, getDirection, isLocale, locales, localeConfig } from "@/i18n";
@@ -76,48 +77,50 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
           {dictionary.common.skipToContent}
         </a>
         <AnimatedBackground />
-        <Navbar
-          locale={locale}
-          labels={{
-            navigation: dictionary.navigation.ariaLabel,
-            openMenu: dictionary.navigation.openMenu,
-            closeMenu: dictionary.navigation.closeMenu,
-            languageSwitcher: dictionary.languageSwitcher.label,
-            sections: dictionary.navigation.sections,
-          }}
-        />
-        {children}
-        <Footer rights={dictionary.footer.rights} />
-        <ChatWidget
-          key={locale}
-          locale={locale}
-          labels={{
-            suggestions: [...dictionary.chatbot.suggestions],
-            welcome: dictionary.chatbot.welcome,
-            dialogLabel: dictionary.chatbot.dialogLabel,
-            title: dictionary.chatbot.title,
-            status: dictionary.chatbot.subtitle,
-            open: dictionary.chatbot.open,
-            close: dictionary.chatbot.close,
-            launcher: dictionary.chatbot.title,
-            unreadOne: dictionary.chatbot.unreadOne,
-            unreadMany: dictionary.chatbot.unreadMany,
-            error: dictionary.chatbot.unavailable,
-            user: dictionary.chatbot.userMessageLabel,
-            assistant: dictionary.chatbot.assistantMessageLabel,
-            thinking: dictionary.chatbot.thinking,
-            input: {
-              placeholder: dictionary.chatbot.inputPlaceholder,
-              inputLabel: dictionary.chatbot.inputLabel,
-              send: dictionary.chatbot.send,
-              disclaimer: dictionary.chatbot.disclaimer,
-            },
-            resources: {
-              ...dictionary.chatbot.resources.actions,
-              opensNewTab: dictionary.common.opensInNewTab,
-            },
-          }}
-        />
+        <IntroSequenceProvider locale={locale} phrase={dictionary.loader.tagline} direction={dir}>
+          <Navbar
+            locale={locale}
+            labels={{
+              navigation: dictionary.navigation.ariaLabel,
+              openMenu: dictionary.navigation.openMenu,
+              closeMenu: dictionary.navigation.closeMenu,
+              languageSwitcher: dictionary.languageSwitcher.label,
+              sections: dictionary.navigation.sections,
+            }}
+          />
+          {children}
+          <Footer rights={dictionary.footer.rights} />
+          <ChatWidget
+            key={locale}
+            locale={locale}
+            labels={{
+              suggestions: [...dictionary.chatbot.suggestions],
+              welcome: dictionary.chatbot.welcome,
+              dialogLabel: dictionary.chatbot.dialogLabel,
+              title: dictionary.chatbot.title,
+              status: dictionary.chatbot.subtitle,
+              open: dictionary.chatbot.open,
+              close: dictionary.chatbot.close,
+              launcher: dictionary.chatbot.title,
+              unreadOne: dictionary.chatbot.unreadOne,
+              unreadMany: dictionary.chatbot.unreadMany,
+              error: dictionary.chatbot.unavailable,
+              user: dictionary.chatbot.userMessageLabel,
+              assistant: dictionary.chatbot.assistantMessageLabel,
+              thinking: dictionary.chatbot.thinking,
+              input: {
+                placeholder: dictionary.chatbot.inputPlaceholder,
+                inputLabel: dictionary.chatbot.inputLabel,
+                send: dictionary.chatbot.send,
+                disclaimer: dictionary.chatbot.disclaimer,
+              },
+              resources: {
+                ...dictionary.chatbot.resources.actions,
+                opensNewTab: dictionary.common.opensInNewTab,
+              },
+            }}
+          />
+        </IntroSequenceProvider>
       </body>
     </html>
   );
