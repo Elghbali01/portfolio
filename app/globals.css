@@ -364,6 +364,110 @@ html[dir="rtl"] body {
   opacity: 1;
 }
 
+.expertise-icon-shell,
+.expertise-icon,
+.expertise-illustration,
+.expertise-illustration-track,
+.expertise-illustration-secondary,
+.expertise-illustration-node,
+.expertise-illustration-bar,
+.expertise-illustration-block,
+.expertise-badge {
+  transition:
+    color 260ms ease,
+    background-color 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease,
+    opacity 260ms ease,
+    transform 260ms ease,
+    stroke 260ms ease,
+    fill 260ms ease;
+}
+
+.expertise-icon-shell {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--theme-accent) 8%, transparent);
+}
+
+.expertise-card:hover .expertise-icon-shell {
+  background-color: color-mix(in srgb, var(--theme-accent) 8%, var(--theme-surface));
+  box-shadow: 0 0 1.1rem color-mix(in srgb, var(--theme-glow-primary) 18%, transparent);
+}
+
+.expertise-card:hover .expertise-icon {
+  transform: translateY(-1px) scale(1.06);
+}
+
+.expertise-illustration {
+  width: min(100%, 9rem);
+  color: var(--theme-accent);
+  opacity: 0.78;
+  transform: translateY(0);
+}
+
+.expertise-card:hover .expertise-illustration {
+  opacity: 1;
+  transform: translateY(-2px) scale(1.02);
+}
+
+.expertise-illustration-svg {
+  width: 100%;
+  overflow: visible;
+}
+
+.expertise-illustration-track,
+.expertise-illustration-secondary {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.expertise-illustration-track {
+  stroke: color-mix(in srgb, var(--theme-accent) 62%, transparent);
+}
+
+.expertise-illustration-secondary,
+.expertise-illustration-node--secondary,
+.expertise-illustration-block--secondary {
+  stroke: var(--theme-accent-secondary);
+}
+
+.expertise-illustration-node {
+  fill: var(--theme-accent);
+  stroke: var(--theme-surface-elevated);
+  stroke-width: 1.5;
+}
+
+.expertise-illustration-node--secondary {
+  fill: var(--theme-accent-secondary);
+}
+
+.expertise-illustration-bar {
+  fill: none;
+  stroke: color-mix(in srgb, var(--theme-glow-primary) 74%, transparent);
+  stroke-linecap: round;
+  stroke-width: 8;
+}
+
+.expertise-illustration-block {
+  fill: color-mix(in srgb, var(--theme-accent) 8%, var(--theme-surface));
+  stroke: color-mix(in srgb, var(--theme-accent) 68%, transparent);
+  stroke-width: 1.5;
+}
+
+.expertise-illustration-block--secondary {
+  fill: color-mix(in srgb, var(--theme-accent-secondary) 10%, var(--theme-surface));
+}
+
+.expertise-illustration-path--animated {
+  stroke-dasharray: 7 6;
+  stroke-dashoffset: 12;
+}
+
+.expertise-card:hover .expertise-illustration-path--animated {
+  stroke-dashoffset: 0;
+}
+
 .contact-field {
   transition:
     border-color 220ms ease,
@@ -479,6 +583,15 @@ html[dir="rtl"] body {
   .expertise-card:hover .expertise-card-light,
   .expertise-card:focus-within .expertise-card-light {
     opacity: 0;
+  }
+
+  .expertise-card:hover .expertise-icon,
+  .expertise-card:hover .expertise-illustration {
+    transform: none;
+  }
+
+  .expertise-card:hover .expertise-illustration-path--animated {
+    stroke-dashoffset: 12;
   }
 
   .contact-submit:hover:not(:disabled) {

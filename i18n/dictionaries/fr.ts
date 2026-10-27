@@ -86,18 +86,21 @@ const fr = {
         title: "Intelligence Artificielle",
         description:
           "Concevoir des systèmes intelligents fondés sur le Machine Learning et des algorithmes adaptés au besoin.",
+        badges: ["Machine Learning", "Deep Learning", "Réseaux de neurones"],
       },
       {
         id: "data-science",
         title: "Data Science",
         description:
           "Transformer des données brutes en analyses claires et en solutions décisionnelles fondées sur les faits.",
+        badges: ["Analyse de données", "Visualisation", "EDA"],
       },
       {
         id: "software-engineering",
         title: "Génie logiciel",
         description:
           "Construire des applications évolutives et maintenables, sur des fondations backend et frontend fiables.",
+        badges: ["Java", "Spring Boot", "API REST", "PostgreSQL"],
       },
     ],
   },

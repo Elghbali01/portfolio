@@ -1,3 +1,4 @@
+import ExpertiseCard, { type ExpertiseCardData } from "@/components/ExpertiseCard";
 import Reveal from "@/components/Reveal";
 
 export interface AboutCopy {
@@ -5,7 +6,7 @@ export interface AboutCopy {
   highlightedTitle: string;
   summary: string;
   paragraphs: string[];
-  cards: Array<{ title: string; description: string }>;
+  cards: readonly ExpertiseCardData[];
 }
 
 const defaultCopy: AboutCopy = {
@@ -20,16 +21,22 @@ const defaultCopy: AboutCopy = {
   ],
   cards: [
     {
+      id: "artificial-intelligence",
       title: "Artificial Intelligence",
       description: "Designing intelligent systems powered by Machine Learning and well-chosen algorithms.",
+      badges: ["Machine Learning", "Deep Learning", "Neural Networks"],
     },
     {
+      id: "data-science",
       title: "Data Science",
       description: "Turning raw data into clear insights, tested models, and useful decision support.",
+      badges: ["Data Analysis", "Data Visualization", "EDA"],
     },
     {
+      id: "software-engineering",
       title: "Software Engineering",
       description: "Building maintainable, reliable, and performance-conscious applications.",
+      badges: ["Java", "Spring Boot", "REST API", "PostgreSQL"],
     },
   ],
 };
@@ -63,17 +70,8 @@ export default function About({ copy: overrides, rtl = false }: AboutProps) {
           </Reveal>
 
           <Reveal from="end" rtl={rtl} className="grid gap-6">
-            {copy.cards.map((item) => (
-              <article
-                key={item.title}
-                className="expertise-card group relative overflow-hidden rounded-xl border border-outline-default bg-surface-elevated/40 p-6 backdrop-blur-md transition-[border-color,box-shadow,transform] duration-300 ease-out motion-safe:hover:-translate-y-1 hover:border-accent hover:shadow-lg hover:shadow-glow-primary/10"
-              >
-                <span aria-hidden="true" className="expertise-card-light" />
-                <div className="relative z-[1]">
-                  <h3 className="mb-2 text-lg font-semibold text-accent transition-colors duration-300 group-hover:text-accent-secondary">{item.title}</h3>
-                  <p className="text-sm leading-relaxed text-content-secondary">{item.description}</p>
-                </div>
-              </article>
+            {copy.cards.map((card) => (
+              <ExpertiseCard key={card.id} card={card} />
             ))}
           </Reveal>
         </div>

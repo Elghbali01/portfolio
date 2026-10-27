@@ -106,7 +106,12 @@ export default async function HomePage({ params }: HomePageProps) {
           highlightedTitle: dictionary.about.titleAccent,
           summary: dictionary.about.summary,
           paragraphs: [...dictionary.about.paragraphs],
-          cards: dictionary.about.focusAreas.map(({ title, description }) => ({ title, description })),
+          cards: dictionary.about.focusAreas.map((card) => ({
+            id: card.id,
+            title: card.title,
+            description: card.description,
+            badges: [...card.badges],
+          })),
         }}
       />
       <Projects

@@ -86,18 +86,21 @@ const en = {
         title: "Artificial Intelligence",
         description:
           "Designing intelligent systems supported by Machine Learning and well-chosen algorithms.",
+        badges: ["Machine Learning", "Deep Learning", "Neural Networks"],
       },
       {
         id: "data-science",
         title: "Data Science",
         description:
           "Turning raw data into clear insights and actionable, evidence-based solutions.",
+        badges: ["Data Analysis", "Data Visualization", "EDA"],
       },
       {
         id: "software-engineering",
         title: "Software Engineering",
         description:
           "Building scalable, maintainable applications with reliable backend and frontend foundations.",
+        badges: ["Java", "Spring Boot", "REST API", "PostgreSQL"],
       },
     ],
   },

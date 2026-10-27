@@ -185,6 +185,7 @@ export type PortfolioDictionary = {
       id: "artificial-intelligence" | "data-science" | "software-engineering";
       title: string;
       description: string;
+      badges: readonly string[];
     }[];
   };
   skills: {
