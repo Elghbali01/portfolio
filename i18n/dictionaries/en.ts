@@ -833,6 +833,7 @@ const en = {
     copyright: "© {year} Issam Elghbali.",
     rights: "All rights reserved.",
     navigationLabel: "Footer navigation",
+    backToTop: "Back to top",
   },
   breadcrumbs: {
     ariaLabel: "Breadcrumb",

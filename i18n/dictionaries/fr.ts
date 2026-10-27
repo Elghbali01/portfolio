@@ -834,6 +834,7 @@ const fr = {
     copyright: "© {year} Issam Elghbali.",
     rights: "Tous droits réservés.",
     navigationLabel: "Navigation de pied de page",
+    backToTop: "Retour en haut",
   },
   breadcrumbs: {
     ariaLabel: "Fil d’Ariane",

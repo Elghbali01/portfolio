@@ -101,7 +101,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
               }}
             />
             {children}
-            <Footer rights={dictionary.footer.rights} />
+            <Footer rights={dictionary.footer.rights} backToTopLabel={dictionary.footer.backToTop} />
             <ChatWidget
               key={locale}
               locale={locale}

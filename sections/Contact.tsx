@@ -236,7 +236,7 @@ export default function Contact({ labels, dir }: ContactProps) {
               }
               onInvalid={(event) => handleInvalid("name", event)}
               onInput={(event) => clearFieldErrorWhenValid("name", event)}
-              className="w-full rounded-lg border border-outline-strong bg-transparent px-4 py-3 text-content-primary outline-none transition placeholder:text-content-subtle focus:border-accent focus:ring-2 focus:ring-accent/40"
+              className="contact-field w-full rounded-lg border border-outline-strong bg-transparent px-4 py-3 text-content-primary outline-none transition placeholder:text-content-subtle focus:border-accent focus:ring-2 focus:ring-accent/40"
             />
             {fieldErrors.name && (
               <p id={`${nameId}-error`} className="mt-2 text-sm text-state-error">
@@ -268,7 +268,7 @@ export default function Contact({ labels, dir }: ContactProps) {
               }
               onInvalid={(event) => handleInvalid("email", event)}
               onInput={(event) => clearFieldErrorWhenValid("email", event)}
-              className="w-full rounded-lg border border-outline-strong bg-transparent px-4 py-3 text-start text-content-primary outline-none transition placeholder:text-content-subtle focus:border-accent focus:ring-2 focus:ring-accent/40"
+              className="contact-field w-full rounded-lg border border-outline-strong bg-transparent px-4 py-3 text-start text-content-primary outline-none transition placeholder:text-content-subtle focus:border-accent focus:ring-2 focus:ring-accent/40"
             />
             {fieldErrors.email && (
               <p
@@ -301,7 +301,7 @@ export default function Contact({ labels, dir }: ContactProps) {
               }
               onInvalid={(event) => handleInvalid("message", event)}
               onInput={(event) => clearFieldErrorWhenValid("message", event)}
-              className="w-full resize-y rounded-lg border border-outline-strong bg-transparent px-4 py-3 text-content-primary outline-none transition placeholder:text-content-subtle focus:border-accent focus:ring-2 focus:ring-accent/40"
+              className="contact-field w-full resize-y rounded-lg border border-outline-strong bg-transparent px-4 py-3 text-content-primary outline-none transition placeholder:text-content-subtle focus:border-accent focus:ring-2 focus:ring-accent/40"
             />
             {fieldErrors.message && (
               <p
@@ -316,7 +316,7 @@ export default function Contact({ labels, dir }: ContactProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-action py-3 font-medium text-on-action shadow-lg shadow-glow-primary/20 transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated disabled:cursor-wait disabled:opacity-70"
+            className="contact-submit w-full rounded-lg bg-action py-3 font-medium text-on-action shadow-lg shadow-glow-primary/20 transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated disabled:cursor-wait disabled:opacity-70"
           >
             {loading ? copy.sending : copy.sendMessage}
           </button>

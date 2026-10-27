@@ -832,6 +832,7 @@ const ar = {
     copyright: "© {year} عصام الغبالي.",
     rights: "جميع الحقوق محفوظة.",
     navigationLabel: "روابط تذييل الصفحة",
+    backToTop: "العودة إلى الأعلى",
   },
   breadcrumbs: {
     ariaLabel: "مسار التنقل",

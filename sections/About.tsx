@@ -66,10 +66,13 @@ export default function About({ copy: overrides, rtl = false }: AboutProps) {
             {copy.cards.map((item) => (
               <article
                 key={item.title}
-                className="rounded-xl border border-outline-default bg-surface-elevated/40 p-6 backdrop-blur-md transition-all duration-300 hover:border-accent hover:shadow-lg hover:shadow-glow-primary/10"
+                className="expertise-card group relative overflow-hidden rounded-xl border border-outline-default bg-surface-elevated/40 p-6 backdrop-blur-md transition-[border-color,box-shadow,transform] duration-300 ease-out motion-safe:hover:-translate-y-1 hover:border-accent hover:shadow-lg hover:shadow-glow-primary/10"
               >
-                <h3 className="mb-2 text-lg font-semibold text-accent">{item.title}</h3>
-                <p className="text-sm leading-relaxed text-content-secondary">{item.description}</p>
+                <span aria-hidden="true" className="expertise-card-light" />
+                <div className="relative z-[1]">
+                  <h3 className="mb-2 text-lg font-semibold text-accent transition-colors duration-300 group-hover:text-accent-secondary">{item.title}</h3>
+                  <p className="text-sm leading-relaxed text-content-secondary">{item.description}</p>
+                </div>
               </article>
             ))}
           </Reveal>

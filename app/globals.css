@@ -346,6 +346,48 @@ html[dir="rtl"] body {
   color: var(--skill-color);
 }
 
+.expertise-card-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle at 12% 0%,
+    color-mix(in srgb, var(--theme-accent) 18%, transparent),
+    transparent 62%
+  );
+  transition: opacity 300ms ease;
+}
+
+.expertise-card:hover .expertise-card-light,
+.expertise-card:focus-within .expertise-card-light {
+  opacity: 1;
+}
+
+.contact-field {
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background-color 220ms ease;
+}
+
+.contact-field:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-accent) 16%, transparent);
+  background-color: color-mix(in srgb, var(--theme-accent) 3%, transparent);
+}
+
+.contact-submit {
+  transition:
+    transform 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.contact-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0.65rem 1.2rem color-mix(in srgb, var(--theme-glow-primary) 20%, transparent);
+}
+
 /*
  * One copy per skill is enough: on large screens the rail gently pans between
  * its two ends. It pauses for pointer and keyboard interaction. Mobile remains
@@ -426,6 +468,21 @@ html[dir="rtl"] body {
   .ambient-orb,
   .skills-track {
     transform: none !important;
+  }
+
+  .skill-card:hover .skill-logo {
+    filter: none;
+    transform: none;
+  }
+
+  .skill-card:hover .skill-logo-shell::before,
+  .expertise-card:hover .expertise-card-light,
+  .expertise-card:focus-within .expertise-card-light {
+    opacity: 0;
+  }
+
+  .contact-submit:hover:not(:disabled) {
+    transform: none;
   }
 
   .typewriter-caret::after {

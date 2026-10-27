@@ -60,7 +60,7 @@ export default function ProjectCard({
       transition={{ delay: shouldReduceMotion ? 0 : Math.min(index * 0.08, 0.32) }}
       viewport={{ once: true, amount: 0.1 }}
       whileHover={shouldReduceMotion ? undefined : { y: -4 }}
-      className="scroll-mt-28 overflow-hidden rounded-xl border border-outline-default bg-surface-elevated/50 shadow-xl backdrop-blur-md transition hover:border-accent"
+      className="group scroll-mt-28 overflow-hidden rounded-xl border border-outline-default bg-surface-elevated/50 shadow-xl backdrop-blur-md transition-[border-color,box-shadow] duration-300 ease-out hover:border-accent hover:shadow-lg hover:shadow-glow-primary/10 focus-within:border-accent"
     >
       <div className="relative aspect-[16/9] overflow-hidden bg-surface">
         <Image
@@ -69,7 +69,7 @@ export default function ProjectCard({
           fill
           quality={76}
           sizes="(min-width: 1280px) 592px, (min-width: 768px) 44vw, 100vw"
-          className="object-cover transition duration-500 motion-safe:hover:scale-105"
+          className="object-cover transition-transform duration-500 ease-out motion-safe:group-hover:scale-[1.04]"
         />
       </div>
 
@@ -97,10 +97,10 @@ export default function ProjectCard({
             href={project.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-sm py-2 text-sm font-medium text-accent-soft hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            className="group/link inline-flex items-center gap-1 rounded-sm py-2 text-sm font-medium text-accent-soft transition-colors duration-200 hover:text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             {isProfileLink ? copy.githubProfile : copy.githubRepository}
-            <span aria-hidden="true"> ↗</span>
+            <span aria-hidden="true" className="transition-transform duration-200 motion-safe:group-hover/link:translate-x-0.5 motion-safe:group-hover/link:-translate-y-0.5">↗</span>
           </a>
 
           <Link
@@ -108,9 +108,10 @@ export default function ProjectCard({
             aria-label={copy.viewDetailsFor.includes("{project}")
               ? copy.viewDetailsFor.replace("{project}", project.title)
               : `${copy.viewDetailsFor} ${project.title}`}
-            className="rounded-lg bg-action px-4 py-2 text-sm font-medium text-on-action transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            className="group/details inline-flex items-center gap-1 rounded-lg bg-action px-4 py-2 text-sm font-medium text-on-action transition-[background-color,box-shadow] duration-300 hover:bg-action-hover hover:shadow-md hover:shadow-glow-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             {copy.viewDetails}
+            <span aria-hidden="true" className="transition-transform duration-200 motion-safe:group-hover/details:translate-x-0.5">→</span>
           </Link>
         </div>
       </div>

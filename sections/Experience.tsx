@@ -1,7 +1,7 @@
 "use client";
 
-import { useId } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useId, useRef } from "react";
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { journey } from "../data/journey";
 
 export interface JourneyItem {
@@ -44,6 +44,16 @@ export default function Experience({
   const copy: ExperienceLabels = { ...DEFAULT_LABELS, ...labels };
   const headingId = useId();
   const shouldReduceMotion = useReducedMotion();
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: timelineRef,
+    offset: ["start 78%", "end 28%"],
+  });
+  const lineProgress = useSpring(useTransform(scrollYProgress, [0, 1], [0, 1]), {
+    stiffness: 150,
+    damping: 28,
+    mass: 0.45,
+  });
 
   return (
     <section
@@ -62,10 +72,15 @@ export default function Experience({
         </p>
       </div>
 
-      <div className="relative w-full max-w-5xl">
+      <div ref={timelineRef} className="relative w-full max-w-5xl">
         <span
           aria-hidden="true"
-          className="absolute bottom-6 top-6 w-0.5 bg-outline-default [inset-inline-start:0.625rem] lg:[inset-inline-start:50%]"
+          className="absolute bottom-6 top-6 w-0.5 bg-outline-subtle [inset-inline-start:0.625rem] lg:[inset-inline-start:50%]"
+        />
+        <motion.span
+          aria-hidden="true"
+          style={{ scaleY: shouldReduceMotion ? 1 : lineProgress }}
+          className="absolute bottom-6 top-6 origin-top w-0.5 bg-gradient-to-b from-accent via-glow-primary to-accent [inset-inline-start:0.625rem] lg:[inset-inline-start:50%]"
         />
 
         <ol aria-label={copy.timelineLabel} className="space-y-8 lg:space-y-10">
@@ -78,17 +93,25 @@ export default function Experience({
                 key={item.id ?? `${item.period}-${item.title}`}
                 initial={shouldReduceMotion ? false : { opacity: 0, y: 32 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.55 }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.55,
+                  delay: shouldReduceMotion ? 0 : Math.min(index * 0.07, 0.28),
+                }}
                 viewport={{ once: true, amount: 0.2 }}
                 className="relative grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-4 lg:grid-cols-[minmax(0,1fr)_1.5rem_minmax(0,1fr)] lg:gap-x-6"
               >
-                <span
+                <motion.span
                   aria-hidden="true"
+                  initial={shouldReduceMotion ? false : { opacity: 0.55, scale: 0.78 }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, scale: 1 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: "easeOut" }}
+                  viewport={{ once: true, amount: 0.45 }}
                   className="relative z-10 col-start-1 row-start-1 mt-6 h-4 w-4 justify-self-center rounded-full border-4 border-canvas bg-accent lg:col-start-2"
                 />
 
-                <article
-                  className={`relative z-[1] col-start-2 row-start-1 w-full rounded-xl border border-outline-default bg-surface-elevated/50 p-6 text-start backdrop-blur-md lg:col-span-1 ${cardColumn}`}
+                <motion.article
+                  whileHover={shouldReduceMotion ? undefined : { y: -3 }}
+                  className={`relative z-[1] col-start-2 row-start-1 w-full rounded-xl border border-outline-default bg-surface-elevated/50 p-6 text-start backdrop-blur-md transition-[border-color,box-shadow] duration-300 ease-out hover:border-accent hover:shadow-lg hover:shadow-glow-primary/10 lg:col-span-1 ${cardColumn}`}
                 >
                   <p className="text-sm font-medium text-accent">
                     {item.typeLabel ? (
@@ -116,7 +139,7 @@ export default function Experience({
                   <p className="text-sm leading-relaxed text-content-secondary">
                     {item.description}
                   </p>
-                </article>
+                </motion.article>
               </motion.li>
             );
           })}

@@ -1,8 +1,14 @@
+import BackToTopButton from "@/components/BackToTopButton";
+
 interface FooterProps {
   rights?: string;
+  backToTopLabel?: string;
 }
 
-export default function Footer({ rights = "All rights reserved." }: FooterProps) {
+export default function Footer({
+  rights = "All rights reserved.",
+  backToTopLabel = "Back to top",
+}: FooterProps) {
   return (
     <footer className="mt-24 border-t border-outline-subtle/80 pb-8 pt-10 text-content-muted">
       <div className="mx-auto max-w-4xl space-y-4 px-6 text-center">
@@ -12,6 +18,7 @@ export default function Footer({ rights = "All rights reserved." }: FooterProps)
           © {new Date().getFullYear()} Issam Elghbali. <span>{rights}</span>
         </p>
       </div>
+      <BackToTopButton label={backToTopLabel} />
     </footer>
   );
 }

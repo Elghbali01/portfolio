@@ -300,6 +300,7 @@ export type PortfolioDictionary = {
     copyright: string;
     rights: string;
     navigationLabel: string;
+    backToTop: string;
   };
   breadcrumbs: {
     ariaLabel: string;
