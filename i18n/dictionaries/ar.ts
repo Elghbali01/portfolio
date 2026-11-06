@@ -198,21 +198,41 @@ const ar = {
       },
       backToPortfolio: "العودة إلى الملف المهني",
       collectionLabel: "مجموعة المشاريع",
+      filters: {
+        label: "تصفية المشاريع حسب الفئة",
+        all: "كل المشاريع",
+        softwareEngineering: "هندسة البرمجيات",
+        dataScienceAi: "علم البيانات والذكاء الاصطناعي",
+        webDevelopment: "تطوير الويب",
+        emptyTitle: "لا توجد مشاريع في هذا العرض",
+        emptyDescription: "جرّب فئة أخرى أو أعد ضبط عوامل التصفية.",
+        reset: "عرض كل المشاريع",
+      },
     },
     card: {
       githubProfile: "حساب GitHub",
       githubRepository: "مستودع GitHub",
       viewDetails: "تفاصيل المشروع",
       viewDetailsFor: "عرض تفاصيل مشروع {project}",
+      imageAlt: "معاينة",
       technologiesLabel: "التقنيات المستخدمة",
+      moreTechnologies: "+{count} أخرى",
+      projectOrdinal: "مشروع",
     },
     detail: {
       backToProjects: "العودة إلى جميع المشاريع",
       githubProfile: "عرض حساب GitHub",
       githubRepository: "عرض المستودع على GitHub",
-      projectImageLabel: "معاينة المشروع",
+      projectImageLabel: "عرض صورة أكبر لمشروع {project}",
+      imageCounterLabel: "الصورة {current} من {total}",
       technologiesHeading: "التقنيات",
       caseStudyHeading: "دراسة المشروع",
+      contentsLabel: "في هذه الصفحة",
+      architectureDiagramLabel: "مخطط بنية {project}",
+      previousProject: "المشروع السابق",
+      nextProject: "المشروع التالي",
+      projectNavigationLabel: "التنقل بين المشاريع",
+      projectPosition: "المشروع {current} من {total}",
     },
     items: {
       "indonesia-tourism": {
@@ -281,6 +301,7 @@ const ar = {
             paragraphs: [
               "تستخدم الواجهة الخلفية Spring Boot وتعرض REST API، بينما توفر واجهة React.js تجربة تفاعلية وتتولى إدارة حالة التطبيق.",
             ],
+            architectureFlow: ["واجهة React.js", "REST API", "خلفية Spring Boot"],
           },
           {
             id: "demonstrates",
@@ -323,6 +344,7 @@ const ar = {
             id: "architecture",
             heading: "البنية متعددة الطبقات",
             items: ["طبقة Controller", "طبقة Service", "طبقة Repository"],
+            architectureFlow: ["Thymeleaf", "المتحكم", "الخدمة", "المستودع", "JDBC", "MySQL"],
           },
         ],
       },
@@ -424,6 +446,7 @@ const ar = {
               "التحقق باستخدام Jakarta Validation",
               "تخزين البيانات باستخدام Spring Data JPA",
             ],
+            architectureFlow: ["REST API", "المتحكم", "الخدمة", "المستودع", "Spring Data JPA", "PostgreSQL"],
           },
           {
             id: "status",
@@ -492,6 +515,7 @@ const ar = {
             paragraphs: [
               "تتبع الواجهة الخلفية طبقات Controller وService وRepository، وتؤمّن أدوار رئيس القسم ومسؤول الموارد والتقني والمورد والأستاذ.",
             ],
+            architectureFlow: ["REST API", "المتحكم", "الخدمة", "المستودع", "Spring Data JPA", "PostgreSQL"],
           },
         ],
       },
@@ -518,6 +542,7 @@ const ar = {
               "توفر مجموعة water_potability.csv متغيرات pH وHardness وSolids وChloramines وSulfate وConductivity وOrganic Carbon وTrihalomethanes وTurbidity.",
             ],
             metrics: [{ label: "متغيرات الإدخال", value: "9" }],
+            architectureFlow: ["9 متغيرات لجودة المياه", "معالجة القيم المفقودة", "مقارنة النماذج", "التحقق المتقاطع", "تطبيق Streamlit"],
           },
           {
             id: "feature-importance",
@@ -628,6 +653,7 @@ const ar = {
               "Endpoints للصحة ومعلومات النموذج والتنبؤ الفردي والدُفعي مع توثيق Swagger",
               "واجهة متجاوبة تتضمن 19 مدخلًا للعميل والاحتمال والتنبؤ وعتبة التشغيل",
             ],
+            architectureFlow: ["هندسة الخصائص", "Logistic Regression · عتبة 0.30", "تفسيرات SHAP", "استدلال FastAPI", "تطبيق ويب متجاوب"],
           },
           {
             id: "validation",
@@ -702,6 +728,7 @@ const ar = {
               "واجهة React وTypeScript لاستكشاف اللاعبين ومخططات Radar والمقارنة ومسارات الكشف والتحليلات",
               "عميل API مركزي ومكتوب بأنواع واضحة يربط الواجهة الأمامية بخلفية التوصية",
             ],
+            architectureFlow: ["بيانات كرة القدم", "خصائص تراعي مركز اللاعب", "التشابه والتوصيات", "FastAPI", "React + TypeScript"],
           },
           {
             id: "validation",

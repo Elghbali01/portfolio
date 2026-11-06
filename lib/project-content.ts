@@ -25,6 +25,8 @@ export interface ProjectContentSection {
   heading: string;
   blocks?: readonly ProjectContentBlock[];
   subsections?: readonly ProjectContentSubsection[];
+  metrics?: readonly { label: string; value: string }[];
+  architectureFlow?: readonly string[];
 }
 
 /**

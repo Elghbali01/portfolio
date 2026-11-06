@@ -200,21 +200,41 @@ const fr = {
       },
       backToPortfolio: "Retour au portfolio",
       collectionLabel: "Collection de projets",
+      filters: {
+        label: "Filtrer les projets par catégorie",
+        all: "Tous les projets",
+        softwareEngineering: "Ingénierie logicielle",
+        dataScienceAi: "Science des données et IA",
+        webDevelopment: "Développement web",
+        emptyTitle: "Aucun projet dans cette vue",
+        emptyDescription: "Choisissez une autre catégorie ou réinitialisez les filtres.",
+        reset: "Afficher tous les projets",
+      },
     },
     card: {
       githubProfile: "Profil GitHub",
       githubRepository: "Dépôt GitHub",
       viewDetails: "Découvrir le projet",
       viewDetailsFor: "Découvrir le projet {project}",
+      imageAlt: "Aperçu de",
       technologiesLabel: "Technologies utilisées",
+      moreTechnologies: "+{count} de plus",
+      projectOrdinal: "Projet",
     },
     detail: {
       backToProjects: "Retour à tous les projets",
       githubProfile: "Voir le profil GitHub",
       githubRepository: "Voir le dépôt sur GitHub",
-      projectImageLabel: "Aperçu du projet",
+      projectImageLabel: "Agrandir l’aperçu de {project}",
+      imageCounterLabel: "Image {current} sur {total}",
       technologiesHeading: "Technologies",
       caseStudyHeading: "Étude de cas",
+      contentsLabel: "Sur cette page",
+      architectureDiagramLabel: "Flux d’architecture de {project}",
+      previousProject: "Projet précédent",
+      nextProject: "Projet suivant",
+      projectNavigationLabel: "Navigation entre les projets",
+      projectPosition: "Projet {current} sur {total}",
     },
     items: {
       "indonesia-tourism": {
@@ -283,6 +303,7 @@ const fr = {
             paragraphs: [
               "Le backend Spring Boot expose les API REST. Le frontend React.js prend en charge l’expérience interactive et la gestion d’état de l’application.",
             ],
+            architectureFlow: ["Interface React.js", "API REST", "Backend Spring Boot"],
           },
           {
             id: "demonstrates",
@@ -325,6 +346,7 @@ const fr = {
             id: "architecture",
             heading: "Architecture en couches",
             items: ["Couche Controller", "Couche Service", "Couche Repository"],
+            architectureFlow: ["Thymeleaf", "Contrôleur", "Service", "Repository", "JDBC", "MySQL"],
           },
         ],
       },
@@ -426,6 +448,7 @@ const fr = {
               "Validation avec Jakarta Validation",
               "Persistance avec Spring Data JPA",
             ],
+            architectureFlow: ["API REST", "Contrôleur", "Service", "Repository", "Spring Data JPA", "PostgreSQL"],
           },
           {
             id: "status",
@@ -494,6 +517,7 @@ const fr = {
             paragraphs: [
               "Le backend suit les couches Controller, Service et Repository et sécurise les rôles Chef de département, Responsable des ressources, Technicien, Fournisseur et Enseignant.",
             ],
+            architectureFlow: ["API REST", "Contrôleur", "Service", "Repository", "Spring Data JPA", "PostgreSQL"],
           },
         ],
       },
@@ -520,6 +544,7 @@ const fr = {
               "Le jeu water_potability.csv fournit les variables pH, Hardness, Solids, Chloramines, Sulfate, Conductivity, Organic Carbon, Trihalomethanes et Turbidity.",
             ],
             metrics: [{ label: "Variables d’entrée", value: "9" }],
+            architectureFlow: ["9 variables de qualité de l’eau", "Traitement des valeurs manquantes", "Comparaison des modèles", "Validation croisée", "Application Streamlit"],
           },
           {
             id: "feature-importance",
@@ -630,6 +655,7 @@ const fr = {
               "Endpoints de santé, informations modèle, prédiction unitaire et batch, documentés avec Swagger",
               "Interface responsive pour 19 variables client, probabilité, prédiction et seuil opérationnel",
             ],
+            architectureFlow: ["Ingénierie des variables", "Logistic Regression · seuil 0,30", "Explications SHAP", "Inférence FastAPI", "Application web responsive"],
           },
           {
             id: "validation",
@@ -704,6 +730,7 @@ const fr = {
               "Interface React et TypeScript avec exploration, radars, comparaison, workflows de scouting et analytics",
               "Client API typé centralisé entre frontend et backend de recommandation",
             ],
+            architectureFlow: ["Données football", "Variables adaptées au poste", "Similarité et recommandations", "FastAPI", "React + TypeScript"],
           },
           {
             id: "validation",

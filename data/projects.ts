@@ -70,7 +70,7 @@ export const projectKnowledge: Record<string, ProjectKnowledge> = {
     recruiterValue: "Strong evidence of an end-to-end applied Machine Learning workflow, not primarily a backend project.",
   },
   "customer-churn-prediction": {
-    primaryDomain: "data-science", secondaryDomains: ["ai-ml", "backend"],
+    primaryDomain: "data-science", secondaryDomains: ["ai-ml", "backend", "frontend"],
     objective: "Predict customer churn probabilities and identify at-risk customers to help prioritize retention actions.",
     demonstratedCapabilities: ["End-to-end Machine Learning pipeline", "EDA and feature engineering", "Model evaluation and threshold tuning", "SHAP explainability", "FastAPI inference API", "Automated testing", "Docker containerization"],
     recruiterValue: "Strong evidence of delivering an end-to-end Data Science project from a business problem to a tested and containerized ML application.",

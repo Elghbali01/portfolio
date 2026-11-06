@@ -4,9 +4,10 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import DirectionalArrow from "@/components/DirectionalArrow";
 import JsonLd from "@/components/JsonLd";
-import ProjectCard from "@/components/ProjectCard";
+import ProjectGallery, { type ProjectGalleryItem } from "@/components/ProjectGallery";
 import Reveal from "@/components/Reveal";
-import { formatCount, getDictionary, isLocale, projectSlugs, type Locale } from "@/i18n";
+import { getDictionary, isLocale, projectSlugs, type Locale } from "@/i18n";
+import { getProjectDomainFilters } from "@/lib/project-gallery";
 import { getLocalizedProjectCards } from "@/lib/localized-portfolio";
 import { absoluteUrl, buildLocalizedMetadata } from "@/lib/site";
 
@@ -37,6 +38,11 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
   const locale = await resolveLocale(params);
   const dictionary = await getDictionary(locale);
   const projects = getLocalizedProjectCards(dictionary);
+  const galleryProjects: ProjectGalleryItem[] = projects.map((project, index) => ({
+    ...project,
+    ordinal: index + 1,
+    filters: getProjectDomainFilters(project.slug),
+  }));
   const imageAlts = Object.fromEntries(projectSlugs.map((slug) => [slug, dictionary.projects.items[slug].imageAlt]));
 
   const itemListJsonLd = {
@@ -73,30 +79,37 @@ export default async function ProjectsPage({ params }: ProjectsPageProps) {
           <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-content-secondary">
             {dictionary.projects.listing.description}
           </p>
-          <p className="mt-3 text-sm text-content-muted">
-            {formatCount(projects.length, locale, dictionary.projects.listing.count)}
-          </p>
         </Reveal>
 
-        <section aria-label={dictionary.projects.listing.collectionLabel} className="grid gap-10 lg:grid-cols-2">
-          {projects.map((project, index) => (
-            <ProjectCard
-              key={project.slug}
-              project={project}
-              index={index}
-              locale={locale}
-              headingLevel="h2"
-              imageAlt={imageAlts[project.slug]}
-              labels={{
-                githubRepository: dictionary.projects.card.githubRepository,
-                githubProfile: dictionary.projects.card.githubProfile,
-                viewDetails: dictionary.projects.card.viewDetails,
-                viewDetailsFor: dictionary.projects.card.viewDetailsFor,
-                technologiesLabel: dictionary.projects.card.technologiesLabel,
-              }}
-            />
-          ))}
-        </section>
+        <ProjectGallery
+          projects={galleryProjects}
+          locale={locale}
+          collectionLabel={dictionary.projects.listing.collectionLabel}
+          imageAlts={imageAlts}
+          cardLabels={{
+            githubRepository: dictionary.projects.card.githubRepository,
+            githubProfile: dictionary.projects.card.githubProfile,
+            viewDetails: dictionary.projects.card.viewDetails,
+            viewDetailsFor: dictionary.projects.card.viewDetailsFor,
+            imageAlt: dictionary.projects.card.imageAlt,
+            technologiesLabel: dictionary.projects.card.technologiesLabel,
+            moreTechnologies: dictionary.projects.card.moreTechnologies,
+            projectOrdinal: dictionary.projects.card.projectOrdinal,
+          }}
+          labels={{
+            filterLabel: dictionary.projects.listing.filters.label,
+            count: dictionary.projects.listing.count,
+            filters: {
+              all: dictionary.projects.listing.filters.all,
+              "software-engineering": dictionary.projects.listing.filters.softwareEngineering,
+              "data-science-ai": dictionary.projects.listing.filters.dataScienceAi,
+              "web-development": dictionary.projects.listing.filters.webDevelopment,
+            },
+            emptyTitle: dictionary.projects.listing.filters.emptyTitle,
+            emptyDescription: dictionary.projects.listing.filters.emptyDescription,
+            reset: dictionary.projects.listing.filters.reset,
+          }}
+        />
 
         <div data-chat-safe-zone className="mt-16 flex justify-center">
           <Link

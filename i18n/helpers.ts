@@ -113,17 +113,12 @@ export function toRenderableCaseStudy(
         blocks.push({ type: "list", items: section.items });
       }
 
-      if (section.metrics && section.metrics.length > 0) {
-        blocks.push({
-          type: "list",
-          items: section.metrics.map((metric) => `${metric.label}: ${metric.value}`),
-        });
-      }
-
       return {
         id: section.id,
         heading: section.heading,
         blocks,
+        metrics: section.metrics,
+        architectureFlow: section.architectureFlow,
       };
     }),
   };

@@ -78,6 +78,8 @@ export type CaseStudySection = {
   paragraphs?: readonly string[];
   items?: readonly string[];
   metrics?: readonly CaseStudyMetric[];
+  /** A documented left-to-right flow for a small architecture diagram. */
+  architectureFlow?: readonly string[];
 };
 
 export type ProjectTranslation = {
@@ -107,6 +109,8 @@ export type RenderableCaseStudy = {
     id: string;
     heading: string;
     blocks: readonly RenderableCaseStudyBlock[];
+    metrics?: readonly CaseStudyMetric[];
+    architectureFlow?: readonly string[];
   }[];
 };
 
@@ -232,21 +236,41 @@ export type PortfolioDictionary = {
       count: PluralForms;
       backToPortfolio: string;
       collectionLabel: string;
+      filters: {
+        label: string;
+        all: string;
+        softwareEngineering: string;
+        dataScienceAi: string;
+        webDevelopment: string;
+        emptyTitle: string;
+        emptyDescription: string;
+        reset: string;
+      };
     };
     card: {
       githubProfile: string;
       githubRepository: string;
       viewDetails: string;
       viewDetailsFor: string;
+      imageAlt: string;
       technologiesLabel: string;
+      moreTechnologies: string;
+      projectOrdinal: string;
     };
     detail: {
       backToProjects: string;
       githubProfile: string;
       githubRepository: string;
       projectImageLabel: string;
+      imageCounterLabel: string;
       technologiesHeading: string;
       caseStudyHeading: string;
+      contentsLabel: string;
+      architectureDiagramLabel: string;
+      previousProject: string;
+      nextProject: string;
+      projectNavigationLabel: string;
+      projectPosition: string;
     };
     items: Record<ProjectSlug, ProjectTranslation>;
   };

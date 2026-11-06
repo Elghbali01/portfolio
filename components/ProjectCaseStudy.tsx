@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ArrowDown } from "lucide-react";
 import {
   parseProjectContent,
   type ProjectContentBlock,
@@ -12,6 +13,8 @@ interface ProjectCaseStudyProps {
   lang?: string;
   dir?: ProjectTextDirection;
   className?: string;
+  architectureDiagramLabel?: string;
+  projectTitle?: string;
 }
 
 interface ContentBlocksProps {
@@ -106,6 +109,48 @@ function inferDirection(lang: string | undefined): ProjectTextDirection | undefi
   return lang.toLowerCase().startsWith("ar") ? "rtl" : "ltr";
 }
 
+function ArchitectureFlow({
+  flow,
+  label,
+  lang,
+}: {
+  flow: readonly string[];
+  label: string;
+  lang: string;
+}) {
+  if (flow.length === 0) return null;
+
+  return (
+    <figure
+      aria-label={label}
+      dir="ltr"
+      className="rounded-2xl border border-outline-subtle bg-surface-elevated/70 p-4 md:p-5"
+    >
+      <figcaption dir="auto" className="mb-4 text-start text-xs font-semibold uppercase tracking-[0.14em] text-content-muted">{label}</figcaption>
+      <ol className="mx-auto flex max-w-md flex-col items-stretch">
+        {flow.map((step, index) => (
+          <li key={`${step}-${index}`} className="flex flex-col items-center">
+            <div className="flex min-h-12 w-full items-center gap-3 rounded-xl border border-outline-default bg-surface px-4 py-3 shadow-sm">
+              <span
+                aria-hidden="true"
+                className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-semibold text-accent"
+              >
+                {new Intl.NumberFormat(lang, { minimumIntegerDigits: 2, useGrouping: false }).format(index + 1)}
+              </span>
+              <span dir="auto" className="min-w-0 text-sm font-medium text-content-strong">
+                {step}
+              </span>
+            </div>
+            {index < flow.length - 1 && (
+              <ArrowDown aria-hidden="true" className="my-1 size-4 text-accent" />
+            )}
+          </li>
+        ))}
+      </ol>
+    </figure>
+  );
+}
+
 /**
  * Renders either legacy project descriptions or localized structured content.
  * Text is rendered as React children; no HTML string is injected.
@@ -116,6 +161,8 @@ export default function ProjectCaseStudy({
   lang,
   dir,
   className = "",
+  architectureDiagramLabel = "Architecture flow",
+  projectTitle = "",
 }: ProjectCaseStudyProps) {
   const parsedContent =
     typeof content === "string" ? parseProjectContent(content) : content;
@@ -131,10 +178,10 @@ export default function ProjectCaseStudy({
     <div
       lang={resolvedLang}
       dir={resolvedDir}
-      className={`mx-auto max-w-3xl space-y-10 text-start text-content-secondary leading-8 ${className}`.trim()}
+      className={`space-y-12 text-start text-content-secondary leading-8 ${className}`.trim()}
     >
       {parsedContent.introduction && parsedContent.introduction.length > 0 && (
-        <div className="space-y-4">
+        <div className="rounded-2xl border border-outline-subtle border-s-4 border-s-accent bg-surface-elevated/60 p-5 text-lg leading-relaxed text-content-strong md:p-7">
           <ContentBlocks
             blocks={parsedContent.introduction}
             technologyTerms={technologyTerms}
@@ -146,22 +193,58 @@ export default function ProjectCaseStudy({
 
       {parsedContent.sections.map((section, sectionIndex) => {
         const sectionKey = section.id ?? `section-${sectionIndex}`;
+        const headingId = `${sectionKey}-heading`;
+        const number = new Intl.NumberFormat(resolvedLang, {
+          minimumIntegerDigits: 2,
+          useGrouping: false,
+        }).format(sectionIndex + 1);
 
         return (
-          <section key={sectionKey} className="space-y-4">
-            <h2
-              id={section.id}
-              className="scroll-mt-28 text-2xl font-bold leading-tight text-content-primary md:text-3xl"
-            >
-              {renderTextWithBidiIsolation(section.heading, technologyTerms, rtl)}
-            </h2>
+          <section
+            key={sectionKey}
+            id={section.id}
+            aria-labelledby={headingId}
+            className="scroll-mt-28 space-y-5 border-t border-outline-subtle pt-8 md:pt-10"
+          >
+            <div className="flex items-start gap-4">
+              <span aria-hidden="true" dir="ltr" className="pt-1 text-sm font-semibold tracking-[0.16em] text-accent">
+                {number}
+              </span>
+              <h2 id={headingId} className="text-2xl font-bold leading-tight text-content-primary md:text-3xl">
+                {renderTextWithBidiIsolation(section.heading, technologyTerms, rtl)}
+              </h2>
+            </div>
 
-            <ContentBlocks
-              blocks={section.blocks}
-              technologyTerms={technologyTerms}
-              rtl={rtl}
-              keyPrefix={`${sectionKey}-content`}
-            />
+            <div className={section.architectureFlow ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.72fr)] lg:items-start" : "space-y-5"}>
+              {section.blocks && section.blocks.length > 0 && (
+                <div className="space-y-4">
+                  <ContentBlocks
+                    blocks={section.blocks}
+                    technologyTerms={technologyTerms}
+                    rtl={rtl}
+                    keyPrefix={`${sectionKey}-content`}
+                  />
+                </div>
+              )}
+              {section.architectureFlow && (
+                <ArchitectureFlow
+                  flow={section.architectureFlow}
+                  label={architectureDiagramLabel.replace("{project}", projectTitle)}
+                  lang={resolvedLang ?? "en"}
+                />
+              )}
+            </div>
+
+            {section.metrics && section.metrics.length > 0 && (
+              <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {section.metrics.map((metric) => (
+                  <div key={`${metric.label}-${metric.value}`} className="rounded-2xl border border-outline-subtle bg-surface-elevated/65 p-4 md:p-5">
+                    <dt className="text-sm text-content-secondary">{metric.label}</dt>
+                    <dd className="mt-2 text-2xl font-semibold tracking-tight text-accent md:text-3xl">{metric.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
 
             {section.subsections?.map((subsection, subsectionIndex) => {
               const subsectionKey =

@@ -199,21 +199,41 @@ const en = {
       },
       backToPortfolio: "Back to portfolio",
       collectionLabel: "Project collection",
+      filters: {
+        label: "Filter projects by category",
+        all: "All projects",
+        softwareEngineering: "Software Engineering",
+        dataScienceAi: "Data Science & AI",
+        webDevelopment: "Web Development",
+        emptyTitle: "No projects in this view",
+        emptyDescription: "Choose another category or reset the filters.",
+        reset: "Show all projects",
+      },
     },
     card: {
       githubProfile: "GitHub profile",
       githubRepository: "GitHub repository",
       viewDetails: "View details",
       viewDetailsFor: "View details for {project}",
+      imageAlt: "Preview of",
       technologiesLabel: "Technologies used",
+      moreTechnologies: "+{count} more",
+      projectOrdinal: "Project",
     },
     detail: {
       backToProjects: "Back to all projects",
       githubProfile: "View GitHub profile",
       githubRepository: "View repository on GitHub",
-      projectImageLabel: "Project preview",
+      projectImageLabel: "Open a larger preview of {project}",
+      imageCounterLabel: "Image {current} of {total}",
       technologiesHeading: "Technologies",
       caseStudyHeading: "Case study",
+      contentsLabel: "On this page",
+      architectureDiagramLabel: "Architecture flow for {project}",
+      previousProject: "Previous project",
+      nextProject: "Next project",
+      projectNavigationLabel: "Project navigation",
+      projectPosition: "Project {current} of {total}",
     },
     items: {
       "indonesia-tourism": {
@@ -282,6 +302,7 @@ const en = {
             paragraphs: [
               "The backend uses Spring Boot and exposes REST APIs. The React.js frontend provides the interactive user experience and manages application state.",
             ],
+            architectureFlow: ["React.js frontend", "REST APIs", "Spring Boot backend"],
           },
           {
             id: "demonstrates",
@@ -324,6 +345,7 @@ const en = {
             id: "architecture",
             heading: "Layered architecture",
             items: ["Controller layer", "Service layer", "Repository layer"],
+            architectureFlow: ["Thymeleaf", "Controller", "Service", "Repository", "JDBC", "MySQL"],
           },
         ],
       },
@@ -425,6 +447,7 @@ const en = {
               "Jakarta Validation",
               "Persistence with Spring Data JPA",
             ],
+            architectureFlow: ["REST API", "Controller", "Service", "Repository", "Spring Data JPA", "PostgreSQL"],
           },
           {
             id: "status",
@@ -493,6 +516,7 @@ const en = {
             paragraphs: [
               "The backend follows Controller, Service, and Repository layers and secures the Department Head, Resource Manager, Technician, Supplier, and Teacher roles.",
             ],
+            architectureFlow: ["REST API", "Controller", "Service", "Repository", "Spring Data JPA", "PostgreSQL"],
           },
         ],
       },
@@ -519,6 +543,7 @@ const en = {
               "The water_potability.csv dataset provides pH, Hardness, Solids, Chloramines, Sulfate, Conductivity, Organic Carbon, Trihalomethanes, and Turbidity.",
             ],
             metrics: [{ label: "Input features", value: "9" }],
+            architectureFlow: ["9 water-quality features", "Missing-value handling", "Model comparison", "Cross-validation", "Streamlit application"],
           },
           {
             id: "feature-importance",
@@ -629,6 +654,7 @@ const en = {
               "Health, model information, single prediction, and batch prediction endpoints with Swagger documentation",
               "Responsive interface for 19 customer inputs, probability, prediction, and the operational threshold",
             ],
+            architectureFlow: ["Feature engineering", "Logistic Regression · 0.30 threshold", "SHAP explanations", "FastAPI inference", "Responsive web app"],
           },
           {
             id: "validation",
@@ -703,6 +729,7 @@ const en = {
               "React and TypeScript interface with exploration, radar charts, comparisons, scouting workflows, and analytics",
               "Centralised typed API client connecting the frontend and recommendation backend",
             ],
+            architectureFlow: ["Football data", "Position-aware features", "Similarity and recommendations", "FastAPI", "React + TypeScript"],
           },
           {
             id: "validation",

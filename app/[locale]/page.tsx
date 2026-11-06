@@ -129,6 +129,8 @@ export default async function HomePage({ params }: HomePageProps) {
             viewDetails: dictionary.projects.card.viewDetails,
             viewDetailsFor: dictionary.projects.card.viewDetailsFor,
             technologiesLabel: dictionary.projects.card.technologiesLabel,
+              moreTechnologies: dictionary.projects.card.moreTechnologies,
+              projectOrdinal: dictionary.projects.card.projectOrdinal,
           },
         }}
       />
