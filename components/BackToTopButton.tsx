@@ -25,13 +25,20 @@ export default function BackToTopButton({ label = "Back to top" }: BackToTopButt
   }, []);
 
   useEffect(() => {
-    const panel = document.querySelector<HTMLElement>("[data-back-to-top-safe-zone]");
-    if (!panel) return;
+    const panels = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-back-to-top-safe-zone]"),
+    );
+    if (panels.length === 0) return;
 
-    const observer = new IntersectionObserver(([entry]) => {
-      setInsideInteractivePanel(Boolean(entry?.isIntersecting));
+    const visiblePanels = new Set<Element>();
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) visiblePanels.add(entry.target);
+        else visiblePanels.delete(entry.target);
+      });
+      setInsideInteractivePanel(visiblePanels.size > 0);
     });
-    observer.observe(panel);
+    panels.forEach((panel) => observer.observe(panel));
     return () => observer.disconnect();
   }, [pathname]);
 

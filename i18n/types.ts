@@ -124,6 +124,7 @@ export type CertificationTranslation = {
 export type ExperienceTranslation = {
   title: string;
   period: string;
+  type: "education" | "experience";
   institution: string;
   location: string;
   duration?: string;

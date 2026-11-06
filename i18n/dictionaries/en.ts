@@ -185,12 +185,13 @@ const en = {
     titleLead: "Professional",
     titleAccent: "Journey",
     description:
-      "My academic and professional path, building expertise in Software Engineering, Data Science, and intelligent systems.",
+      "From scientific foundations to computer engineering, practical software engineering, and ongoing study in data science and intelligent systems.",
     timelineLabel: "Academic and professional timeline",
     items: {
       "master-data-science": {
         title: "Master in Data Science & Intelligent Systems",
         period: "2025 – Present",
+        type: "education",
         institution: "Faculty of Sciences and Techniques of Fez (FST Fez)",
         location: "Fez, Morocco",
         description:
@@ -200,16 +201,18 @@ const en = {
       "software-engineering-internship": {
         title: "Software Engineering Intern",
         period: "2025",
+        type: "experience",
         institution: "École Polytechnique des Génies",
         location: "Fez, Morocco",
         duration: "2 months",
         description:
           "Designed and developed an internal resource management platform with Spring Boot and React.js, focusing on backend architecture, REST APIs, and reliable system integration to streamline internal operations.",
-        typeLabel: "Professional experience",
+        typeLabel: "Internship",
       },
       "computer-engineering-licence": {
         title: "Licence Sciences et Techniques — Computer Engineering",
         period: "2024 – 2025",
+        type: "education",
         institution: "Faculty of Sciences and Techniques of Fez (FST Fez)",
         location: "Fez, Morocco",
         description:
@@ -219,6 +222,7 @@ const en = {
       deust: {
         title: "DEUST",
         period: "2022 – 2024",
+        type: "education",
         institution: "Faculty of Sciences and Techniques of Fez (FST Fez)",
         location: "Fez, Morocco",
         description:

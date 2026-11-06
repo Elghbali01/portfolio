@@ -186,12 +186,13 @@ const fr = {
     titleLead: "Mon",
     titleAccent: "parcours",
     description:
-      "Un parcours académique et professionnel qui développe mes compétences en génie logiciel, Data Science et systèmes intelligents.",
+      "Des fondements scientifiques au génie informatique, au génie logiciel en pratique et à une spécialisation en cours en Data Science et systèmes intelligents.",
     timelineLabel: "Parcours académique et professionnel",
     items: {
       "master-data-science": {
         title: "Master en Data Science & Systèmes Intelligents",
         period: "2025 – aujourd’hui",
+        type: "education",
         institution: "Faculté des Sciences et Techniques de Fès (FST Fès)",
         location: "Fès, Maroc",
         description:
@@ -201,16 +202,18 @@ const fr = {
       "software-engineering-internship": {
         title: "Stagiaire en génie logiciel",
         period: "2025",
+        type: "experience",
         institution: "École Polytechnique des Génies",
         location: "Fès, Maroc",
         duration: "2 mois",
         description:
           "Conception et développement d’une plateforme interne de gestion des ressources avec Spring Boot et React.js, avec un travail centré sur l’architecture backend, les API REST et une intégration fiable des composants du système.",
-        typeLabel: "Expérience professionnelle",
+        typeLabel: "Stage",
       },
       "computer-engineering-licence": {
         title: "Licence Sciences et Techniques — Génie informatique",
         period: "2024 – 2025",
+        type: "education",
         institution: "Faculté des Sciences et Techniques de Fès (FST Fès)",
         location: "Fès, Maroc",
         description:
@@ -220,6 +223,7 @@ const fr = {
       deust: {
         title: "DEUST",
         period: "2022 – 2024",
+        type: "education",
         institution: "Faculté des Sciences et Techniques de Fès (FST Fès)",
         location: "Fès, Maroc",
         description:

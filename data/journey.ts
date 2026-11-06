@@ -36,4 +36,4 @@ export const journey = [
     description:
       "Built a strong foundation in mathematics and computer science fundamentals, developing analytical thinking, problem-solving skills, and core engineering principles.",
   },
-];
+] as const;

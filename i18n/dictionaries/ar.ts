@@ -185,12 +185,13 @@ const ar = {
     titleLead: "مساري",
     titleAccent: "المهني والأكاديمي",
     description:
-      "مسار أكاديمي ومهني يطوّر خبرتي في هندسة البرمجيات وعلم البيانات والأنظمة الذكية.",
+      "من الأسس العلمية إلى هندسة الحاسوب، والتطبيق العملي لهندسة البرمجيات، ومتابعة التخصص في علم البيانات والأنظمة الذكية.",
     timelineLabel: "الخط الزمني للمسار الأكاديمي والمهني",
     items: {
       "master-data-science": {
         title: "ماستر علم البيانات والأنظمة الذكية",
         period: "2025 – الآن",
+        type: "education",
         institution: "كلية العلوم والتقنيات بفاس (FST Fès)",
         location: "فاس، المغرب",
         description:
@@ -200,16 +201,18 @@ const ar = {
       "software-engineering-internship": {
         title: "متدرب في هندسة البرمجيات",
         period: "2025",
+        type: "experience",
         institution: "École Polytechnique des Génies",
         location: "فاس، المغرب",
         duration: "شهران",
         description:
           "صممت وطورت منصة داخلية لإدارة الموارد باستخدام Spring Boot وReact.js، مع التركيز على بنية الواجهة الخلفية وREST API والتكامل الموثوق بين مكونات النظام لتبسيط العمليات الداخلية.",
-        typeLabel: "خبرة مهنية",
+        typeLabel: "تدريب مهني",
       },
       "computer-engineering-licence": {
         title: "الإجازة في العلوم والتقنيات — هندسة الحاسوب",
         period: "2024 – 2025",
+        type: "education",
         institution: "كلية العلوم والتقنيات بفاس (FST Fès)",
         location: "فاس، المغرب",
         description: "تخصص في تطوير البرمجيات والخوارزميات وبنية الأنظمة.",
@@ -218,6 +221,7 @@ const ar = {
       deust: {
         title: "دبلوم الدراسات الجامعية في العلوم والتقنيات (DEUST)",
         period: "2022 – 2024",
+        type: "education",
         institution: "كلية العلوم والتقنيات بفاس (FST Fès)",
         location: "فاس، المغرب",
         description:
