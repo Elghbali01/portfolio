@@ -4,18 +4,29 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { defaultTheme, isThemeId, themeStorageKey, type ThemeId } from "@/lib/theme";
+import {
+  appearanceStorageKey,
+  defaultAppearance,
+  defaultTheme,
+  isAppearanceId,
+  isThemeId,
+  themeStorageKey,
+  type AppearanceId,
+  type ThemeId,
+} from "@/lib/theme";
 
 interface ThemeContextValue {
   theme: ThemeId;
+  appearance: AppearanceId;
   ready: boolean;
   setTheme: (theme: ThemeId) => void;
+  setAppearance: (appearance: AppearanceId) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -36,31 +47,57 @@ function getThemeSnapshot(): ThemeId {
   return isThemeId(current) ? current : defaultTheme;
 }
 
+function getAppearanceSnapshot(): AppearanceId {
+  const current = document.documentElement.dataset.appearance;
+  return isAppearanceId(current) ? current : defaultAppearance;
+}
+
 function getReadySnapshot() {
   return providerReady;
 }
 
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const theme = useSyncExternalStore(subscribe, getThemeSnapshot, () => defaultTheme);
+  const appearance = useSyncExternalStore(subscribe, getAppearanceSnapshot, () => defaultAppearance);
   const ready = useSyncExternalStore(subscribe, getReadySnapshot, () => false);
   const transitionTimer = useRef<number | null>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    try {
+      const savedTheme = window.localStorage.getItem(themeStorageKey);
+      const savedAppearance = window.localStorage.getItem(appearanceStorageKey);
+      if (isThemeId(savedTheme)) root.dataset.theme = savedTheme;
+      if (isAppearanceId(savedAppearance)) root.dataset.appearance = savedAppearance;
+    } catch {
+      // Keep the valid document preferences when storage is unavailable.
+    }
+
     if (!isThemeId(document.documentElement.dataset.theme)) {
       document.documentElement.dataset.theme = defaultTheme;
+    }
+    if (!isAppearanceId(document.documentElement.dataset.appearance)) {
+      document.documentElement.dataset.appearance = defaultAppearance;
     }
     providerReady = true;
     notifySubscribers();
 
-    const syncTheme = (event: StorageEvent) => {
-      if (event.key !== themeStorageKey) return;
-      document.documentElement.dataset.theme = isThemeId(event.newValue) ? event.newValue : defaultTheme;
+    const syncPreference = (event: StorageEvent) => {
+      if (event.key === themeStorageKey) {
+        document.documentElement.dataset.theme = isThemeId(event.newValue) ? event.newValue : defaultTheme;
+      } else if (event.key === appearanceStorageKey) {
+        document.documentElement.dataset.appearance = isAppearanceId(event.newValue)
+          ? event.newValue
+          : defaultAppearance;
+      } else {
+        return;
+      }
       notifySubscribers();
     };
 
-    window.addEventListener("storage", syncTheme);
+    window.addEventListener("storage", syncPreference);
     return () => {
-      window.removeEventListener("storage", syncTheme);
+      window.removeEventListener("storage", syncPreference);
       if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
       providerReady = false;
     };
@@ -88,7 +125,32 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const value = useMemo(() => ({ theme, ready, setTheme }), [ready, setTheme, theme]);
+  const setAppearance = useCallback((nextAppearance: AppearanceId) => {
+    if (!isAppearanceId(nextAppearance)) return;
+
+    const root = document.documentElement;
+    if (root.dataset.appearance !== nextAppearance) {
+      root.dataset.themeTransitioning = "true";
+      root.dataset.appearance = nextAppearance;
+      notifySubscribers();
+      if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+      transitionTimer.current = window.setTimeout(() => {
+        delete root.dataset.themeTransitioning;
+        transitionTimer.current = null;
+      }, 360);
+    }
+
+    try {
+      window.localStorage.setItem(appearanceStorageKey, nextAppearance);
+    } catch {
+      // The appearance remains active for this page view when storage is unavailable.
+    }
+  }, []);
+
+  const value = useMemo(
+    () => ({ theme, appearance, ready, setTheme, setAppearance }),
+    [appearance, ready, setAppearance, setTheme, theme],
+  );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

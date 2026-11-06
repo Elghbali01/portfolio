@@ -135,3 +135,25 @@ npm run start
 ```
 
 Le domaine final, les identifiants EmailJS et la clé Groq doivent être configurés dans l’environnement de déploiement avant la validation finale.
+
+## Thèmes et navigation
+
+Le thème est composé d’une palette (**data-theme**) et d’une apparence (**data-appearance**). Les cinq identifiants de palette restent **original-blue**, **royal-violet**, **emerald-tech**, **midnight-gold** et **crimson-night**; chacune possède une apparence sombre et une apparence claire. Les variantes sombres existantes restent la référence.
+
+**lib/theme.ts** définit les identifiants, les valeurs par défaut et les clés de stockage. La palette reste enregistrée sous **portfolio-theme-v1**; l’apparence utilise **portfolio-appearance-v1** et vaut **dark** par défaut. Le script du layout restaure les deux valeurs avant le premier affichage. Le **ThemeProvider** les synchronise avec les préférences enregistrées et les autres onglets.
+
+Les composants utilisent des jetons CSS sémantiques définis dans **app/globals.css** (canvas, surface, texte, accent, action, bordures et dégradés). Pour ajouter une palette, mettez à jour **lib/theme.ts**, ajoutez ses jetons sombres et clairs dans **app/globals.css**, puis renseignez son nom dans les trois dictionnaires.
+
+Contrastes calculés pour les variantes claires (WCAG relative luminance):
+
+| Palette claire | Fond | Accent de texte | Texte secondaire le plus faible | Libellé blanc sur bouton |
+|---|---|---|---:|---:|
+| Original Blue | `#F3F7FF` | `#1D4ED8` · 6,24:1 | 5,39:1 | 6,70:1 |
+| Royal Violet | `#F7F4FF` | `#6D28D9` · 6,54:1 | 6,09:1 | 7,10:1 |
+| Emerald Tech | `#EFFBF7` | `#0F766E` · 5,16:1 | 5,52:1 | 5,47:1 |
+| Midnight Gold | `#FFF9EB` | `#854D0E` · 6,53:1 | 6,48:1 | 6,85:1 |
+| Crimson Night | `#FFF4F5` | `#BE123C` · 5,84:1 | 7,05:1 | 8,02:1 |
+
+Le contraste du texte secondaire le plus faible est celui du jeton muted/subtle sur le fond de chaque palette. Les libellés blancs sont mesurés contre la couleur action du bouton; la variante Crimson Night emploie `#9F1239` pour les boutons.
+
+La navigation regroupe la langue, la palette et l’apparence dans des commandes compactes. **NavbarDropdown** gère le focus, les touches fléchées, Échap, le clic extérieur et le positionnement dans la fenêtre; le sélecteur de langue conserve le chemin, la query et le hash lorsque la route correspond. **CursorFollower** n’écoute le pointeur que sur un appareil avec pointeur fin et survol, suit l’accent actif et se désactive avec **prefers-reduced-motion** ou pendant l’introduction cinématique.

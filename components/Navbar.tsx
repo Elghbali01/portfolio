@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Suspense, useEffect, useRef, useState } from "react";
+import AppearanceSwitcher, { type AppearanceSwitcherLabels } from "@/components/AppearanceSwitcher";
 import { useIntroSequence } from "@/components/IntroSequence";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PortfolioWordmark from "@/components/PortfolioWordmark";
@@ -17,6 +18,7 @@ export interface NavbarLabels {
   closeMenu: string;
   languageSwitcher: string;
   themeSwitcher: string;
+  appearanceSwitcher: AppearanceSwitcherLabels;
   themes: Record<ThemeId, string>;
   sections: Record<SectionId, string>;
 }
@@ -27,6 +29,13 @@ const defaultLabels: NavbarLabels = {
   closeMenu: "Close navigation menu",
   languageSwitcher: "Choose language",
   themeSwitcher: "Color palette",
+  appearanceSwitcher: {
+    label: "Appearance",
+    switchToLight: "Switch to Light Mode",
+    switchToDark: "Switch to Dark Mode",
+    light: "Light",
+    dark: "Dark",
+  },
   themes: {
     "original-blue": "Original Blue",
     "royal-violet": "Royal Violet",
@@ -51,6 +60,7 @@ interface NavbarProps {
   labels?: Partial<NavbarLabels> & {
     sections?: Partial<NavbarLabels["sections"]>;
     themes?: Partial<NavbarLabels["themes"]>;
+    appearanceSwitcher?: Partial<AppearanceSwitcherLabels>;
   };
 }
 
@@ -60,6 +70,7 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
     ...labels,
     sections: { ...defaultLabels.sections, ...labels?.sections },
     themes: { ...defaultLabels.themes, ...labels?.themes },
+    appearanceSwitcher: { ...defaultLabels.appearanceSwitcher, ...labels?.appearanceSwitcher },
   };
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -84,6 +95,7 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        if (event.target instanceof Element && event.target.closest('[role="menu"]')) return;
         setMenuOpen(false);
         triggerRef.current?.focus();
       }
@@ -176,6 +188,7 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
               <LanguageSwitcher locale={locale} label={copy.languageSwitcher} />
             </Suspense>
             <ThemeSwitcher label={copy.themeSwitcher} themes={copy.themes} />
+            <AppearanceSwitcher labels={copy.appearanceSwitcher} />
           </motion.div>
         </motion.div>
 
@@ -221,7 +234,7 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
                 </Link>
               ))}
               <div className="mt-3 border-t border-outline-subtle pt-4">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
                   <Suspense fallback={null}>
                     <LanguageSwitcher
                       locale={locale}
@@ -230,6 +243,7 @@ export default function Navbar({ visible = true, locale = "en", labels }: Navbar
                     />
                   </Suspense>
                   <ThemeSwitcher label={copy.themeSwitcher} themes={copy.themes} />
+                  <AppearanceSwitcher labels={copy.appearanceSwitcher} />
                 </div>
               </div>
             </div>

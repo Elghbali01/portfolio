@@ -52,6 +52,13 @@ const en = {
       "crimson-night": "Crimson Night",
     },
   },
+  appearanceSwitcher: {
+    label: "Appearance",
+    switchToLight: "Switch to Light Mode",
+    switchToDark: "Switch to Dark Mode",
+    light: "Light",
+    dark: "Dark",
+  },
   hero: {
     greeting: "Hi, I’m",
     name: "Issam Elghbali",

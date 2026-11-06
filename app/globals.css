@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: dark;
   --theme-canvas: #0b1120;
   --theme-surface: #0f172a;
   --theme-surface-elevated: #1e293b;
@@ -29,6 +30,11 @@
   --theme-error: #fca5a5;
   --theme-error-strong: #b91c1c;
   --theme-warning: #fbbf24;
+  --theme-input-background: var(--theme-surface-inset);
+  --theme-input-border: var(--theme-outline-default);
+  --theme-hover-surface: color-mix(in srgb, var(--theme-accent) 8%, var(--theme-surface));
+  --theme-cursor-ring: var(--theme-accent);
+  --theme-star-color: rgb(255 255 255 / 55%);
 }
 
 :root[data-theme="royal-violet"] {
@@ -139,6 +145,151 @@
   --theme-glow-tertiary: #fda4af;
 }
 
+/* Light appearance tokens are shared by every page and section. */
+:root[data-appearance="light"] {
+  color-scheme: light;
+  --theme-canvas: #f3f7ff;
+  --theme-surface: #ffffff;
+  --theme-surface-elevated: #e8f0fc;
+  --theme-surface-inset: #edf3fc;
+  --theme-content-primary: #101b2e;
+  --theme-content-strong: #203450;
+  --theme-content-secondary: #394c66;
+  --theme-content-muted: #4c607a;
+  --theme-content-subtle: #526783;
+  --theme-outline-subtle: #cbd8ea;
+  --theme-outline-default: #71839d;
+  --theme-outline-strong: #526783;
+  --theme-accent: #1d4ed8;
+  --theme-accent-secondary: #2563eb;
+  --theme-accent-soft: #1d4ed8;
+  --theme-action: #1d4ed8;
+  --theme-action-hover: #1e40af;
+  --theme-on-action: #ffffff;
+  --theme-gradient-start: #edf4ff;
+  --theme-gradient-middle: #f3f7ff;
+  --theme-gradient-end: #e2eaff;
+  --theme-glow-primary: #3b82f6;
+  --theme-glow-secondary: #6366f1;
+  --theme-glow-tertiary: #0891b2;
+  --theme-success: #166534;
+  --theme-error: #b91c1c;
+  --theme-error-strong: #991b1b;
+  --theme-warning: #92400e;
+  --theme-hover-surface: color-mix(in srgb, var(--theme-accent) 7%, var(--theme-surface));
+  --theme-star-color: color-mix(in srgb, var(--theme-accent) 19%, transparent);
+}
+
+:root[data-appearance="light"][data-theme="original-blue"] {
+  --theme-gradient-start: #eaf2ff;
+  --theme-gradient-middle: #f3f7ff;
+  --theme-gradient-end: #e2eaff;
+  --theme-glow-primary: #3b82f6;
+  --theme-glow-secondary: #6366f1;
+  --theme-glow-tertiary: #0891b2;
+}
+
+:root[data-appearance="light"][data-theme="royal-violet"] {
+  --theme-canvas: #f7f4ff;
+  --theme-surface-elevated: #f0ebff;
+  --theme-surface-inset: #f2eeff;
+  --theme-content-primary: #211536;
+  --theme-content-strong: #33274a;
+  --theme-content-secondary: #4e4367;
+  --theme-content-muted: #5d5178;
+  --theme-content-subtle: #615878;
+  --theme-outline-subtle: #ddd2f2;
+  --theme-outline-default: #827397;
+  --theme-outline-strong: #5e4c79;
+  --theme-accent: #6d28d9;
+  --theme-accent-secondary: #7c3aed;
+  --theme-accent-soft: #6d28d9;
+  --theme-action: #6d28d9;
+  --theme-action-hover: #5b21b6;
+  --theme-gradient-start: #f3eeff;
+  --theme-gradient-middle: #f7f4ff;
+  --theme-gradient-end: #e9ddff;
+  --theme-glow-primary: #7c3aed;
+  --theme-glow-secondary: #8b5cf6;
+  --theme-glow-tertiary: #6d28d9;
+}
+
+:root[data-appearance="light"][data-theme="emerald-tech"] {
+  --theme-canvas: #effbf7;
+  --theme-surface-elevated: #e5f5ef;
+  --theme-surface-inset: #ebf8f3;
+  --theme-content-primary: #102923;
+  --theme-content-strong: #1f4038;
+  --theme-content-secondary: #385c52;
+  --theme-content-muted: #486b60;
+  --theme-content-subtle: #4c6b62;
+  --theme-outline-subtle: #c7e3d8;
+  --theme-outline-default: #6e9185;
+  --theme-outline-strong: #476b5f;
+  --theme-accent: #0f766e;
+  --theme-accent-secondary: #0e7490;
+  --theme-accent-soft: #0f766e;
+  --theme-action: #0f766e;
+  --theme-action-hover: #115e59;
+  --theme-gradient-start: #e4f7ef;
+  --theme-gradient-middle: #effbf7;
+  --theme-gradient-end: #d7f1e7;
+  --theme-glow-primary: #0f766e;
+  --theme-glow-secondary: #0e7490;
+  --theme-glow-tertiary: #14b8a6;
+}
+
+:root[data-appearance="light"][data-theme="midnight-gold"] {
+  --theme-canvas: #fff9eb;
+  --theme-surface: #fffdf7;
+  --theme-surface-elevated: #f7efdf;
+  --theme-surface-inset: #fbf3e5;
+  --theme-content-primary: #302517;
+  --theme-content-strong: #493823;
+  --theme-content-secondary: #594b37;
+  --theme-content-muted: #675943;
+  --theme-content-subtle: #665942;
+  --theme-outline-subtle: #e8dac1;
+  --theme-outline-default: #8e7b5e;
+  --theme-outline-strong: #66553a;
+  --theme-accent: #854d0e;
+  --theme-accent-secondary: #a16207;
+  --theme-accent-soft: #854d0e;
+  --theme-action: #854d0e;
+  --theme-action-hover: #713f0b;
+  --theme-gradient-start: #fff6df;
+  --theme-gradient-middle: #fff9eb;
+  --theme-gradient-end: #f4e5c5;
+  --theme-glow-primary: #b7791f;
+  --theme-glow-secondary: #d69e2e;
+  --theme-glow-tertiary: #a16207;
+}
+
+:root[data-appearance="light"][data-theme="crimson-night"] {
+  --theme-canvas: #fff4f5;
+  --theme-surface-elevated: #f9e8ec;
+  --theme-surface-inset: #fbedf0;
+  --theme-content-primary: #2c151b;
+  --theme-content-strong: #47242e;
+  --theme-content-secondary: #593841;
+  --theme-content-muted: #694c55;
+  --theme-content-subtle: #684a53;
+  --theme-outline-subtle: #ecced6;
+  --theme-outline-default: #956d79;
+  --theme-outline-strong: #6b3e4a;
+  --theme-accent: #be123c;
+  --theme-accent-secondary: #9f1239;
+  --theme-accent-soft: #be123c;
+  --theme-action: #9f1239;
+  --theme-action-hover: #881337;
+  --theme-gradient-start: #ffedef;
+  --theme-gradient-middle: #fff4f5;
+  --theme-gradient-end: #f6dce3;
+  --theme-glow-primary: #be123c;
+  --theme-glow-secondary: #e11d48;
+  --theme-glow-tertiary: #9f1239;
+}
+
 @theme inline {
   --color-background: var(--theme-canvas);
   --color-foreground: var(--theme-content-primary);
@@ -205,6 +356,10 @@ html[dir="rtl"] body {
   transform: translate3d(0, 0, 0);
 }
 
+:root[data-appearance="light"] .ambient-orb {
+  opacity: 0.09;
+}
+
 .ambient-orb-purple {
   inset-block-start: 10%;
   inset-inline-start: 8%;
@@ -243,7 +398,7 @@ html[dir="rtl"] body {
   pointer-events: none;
   opacity: 0.32;
   background-image:
-    radial-gradient(circle, rgb(255 255 255 / 55%) 1px, transparent 1.5px),
+    radial-gradient(circle, var(--theme-star-color) 1px, transparent 1.5px),
     radial-gradient(circle, color-mix(in srgb, var(--theme-accent) 45%, transparent) 1px, transparent 1.5px);
   background-position:
     0 0,

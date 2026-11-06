@@ -11,6 +11,12 @@ export type ThemeId = (typeof themeIds)[number];
 export const defaultTheme: ThemeId = "original-blue";
 export const themeStorageKey = "portfolio-theme-v1";
 
+export const appearanceIds = ["dark", "light"] as const;
+export type AppearanceId = (typeof appearanceIds)[number];
+
+export const defaultAppearance: AppearanceId = "dark";
+export const appearanceStorageKey = "portfolio-appearance-v1";
+
 export const themeSwatches: Record<ThemeId, readonly [string, string, string]> = {
   "original-blue": ["#0B1120", "#60A5FA", "#2563EB"],
   "royal-violet": ["#100D20", "#A78BFA", "#6D28D9"],
@@ -21,4 +27,8 @@ export const themeSwatches: Record<ThemeId, readonly [string, string, string]> =
 
 export function isThemeId(value: string | null | undefined): value is ThemeId {
   return value != null && (themeIds as readonly string[]).includes(value);
+}
+
+export function isAppearanceId(value: string | null | undefined): value is AppearanceId {
+  return value != null && (appearanceIds as readonly string[]).includes(value);
 }

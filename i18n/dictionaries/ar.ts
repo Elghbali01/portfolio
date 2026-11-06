@@ -52,6 +52,13 @@ const ar = {
       "crimson-night": "ليلة قرمزية",
     },
   },
+  appearanceSwitcher: {
+    label: "المظهر",
+    switchToLight: "التبديل إلى الوضع الفاتح",
+    switchToDark: "التبديل إلى الوضع الداكن",
+    light: "فاتح",
+    dark: "داكن",
+  },
   hero: {
     greeting: "مرحبًا، أنا",
     name: "عصام الغبالي",

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { notFound } from "next/navigation";
 import AnimatedBackground from "@/components/AnimatedBackground";
+import CursorFollower from "@/components/CursorFollower";
 import Footer from "@/components/Footer";
 import IntroSequenceProvider from "@/components/IntroSequence";
 import Navbar from "@/components/Navbar";
@@ -54,7 +55,7 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
 }
 
 export const viewport: Viewport = {
-  colorScheme: "dark",
+  colorScheme: "light dark",
   themeColor: "#0B1120",
   width: "device-width",
   initialScale: 1,
@@ -69,12 +70,18 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const dir = getDirection(locale);
 
   return (
-    <html lang={localeConfig[locale].htmlLang} dir={dir} data-theme="original-blue" suppressHydrationWarning>
+    <html
+      lang={localeConfig[locale].htmlLang}
+      dir={dir}
+      data-theme="original-blue"
+      data-appearance="dark"
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('portfolio-theme-v1');if(['original-blue','royal-violet','emerald-tech','midnight-gold','crimson-night'].indexOf(t)!==-1)document.documentElement.dataset.theme=t}catch(e){}",
+              "try{var r=document.documentElement;var t=localStorage.getItem('portfolio-theme-v1');if(['original-blue','royal-violet','emerald-tech','midnight-gold','crimson-night'].indexOf(t)!==-1)r.dataset.theme=t;var a=localStorage.getItem('portfolio-appearance-v1');r.dataset.appearance=a==='light'||a==='dark'?a:'dark'}catch(e){}",
           }}
         />
       </head>
@@ -88,6 +95,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         <ThemeProvider>
           <AnimatedBackground />
           <IntroSequenceProvider locale={locale} phrase={dictionary.loader.tagline} direction={dir}>
+            <CursorFollower />
             <Navbar
               locale={locale}
               labels={{
@@ -96,6 +104,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
                 closeMenu: dictionary.navigation.closeMenu,
                 languageSwitcher: dictionary.languageSwitcher.label,
                 themeSwitcher: dictionary.themeSwitcher.label,
+                appearanceSwitcher: dictionary.appearanceSwitcher,
                 themes: dictionary.themeSwitcher.themes,
                 sections: dictionary.navigation.sections,
               }}

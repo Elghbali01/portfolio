@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import { Languages } from "lucide-react";
 import { locales, type Locale } from "@/i18n/config";
+import NavbarDropdown, { NavbarMenuItem } from "@/components/NavbarDropdown";
 
 const autonyms: Record<Locale, string> = {
   en: "English",
@@ -48,35 +48,25 @@ export default function LanguageSwitcher({
   const query = searchParams.toString();
 
   return (
-    <div
-      role="group"
-      className="flex items-center gap-1 rounded-xl border border-outline-default bg-canvas/80 p-1"
-      aria-label={label}
-    >
-      <Languages aria-hidden="true" size={15} className="mx-1 text-accent-soft" />
+    <NavbarDropdown label={label} icon={Languages}>
       {locales.map((candidate) => {
         const path = replaceLocale(pathname, candidate);
-        const href = `${path}${query ? `?${query}` : ""}${hash}`;
+        const href = path + (query ? "?" + query : "") + hash;
 
         return (
-          <Link
+          <NavbarMenuItem
             key={candidate}
             href={href}
-            hrefLang={candidate}
             lang={candidate}
             dir={candidate === "ar" ? "rtl" : "ltr"}
-            aria-current={candidate === locale ? "page" : undefined}
-            onClick={onNavigate}
-            className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${
-              candidate === locale
-                ? "bg-action text-on-action"
-                : "text-content-secondary hover:bg-content-primary/10 hover:text-content-primary"
-            }`}
+            selectable
+            selected={candidate === locale}
+            onSelect={onNavigate}
           >
             {autonyms[candidate]}
-          </Link>
+          </NavbarMenuItem>
         );
       })}
-    </div>
+    </NavbarDropdown>
   );
 }

@@ -52,6 +52,13 @@ const fr = {
       "crimson-night": "Nuit cramoisie",
     },
   },
+  appearanceSwitcher: {
+    label: "Apparence",
+    switchToLight: "Passer en mode clair",
+    switchToDark: "Passer en mode sombre",
+    light: "Clair",
+    dark: "Sombre",
+  },
   hero: {
     greeting: "Bonjour, je suis",
     name: "Issam Elghbali",

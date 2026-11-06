@@ -243,3 +243,11 @@ Les identifiants EmailJS sont nécessairement accessibles au navigateur. La clé
 | `npm run test:chatbot-compound` | Build puis scénarios composés |
 
 Il n’existe pas de script agrégateur `test` dans `package.json`. Chaque script `test:chatbot-*` relance actuellement `npm run build` avant sa suite.
+
+## 12. Thèmes, apparence et commandes de navigation
+
+Le modèle visuel conserve les identifiants **original-blue**, **royal-violet**, **emerald-tech**, **midnight-gold** et **crimson-night**. **data-theme** choisit la palette et **data-appearance** choisit **dark** ou **light**; les deux préférences sont indépendantes. La palette reste stockée sous **portfolio-theme-v1** pour compatibilité, l’apparence sous **portfolio-appearance-v1**, et l’apparence sans préférence vaut **dark**. Le script d’initialisation du layout applique les préférences avant l’hydratation.
+
+**app/globals.css** associe les deux attributs à des jetons sémantiques. Les sections consomment les jetons communs plutôt que des règles par apparence. Pour ajouter une palette, déclarer son identifiant et ses aperçus dans **lib/theme.ts**, définir ses jetons sombres et clairs dans la feuille globale et ajouter son nom aux trois dictionnaires.
+
+**LanguageSwitcher** préserve le chemin localisé, la query et le hash pris en charge. **ThemeSwitcher** et **AppearanceSwitcher** utilisent chacun la même infrastructure de menu ou de commande compacte; les labels et actions sont localisés en anglais, français et arabe. **CursorFollower** emploie des motion values Framer Motion, ne persiste aucune coordonnée et se masque pendant l’introduction, sur les appareils tactiles sans pointeur fin et lorsque la réduction des animations est activée.

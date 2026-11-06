@@ -164,6 +164,13 @@ export type PortfolioDictionary = {
     label: string;
     themes: Record<ThemeId, string>;
   };
+  appearanceSwitcher: {
+    label: string;
+    switchToLight: string;
+    switchToDark: string;
+    light: string;
+    dark: string;
+  };
   hero: {
     greeting: string;
     name: string;
