@@ -121,11 +121,12 @@ export default function ChatWidget({ locale = "en", labels }: ChatWidgetProps) {
   }, []);
 
   useEffect(() => {
-    if (!isMobile || isOpen) {
+    if (isOpen) {
       setAvoidCtas(false);
       return;
     }
-    const targets = Array.from(document.querySelectorAll<HTMLElement>("[data-chat-safe-zone]"));
+    const selector = isMobile ? "[data-chat-safe-zone]" : "[data-chat-desktop-safe-zone]";
+    const targets = Array.from(document.querySelectorAll<HTMLElement>(selector));
     const visibleTargets = new Set<Element>();
     const observer = new IntersectionObserver(
       (entries) => {
@@ -135,7 +136,7 @@ export default function ChatWidget({ locale = "en", labels }: ChatWidgetProps) {
         });
         setAvoidCtas(visibleTargets.size > 0);
       },
-      { threshold: 0.15 },
+      { threshold: isMobile ? 0.15 : 0 },
     );
     targets.forEach((target) => observer.observe(target));
     return () => observer.disconnect();

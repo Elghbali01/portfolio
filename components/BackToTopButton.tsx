@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowUp } from "lucide-react";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 interface BackToTopButtonProps {
   label?: string;
@@ -10,7 +11,10 @@ interface BackToTopButtonProps {
 
 export default function BackToTopButton({ label = "Back to top" }: BackToTopButtonProps) {
   const [visible, setVisible] = useState(false);
+  const [insideInteractivePanel, setInsideInteractivePanel] = useState(false);
   const shouldReduceMotion = useReducedMotion();
+  const pathname = usePathname();
+  const isLocalizedHomePage = /^\/(?:en|fr|ar)\/?$/.test(pathname ?? "");
 
   useEffect(() => {
     const updateVisibility = () => setVisible(window.scrollY > 480);
@@ -19,6 +23,17 @@ export default function BackToTopButton({ label = "Back to top" }: BackToTopButt
 
     return () => window.removeEventListener("scroll", updateVisibility);
   }, []);
+
+  useEffect(() => {
+    const panel = document.querySelector<HTMLElement>("[data-back-to-top-safe-zone]");
+    if (!panel) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setInsideInteractivePanel(Boolean(entry?.isIntersecting));
+    });
+    observer.observe(panel);
+    return () => observer.disconnect();
+  }, [pathname]);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -29,7 +44,7 @@ export default function BackToTopButton({ label = "Back to top" }: BackToTopButt
 
   return (
     <AnimatePresence initial={false}>
-      {visible ? (
+      {visible && !(isLocalizedHomePage && insideInteractivePanel) ? (
         <motion.button
           key="back-to-top"
           type="button"

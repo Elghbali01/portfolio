@@ -134,21 +134,7 @@ export default async function HomePage({ params }: HomePageProps) {
           },
         }}
       />
-      <Skills
-        content={{
-          title: dictionary.skills.titleLead,
-          titleAccent: dictionary.skills.titleAccent,
-          introduction: dictionary.skills.description,
-          developerTitle: dictionary.skills.developerTitle,
-          developerDescription: dictionary.skills.developerDescription,
-          dataTitle: dictionary.skills.dataScientistTitle,
-          dataDescription: dictionary.skills.dataScientistDescription,
-          technologiesLabel: dictionary.skills.technologiesLabel,
-          developmentLabel: dictionary.skills.categories.development,
-          dataScienceLabel: dictionary.skills.categories.dataScience,
-          aiLabel: dictionary.skills.categories.aiMachineLearning,
-        }}
-      />
+      <Skills locale={locale} dictionary={dictionary} />
       <Certifications
         locale={locale}
         certifications={featuredCertifications}

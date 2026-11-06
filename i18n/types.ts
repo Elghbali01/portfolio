@@ -1,5 +1,6 @@
 import type { Locale, TextDirection } from "./config";
 import type { ThemeId } from "../lib/theme";
+import type { SkillDomainId } from "../data/skills";
 
 export const sectionIds = [
   "home",
@@ -214,6 +215,40 @@ export type PortfolioDictionary = {
       aiMachineLearning: string;
     };
     tickerInstructions: string;
+    ecosystemLabel: string;
+    identityGroupLabel: string;
+    identityHint: string;
+    domainSelectorLabel: string;
+    relatedDomainLabel: string;
+    selectedLabel: string;
+    coreLabel: string;
+    activeDomainLabel: string;
+    panelLabel: string;
+    technologyListLabel: string;
+    technologyDetailsHeading: string;
+    roleLabel: string;
+    kindLabels: {
+      technology: string;
+      practice: string;
+      method: string;
+    };
+    projectEvidenceLabel: string;
+    projectStackEvidenceLabel: string;
+    workflowStepEvidenceLabel: string;
+    noProjectEvidence: string;
+    workflowTitle: string;
+    workflowDirectionLabel: string;
+    workflowUnavailable: string;
+    relatedProjectLabel: string;
+    projectTechnologiesLabel: string;
+    viewCaseStudy: string;
+    selectTechnologyLabel: string;
+    activeDomainAnnouncement: string;
+    domains: Record<SkillDomainId, {
+      title: string;
+      descriptor: string;
+      description: string;
+    }>;
   };
   experience: {
     titleLead: string;
