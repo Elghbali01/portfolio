@@ -292,6 +292,156 @@ const fr = {
       projectPosition: "Projet {current} sur {total}",
     },
     items: {
+      "ai-fraud-detection-explainable-intelligence": {
+        title: "Détection de fraude par IA et intelligence explicable",
+        category: "Intelligence artificielle / Machine Learning · Analytics full-stack",
+        shortDescription:
+          "Une plateforme full-stack d’analyse de fraude avec scoring ML calibré, explications SHAP, alertes priorisées par risque et détection d’anomalies distincte.",
+        imageAlt:
+          "Détection de fraude par IA et intelligence explicable — vue d’ensemble du dashboard analytique.",
+        seo: {
+          title: "Détection de fraude par IA et intelligence explicable",
+          description:
+            "Une démonstration locale de portfolio réunissant détection calibrée de la fraude, explications SHAP, priorisation des risques, anomalies et dashboard analytique full-stack.",
+        },
+        introduction: [
+          "Un projet d’ingénierie achevé en six missions, livré comme démonstration locale de portfolio. Il associe un jeu de données historique et anonymisé sur les cartes bancaires, un scoring calibré de la fraude, des explications et des workflows d’investigation.",
+        ],
+        caseStudy: [
+          {
+            id: "overview",
+            heading: "Présentation du projet",
+            paragraphs: [
+              "L’application réunit un pipeline Machine Learning en Python, un service FastAPI local, une persistance des workflows avec SQLite et un dashboard Next.js responsive. Les analystes peuvent consulter les prédictions, explications, files de risque, anomalies, historiques d’analyse et investigations.",
+              "Il s’agit d’une démonstration locale achevée, pas d’une plateforme bancaire déployée publiquement. Aucun live demo public n’est disponible.",
+            ],
+          },
+          {
+            id: "problem-and-data",
+            heading: "Problème et données",
+            paragraphs: [
+              "La fraude est rare par rapport aux opérations légitimes. L’évaluation et les règles de revue doivent donc tenir compte d’un fort déséquilibre des classes. Le projet utilise le jeu public ULB Credit Card Fraud Detection et respecte l’anonymisation de ses variables.",
+            ],
+            metrics: [
+              { label: "Transactions", value: "284 807" },
+              { label: "Transactions frauduleuses", value: "492" },
+              { label: "Colonnes numériques / variables d’inférence", value: "31 / 30" },
+            ],
+            items: [
+              "V1–V28 sont des composantes PCA anonymisées ; Time correspond à des secondes écoulées, sans horodatage calendaire.",
+              "Le jeu de données ne contient aucune identité de commerçant, de client, de lieu ou d’appareil.",
+            ],
+          },
+          {
+            id: "machine-learning",
+            heading: "Approche Machine Learning",
+            paragraphs: [
+              "Le modèle supervisé retenu est un pipeline de Logistic Regression équilibrée, avec prétraitement des variables, StandardScaler et calibration des probabilités par sigmoid. Un seuil de décision choisi sur les données de validation a été figé pour l’inférence ; il s’agit d’une règle de revue documentée, pas d’une preuve de fraude pour chaque opération signalée.",
+            ],
+            items: [
+              "Entraînement, validation et test chronologiques afin de limiter les fuites temporelles.",
+              "Seuil figé : 0.1835921396957453 (environ 0,184).",
+              "L’inférence charge les artefacts persistés ; elle ne réentraîne pas le modèle et ne rouvre pas la partition finale consommée.",
+            ],
+          },
+          {
+            id: "explainability",
+            heading: "IA explicable",
+            paragraphs: [
+              "Les vues SHAP globales et locales, les classements de variables, les récits locaux et les contributions linéaires exactes aident à examiner le comportement du modèle. Les explications utilisent le modèle entraîné et les artefacts d’analyse persistés.",
+              "SHAP et les attributions linéaires sont exprimés dans l’espace des log-odds bruts. Ils ne représentent pas des variations directes en points de pourcentage de la probabilité calibrée, ne prouvent pas de causalité et ne donnent pas de sens métier connu aux composantes PCA anonymisées.",
+            ],
+          },
+          {
+            id: "risk-intelligence",
+            heading: "Intelligence du risque et priorisation des alertes",
+            paragraphs: [
+              "Une couche de politique transforme les probabilités calibrées en score de risque dérivé, en quatre niveaux opérationnels et en files d’investigation priorisées. Elle prend en charge les filtres de risque, la sélection Top-K et les budgets de revue exprimés en pourcentage.",
+            ],
+            items: [
+              "Niveaux de risque : Low, Elevated, High et Critical.",
+              "Le score de risque dérive de la probabilité calibrée ; il ne s’agit pas d’un second modèle prédictif.",
+              "Le classement des alertes suit la politique documentée du backend et ne revendique aucune économie financière mesurée.",
+            ],
+          },
+          {
+            id: "anomaly-detection",
+            heading: "Détection d’anomalies distincte",
+            paragraphs: [
+              "Isolation Forest fournit un signal complémentaire d’atypie, référencé sur des opérations légitimes de l’entraînement. Le score d’anomalie reste séparé de la probabilité supervisée de fraude : une opération atypique n’est pas nécessairement frauduleuse et ce score n’est pas une probabilité.",
+            ],
+          },
+          {
+            id: "backend-architecture",
+            heading: "Architecture backend",
+            paragraphs: [
+              "L’API Python utilise FastAPI, Pydantic, SQLAlchemy, SQLite et Alembic avec scikit-learn, SHAP, NumPy, pandas et joblib. Elle prend en charge les prédictions unitaires et batch, l’analyse CSV limitée, le statut du modèle, les explications, le scoring du risque et des anomalies, l’historique et les investigations.",
+              "SQLite stocke les prédictions dérivées et les enregistrements de workflow, notamment les analyses, investigations, notes et événements. L’API n’a ni authentification ni autorisation et reste destinée à un usage local.",
+            ],
+            architectureFlow: [
+              "Jeu ULB et EDA",
+              "Classifieur calibré et Isolation Forest",
+              "Explications SHAP et politique de risque",
+              "Service FastAPI local",
+              "Historique et investigations SQLite",
+              "Dashboard analyste Next.js",
+            ],
+          },
+          {
+            id: "frontend-architecture",
+            heading: "Frontend et workflows analyste",
+            paragraphs: [
+              "Le dashboard responsive utilise Next.js, React, TypeScript et Tailwind CSS. Il regroupe les résultats du modèle et les outils d’investigation tout en distinguant probabilité, niveau de risque, score d’anomalie, explications et décisions des analystes.",
+            ],
+            items: [
+              "Vue analytique, prédictions unitaires et batch, analyse CSV limitée aux variables d’entrée.",
+              "Priorisation du risque, visualisations SHAP globales et locales, revue des anomalies.",
+              "Historique des prédictions, gestion des investigations et statut du système et du modèle.",
+            ],
+          },
+          {
+            id: "historical-evaluation",
+            heading: "Évaluation historique sur test tenu à l’écart",
+            paragraphs: [
+              "Ces métriques proviennent du test chronologique final documenté. Elles décrivent une évaluation historique, pas un comportement en production ni une validation sur un futur jeu bancaire indépendant.",
+            ],
+            metrics: [
+              { label: "ROC-AUC", value: "0,977" },
+              { label: "Average Precision", value: "0,737" },
+              { label: "Précision", value: "0,905" },
+              { label: "Rappel", value: "0,731" },
+              { label: "F1-score", value: "0,809" },
+            ],
+          },
+          {
+            id: "validation",
+            heading: "Validation technique",
+            paragraphs: [
+              "Le rapport de livraison Mission 06 documente les contrôles backend et frontend, un build de production et des parcours navigateur avec des entrées synthétiques. Les scans d’accessibilité automatisés concernent les routes et règles vérifiées ; ils ne constituent pas une certification WCAG.",
+            ],
+            metrics: [
+              { label: "Tests backend réussis", value: "81" },
+              { label: "Tests unitaires frontend réussis", value: "16" },
+              { label: "Tests Playwright réussis", value: "14" },
+            ],
+            items: [
+              "TypeScript, ESLint et le build de production optimisé du frontend ont réussi.",
+              "36 combinaisons route/viewport sans débordement horizontal du document ; 18 scans axe configurés sans violation signalée.",
+              "Aucune affirmation d’audit de sécurité exhaustif, de revue manuelle par lecteur d’écran ou de préparation à la production.",
+            ],
+          },
+          {
+            id: "limitations",
+            heading: "Limites et périmètre",
+            items: [
+              "Les données sont historiques et anonymisées ; la partition finale est consommée et aucune évaluation indépendante sur une période future n’a été réalisée.",
+              "Le modèle ne détecte pas toutes les fraudes et aucun résultat d’économies financières n’est vérifié.",
+              "L’API locale n’a pas d’authentification et SQLite n’est pas chiffré au repos ; le système n’est pas un moteur bancaire de production.",
+              "SHAP ne démontre pas de causalité et l’atypie Isolation Forest n’est pas une probabilité de fraude.",
+            ],
+          },
+        ],
+      },
       "indonesia-tourism": {
         title: "Indonesia Tourism Website",
         category: "Frontend / Développement web",

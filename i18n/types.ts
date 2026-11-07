@@ -16,6 +16,7 @@ export const sectionIds = [
 export type SectionId = (typeof sectionIds)[number];
 
 export const projectSlugs = [
+  "ai-fraud-detection-explainable-intelligence",
   "indonesia-tourism",
   "resource-platform",
   "employee-management",

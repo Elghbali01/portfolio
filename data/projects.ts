@@ -21,6 +21,22 @@ export interface ProjectKnowledge {
 }
 
 export const projectKnowledge: Record<string, ProjectKnowledge> = {
+  "ai-fraud-detection-explainable-intelligence": {
+    primaryDomain: "data-science",
+    secondaryDomains: ["ai-ml", "backend", "frontend"],
+    objective:
+      "Detect rare potentially fraudulent transactions and give analysts calibrated, interpretable, risk-prioritized local review workflows.",
+    demonstratedCapabilities: [
+      "Imbalance-aware calibrated classification",
+      "Chronological model evaluation and threshold selection",
+      "Global and local SHAP explanations in raw log-odds space",
+      "Policy-based risk tiers and alert prioritization",
+      "Separate Isolation Forest anomaly signal",
+      "FastAPI, SQLite, and Next.js integration",
+    ],
+    recruiterValue:
+      "Demonstrates end-to-end applied Machine Learning and full-stack analytics with explicit scientific and local-demo limitations.",
+  },
   "indonesia-tourism": {
     primaryDomain: "frontend", secondaryDomains: ["frontend"],
     objective: "Present Indonesia's culture, destinations, and attractions in a responsive tourism website.",
@@ -101,6 +117,33 @@ export const projectKnowledge: Record<string, ProjectKnowledge> = {
 };
 
 export const projects: Project[] = [
+  {
+    title: "AI Fraud Detection & Explainable Intelligence",
+    slug: "ai-fraud-detection-explainable-intelligence",
+    category: "Artificial Intelligence / Machine Learning · Full-Stack Analytics",
+    shortDescription:
+      "A full-stack fraud analytics platform with calibrated ML scoring, SHAP explanations, risk-prioritized alerts, and separate anomaly detection.",
+    fullDescription: `
+Completed as a local portfolio demonstration, this end-to-end fraud analytics project uses a historical, anonymized credit-card dataset.
+
+It combines a calibrated Logistic Regression classifier, global and local SHAP explanations, risk-based alert prioritization, and a separate Isolation Forest anomaly signal. A local FastAPI backend and SQLite workflow support a responsive Next.js analyst dashboard for prediction, CSV analysis, history, and investigations.
+
+The evaluation results are historical held-out results, not live production performance. The API is intended for local use and has no authentication. The project does not claim future-period validation, production deployment, or financial savings.
+    `,
+    technologies: [
+      "Python",
+      "Scikit-learn",
+      "SHAP",
+      "FastAPI",
+      "Next.js",
+      "TypeScript",
+      "SQLite",
+      "Tailwind CSS",
+    ],
+    github: "https://github.com/Elghbali01/ai-fraud-detection",
+    image: "/01-dashboard-overview.png",
+    featured: true,
+  },
   {
     title: "Indonesia Tourism Website",
     slug: "indonesia-tourism",

@@ -291,6 +291,156 @@ const en = {
       projectPosition: "Project {current} of {total}",
     },
     items: {
+      "ai-fraud-detection-explainable-intelligence": {
+        title: "AI Fraud Detection & Explainable Intelligence",
+        category: "Artificial Intelligence / Machine Learning · Full-Stack Analytics",
+        shortDescription:
+          "A full-stack fraud analytics platform with calibrated ML scoring, SHAP explanations, risk-prioritized alerts, and separate anomaly detection.",
+        imageAlt:
+          "AI Fraud Detection & Explainable Intelligence — premium analytics dashboard overview.",
+        seo: {
+          title: "AI Fraud Detection & Explainable Intelligence",
+          description:
+            "A local portfolio demonstration combining calibrated fraud detection, SHAP explanations, risk prioritization, anomaly intelligence, and a full-stack analytics dashboard.",
+        },
+        introduction: [
+          "A completed six-mission engineering project delivered as a local portfolio demonstration. It combines a historical, anonymized credit-card dataset, calibrated fraud scoring, explainable intelligence, and analyst review workflows.",
+        ],
+        caseStudy: [
+          {
+            id: "overview",
+            heading: "Project overview",
+            paragraphs: [
+              "The application brings together a Python Machine Learning pipeline, a local FastAPI service, SQLite workflow persistence, and a responsive Next.js dashboard. Analysts can explore predictions, explanations, risk queues, anomaly signals, analysis history, and investigations.",
+              "It is a completed local demonstration, not a publicly deployed banking platform. No public live demo is available.",
+            ],
+          },
+          {
+            id: "problem-and-data",
+            heading: "Problem and dataset",
+            paragraphs: [
+              "Fraud is rare relative to legitimate activity, so evaluation and review policy must account for severe class imbalance. The project uses the public ULB Credit Card Fraud Detection dataset and preserves its anonymized feature boundaries.",
+            ],
+            metrics: [
+              { label: "Transactions", value: "284,807" },
+              { label: "Fraudulent transactions", value: "492" },
+              { label: "Numerical columns / inference features", value: "31 / 30" },
+            ],
+            items: [
+              "V1–V28 are anonymized PCA components; Time is elapsed seconds without a calendar timestamp.",
+              "The dataset contains no merchant, customer, location, or device identities.",
+            ],
+          },
+          {
+            id: "machine-learning",
+            heading: "Machine Learning approach",
+            paragraphs: [
+              "The selected supervised model is a balanced Logistic Regression pipeline with feature preprocessing, StandardScaler, and sigmoid probability calibration. A decision threshold was selected on validation data and frozen for inference; it is a documented review rule rather than a claim that every flagged transaction is fraud.",
+            ],
+            items: [
+              "Chronological train, validation, and held-out test workflow to reduce temporal leakage.",
+              "Frozen threshold: 0.1835921396957453 (about 0.184).",
+              "Inference loads persisted model artifacts; it does not retrain the model or reopen the consumed final-test partition.",
+            ],
+          },
+          {
+            id: "explainability",
+            heading: "Explainable AI",
+            paragraphs: [
+              "Global and local SHAP views, feature rankings, local narratives, and exact linear contributions help inspect model behavior. The explanation artifacts use the trained model and persisted analysis outputs.",
+              "SHAP and linear attributions are expressed in raw log-odds space. They are not direct percentage-point changes in calibrated fraud probability, causal explanations, or known business meanings for the anonymized PCA components.",
+            ],
+          },
+          {
+            id: "risk-intelligence",
+            heading: "Risk intelligence and alert prioritization",
+            paragraphs: [
+              "A policy layer transforms calibrated fraud probabilities into a derived risk score, four operational tiers, and prioritized investigation queues. It supports risk filters, Top-K selection, and percentage-based review budgets.",
+            ],
+            items: [
+              "Risk tiers: Low, Elevated, High, and Critical.",
+              "The risk score is derived from the calibrated probability; it is not a separate predictive model.",
+              "Alert ranking follows the documented backend policy and does not claim measured financial savings.",
+            ],
+          },
+          {
+            id: "anomaly-detection",
+            heading: "Separate anomaly detection",
+            paragraphs: [
+              "Isolation Forest provides a complementary unusualness signal against a known-legitimate training reference. The anomaly score is kept separate from supervised fraud probability: an unusual transaction is not necessarily fraudulent, and the score is not a probability.",
+            ],
+          },
+          {
+            id: "backend-architecture",
+            heading: "Backend architecture",
+            paragraphs: [
+              "The Python API uses FastAPI, Pydantic, SQLAlchemy, SQLite, and Alembic alongside scikit-learn, SHAP, NumPy, pandas, and joblib. It supports single and batch prediction, bounded CSV analysis, model status, explanations, risk and anomaly scoring, history, and investigation workflows.",
+              "SQLite stores derived predictions and workflow records such as analyses, investigations, notes, and events. The API has no authentication or authorization and is intended for local-only use.",
+            ],
+            architectureFlow: [
+              "ULB dataset and EDA",
+              "Calibrated classifier and Isolation Forest",
+              "SHAP explanations and risk policy",
+              "Local FastAPI service",
+              "SQLite history and investigations",
+              "Next.js analyst dashboard",
+            ],
+          },
+          {
+            id: "frontend-architecture",
+            heading: "Frontend and analyst workflows",
+            paragraphs: [
+              "The responsive dashboard is built with Next.js, React, TypeScript, and Tailwind CSS. It brings model outputs and investigation tools into one interface while keeping probability, risk tier, anomaly score, explanations, and analyst outcomes distinct.",
+            ],
+            items: [
+              "Analytics overview, single and batch prediction, and feature-only CSV analysis.",
+              "Risk prioritization, global and local SHAP visualizations, and anomaly review.",
+              "Prediction history, investigation management, and model/system status.",
+            ],
+          },
+          {
+            id: "historical-evaluation",
+            heading: "Historical held-out evaluation",
+            paragraphs: [
+              "These metrics come from the documented final chronological test and describe historical evaluation, not live production behavior or validation on a future independent banking dataset.",
+            ],
+            metrics: [
+              { label: "ROC-AUC", value: "0.977" },
+              { label: "Average Precision", value: "0.737" },
+              { label: "Precision", value: "0.905" },
+              { label: "Recall", value: "0.731" },
+              { label: "F1-score", value: "0.809" },
+            ],
+          },
+          {
+            id: "validation",
+            heading: "Engineering validation",
+            paragraphs: [
+              "The Mission 06 release record documents backend and frontend checks, a production build, and browser workflows using synthetic inputs. Automated accessibility scans are evidence for the tested routes and rules, not a WCAG certification.",
+            ],
+            metrics: [
+              { label: "Backend tests passed", value: "81" },
+              { label: "Frontend unit tests passed", value: "16" },
+              { label: "Playwright tests passed", value: "14" },
+            ],
+            items: [
+              "TypeScript, ESLint, and the optimized frontend production build passed.",
+              "36 route/viewport combinations had no horizontal document overflow; 18 configured axe scans reported zero violations.",
+              "No full security audit, manual screen-reader review, or production-readiness claim is made.",
+            ],
+          },
+          {
+            id: "limitations",
+            heading: "Limitations and scope",
+            items: [
+              "The data is historical and anonymized; the final-test partition is consumed, with no independent future-period evaluation.",
+              "The model does not detect every fraudulent transaction and has no verified financial-savings result.",
+              "The local API has no authentication, and SQLite is not encrypted at rest; the system is not a production banking engine.",
+              "SHAP does not establish causality, and Isolation Forest unusualness is not fraud probability.",
+            ],
+          },
+        ],
+      },
       "indonesia-tourism": {
         title: "Indonesia Tourism Website",
         category: "Frontend / Web Development",
