@@ -1,16 +1,22 @@
 import Link from "next/link";
-import CertificationCard, { type CertificationCardLabels } from "@/components/CertificationCard";
-import DirectionalArrow from "@/components/DirectionalArrow";
-import Reveal from "@/components/Reveal";
-import { certifications as allCertifications, featuredCertifications, type Certification } from "@/data/certifications";
+import { ArrowUpRight } from "lucide-react";
+import CertificationSpotlight, {
+  type CertificationSpotlightLabels,
+} from "@/components/CertificationSpotlight";
+import type { CertificatePreviewModalLabels } from "@/components/CertificatePreviewModal";
+import type { Certification, CertificationKnowledge } from "@/data/certifications";
 import type { Locale } from "@/i18n/config";
+import { formatLocalizedNumber } from "@/i18n/helpers";
+
+type CertificationDomain = CertificationKnowledge["domain"];
 
 export interface CertificationsCopy {
   title: string;
   highlightedTitle: string;
   introduction: string;
   viewAll: string;
-  card: CertificationCardLabels;
+  spotlight: CertificationSpotlightLabels;
+  viewer: Partial<CertificatePreviewModalLabels>;
 }
 
 const defaultCopy: CertificationsCopy = {
@@ -19,19 +25,35 @@ const defaultCopy: CertificationsCopy = {
   introduction:
     "Credentials supporting my foundations in Software Engineering, Data Science, Machine Learning, Python, and Java.",
   viewAll: "View all certifications",
-  card: {
-    previewCertificateAriaLabel: "Preview {title}",
-    verifyCertificate: "Verify certificate",
-    verifyCertificateAriaLabel: "Verify {title} certificate (opens in a new tab)",
-    viewOnLinkedIn: "View on LinkedIn",
-    viewOnLinkedInAriaLabel: "View {title} on LinkedIn (opens in a new tab)",
-    credentialUnavailable: "Credential link unavailable",
+  spotlight: {
+    eyebrow: "Featured credentials",
+    selectorsLabel: "Select a featured credential",
+    selectedLabel: "Selected",
+    positionLabel: "Credential {current} of {total}",
+    previewLabel: "Preview {title}",
+    previewActionLabel: "Preview",
+    verifyLabel: "Verify credential",
+    verifyAriaLabel: "Verify {title} (opens in a new tab)",
+    linkedInLabel: "View on LinkedIn",
+    linkedInAriaLabel: "View {title} on LinkedIn (opens in a new tab)",
+    categories: {
+      "software-engineering": "Software Engineering",
+      "backend-java": "Backend & Java",
+      "data-science": "Data Science",
+      "machine-learning": "Machine Learning",
+    },
   },
+  viewer: {},
 };
 
 interface CertificationsProps {
   locale?: Locale;
-  copy?: Partial<CertificationsCopy> & { card?: Partial<CertificationCardLabels> };
+  copy?: Partial<Omit<CertificationsCopy, "spotlight" | "viewer">> & {
+    spotlight?: Partial<Omit<CertificationSpotlightLabels, "categories">> & {
+      categories?: Record<CertificationDomain, string>;
+    };
+    viewer?: Partial<CertificatePreviewModalLabels>;
+  };
   certifications?: Certification[];
   totalCount?: number;
   imageAlts?: Record<string, string>;
@@ -40,50 +62,72 @@ interface CertificationsProps {
 export default function Certifications({
   locale = "en",
   copy: overrides,
-  certifications = featuredCertifications,
-  totalCount = allCertifications.length,
+  certifications,
+  totalCount,
   imageAlts = {},
 }: CertificationsProps) {
-  const copy: CertificationsCopy = {
+  const items = certifications ?? [];
+  const spotlight: CertificationSpotlightLabels = {
+    ...defaultCopy.spotlight,
+    ...overrides?.spotlight,
+    categories: {
+      ...defaultCopy.spotlight.categories,
+      ...overrides?.spotlight?.categories,
+    },
+  };
+  const copy = {
     ...defaultCopy,
     ...overrides,
-    card: { ...defaultCopy.card, ...overrides?.card },
+    spotlight,
+    viewer: { ...defaultCopy.viewer, ...overrides?.viewer },
   };
+  const credentialCount = totalCount ?? items.length;
+  const paddedCount = (value: number) => formatLocalizedNumber(value, locale, {
+    minimumIntegerDigits: 2,
+    useGrouping: false,
+  });
 
   return (
-    <section id="certifications" className="relative flex min-h-screen scroll-mt-24 flex-col items-center justify-center px-6 py-24 text-content-primary md:px-10">
-      <div className="w-full max-w-6xl">
-        <Reveal className="mb-16 text-center">
-          <h2 className="text-3xl font-bold md:text-5xl">
-            {copy.title} <span className="text-accent">{copy.highlightedTitle}</span>
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-content-secondary">{copy.introduction}</p>
-        </Reveal>
-
-        <div className="grid gap-8 lg:grid-cols-3">
-          {certifications.map((certification, index) => (
-            <CertificationCard
-              key={certification.id}
-              cert={certification}
-              index={index}
-              variant="preview"
-              labels={copy.card}
-              imageAlt={imageAlts[certification.id]}
-            />
-          ))}
-        </div>
-
-        <Reveal delay={0.2} className="mt-12 flex justify-center">
-          <div data-chat-safe-zone>
-            <Link
-              href={`/${locale}/certifications`}
-              className="inline-flex items-center gap-2 rounded-lg border border-accent px-7 py-3 text-sm font-medium text-accent-soft transition-all duration-300 hover:bg-action hover:text-on-action focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+    <section
+      id="certifications"
+      aria-labelledby="certifications-heading"
+      className="relative scroll-mt-24 px-5 py-20 text-content-primary sm:px-8 sm:py-24 lg:px-10 lg:py-28"
+    >
+      <div className="mx-auto max-w-7xl">
+        <header className="mb-10 grid items-end gap-6 border-b border-outline-subtle/80 pb-8 sm:mb-12 sm:pb-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12">
+          <div>
+            <h2
+              id="certifications-heading"
+              className="text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl"
             >
-              {copy.viewAll} ({totalCount})
-              <DirectionalArrow locale={locale} direction="forward" />
-            </Link>
+              {copy.title} <span className="text-accent">{copy.highlightedTitle}</span>
+            </h2>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-content-secondary sm:text-lg sm:leading-8">
+              {copy.introduction}
+            </p>
           </div>
-        </Reveal>
+          <p className="font-mono text-sm font-medium tabular-nums text-content-muted lg:pb-1">
+            {paddedCount(items.length)} / {paddedCount(credentialCount)}
+          </p>
+        </header>
+
+        <CertificationSpotlight
+          certifications={items}
+          locale={locale}
+          imageAlts={imageAlts}
+          labels={spotlight}
+          viewerLabels={copy.viewer}
+        />
+
+        <div className="mt-10 flex justify-center sm:mt-12">
+          <Link
+            href={`/${locale}/certifications`}
+            className="group inline-flex min-h-12 items-center justify-center gap-3 rounded-full border border-outline-default px-6 py-3 text-sm font-semibold text-content-strong transition-colors hover:border-accent hover:bg-hover-surface hover:text-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+          >
+            {copy.viewAll} <span className="tabular-nums">({formatLocalizedNumber(credentialCount, locale)})</span>
+            <ArrowUpRight aria-hidden="true" size={16} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </Link>
+        </div>
       </div>
     </section>
   );

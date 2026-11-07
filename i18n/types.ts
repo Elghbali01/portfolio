@@ -1,6 +1,7 @@
 import type { Locale, TextDirection } from "./config";
 import type { ThemeId } from "../lib/theme";
 import type { SkillDomainId } from "../data/skills";
+import type { CertificationKnowledge } from "../data/certifications";
 
 export const sectionIds = [
   "home",
@@ -316,6 +317,10 @@ export type PortfolioDictionary = {
       titleAccent: string;
       description: string;
       viewAll: string;
+      spotlightLabel: string;
+      featuredCredentialsLabel: string;
+      selectedLabel: string;
+      positionLabel: string;
     };
     listing: {
       titleLead: string;
@@ -324,20 +329,52 @@ export type PortfolioDictionary = {
       count: PluralForms;
       backToPortfolio: string;
       collectionLabel: string;
+      filters: {
+        label: string;
+        all: string;
+        categories: Record<CertificationKnowledge["domain"], string>;
+        emptyTitle: string;
+        emptyDescription: string;
+      };
+      sort: {
+        label: string;
+        newest: string;
+        oldest: string;
+      };
+      stats: {
+        total: string;
+        domains: string;
+        issuers: string;
+        mostRecentYear: string;
+      };
     };
     card: {
       preview: string;
       previewCertificate: string;
       verify: string;
       verifyCertificate: string;
+      verifyCertificateAriaLabel: string;
       viewOnLinkedIn: string;
+      viewOnLinkedInAriaLabel: string;
       downloadCertificate: string;
+      credentialUnavailable: string;
     };
     modal: {
       dialogLabel: string;
       closePreview: string;
       close: string;
       imageLabel: string;
+      zoomIn: string;
+      zoomOut: string;
+      resetZoom: string;
+      fit: string;
+      previous: string;
+      next: string;
+      position: string;
+      issuerLabel: string;
+      dateLabel: string;
+      domainLabel: string;
+      download: string;
     };
     items: Record<CertificationId, CertificationTranslation>;
   };

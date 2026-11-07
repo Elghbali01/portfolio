@@ -2,25 +2,32 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
+import { Download, Eye } from "lucide-react";
 import type { Certification } from "../data/certifications";
+import type { Locale } from "@/i18n/config";
+import { formatCertificationDate } from "@/lib/certifications";
 
 export interface CertificationCardLabels {
   previewCertificateAriaLabel: string;
+  preview: string;
   verifyCertificate: string;
   verifyCertificateAriaLabel: string;
   viewOnLinkedIn: string;
   viewOnLinkedInAriaLabel: string;
+  downloadCertificate: string;
   credentialUnavailable: string;
 }
 
 const DEFAULT_LABELS: CertificationCardLabels = {
   previewCertificateAriaLabel: "Preview {title}",
+  preview: "Preview",
   verifyCertificate: "Verify Certificate",
   verifyCertificateAriaLabel:
     "Verify {title} certificate (opens in a new tab)",
   viewOnLinkedIn: "View on LinkedIn",
   viewOnLinkedInAriaLabel:
     "View {title} on LinkedIn (opens in a new tab)",
+  downloadCertificate: "Download certificate",
   credentialUnavailable: "Credential link unavailable",
 };
 
@@ -34,6 +41,8 @@ interface CertificationCardProps {
   labels?: Partial<CertificationCardLabels>;
   headingLevel?: "h2" | "h3";
   imageAlt?: string;
+  locale?: Locale;
+  categoryLabel?: string;
 }
 
 function formatLabel(template: string, title: string) {
@@ -50,6 +59,8 @@ export default function CertificationCard({
   labels,
   headingLevel = "h3",
   imageAlt,
+  locale = "en",
+  categoryLabel,
 }: CertificationCardProps) {
   const copy: CertificationCardLabels = {
     ...DEFAULT_LABELS,
@@ -58,6 +69,8 @@ export default function CertificationCard({
   const Heading = headingLevel;
   const shouldReduceMotion = useReducedMotion();
   const canOpenPreview = variant === "full" && Boolean(onImageClick);
+  const formattedDate = formatCertificationDate(cert, locale);
+  const localDownload = cert.pdf ?? cert.downloadImage;
 
   const thumbnail = (
     <Image
@@ -75,6 +88,7 @@ export default function CertificationCard({
 
   return (
     <motion.article
+      layout={!shouldReduceMotion}
       initial={shouldReduceMotion ? false : { opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={
@@ -94,9 +108,12 @@ export default function CertificationCard({
             cert.title,
           )}
           onClick={() => onImageClick?.(cert)}
-          className="relative aspect-[4/3] w-full cursor-pointer overflow-hidden bg-surface/60 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
+          className="group relative aspect-[4/3] w-full cursor-zoom-in overflow-hidden bg-surface-inset/35 focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus"
         >
           {thumbnail}
+          <span className="absolute bottom-3 end-3 inline-flex min-h-9 items-center gap-2 rounded-full border border-outline-default/70 bg-canvas/95 px-3 text-xs font-semibold text-content-primary shadow-lg backdrop-blur-sm transition-colors group-hover:border-accent group-hover:text-accent-soft">
+            <Eye aria-hidden="true" size={14} />{copy.preview}
+          </span>
         </button>
       ) : (
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-surface/60">
@@ -111,14 +128,13 @@ export default function CertificationCard({
 
         <p className="text-sm font-medium text-accent">{cert.issuer}</p>
 
-        {cert.date && (
-          <p className="mt-0.5 text-xs text-content-subtle">{cert.date}</p>
-        )}
+        {formattedDate && <p className="mt-0.5 text-xs text-content-subtle"><time dateTime={cert.dateISO}>{formattedDate}</time></p>}
+        {categoryLabel && <span className="mt-2 w-fit rounded-full border border-outline-default/70 px-2.5 py-1 text-[11px] font-medium text-content-muted">{categoryLabel}</span>}
 
         <div className="flex-1" />
 
         {variant === "full" && (
-          <div data-chat-safe-zone className="mt-4">
+          <div data-chat-safe-zone className="mt-4 grid gap-2">
             {cert.verificationUrl ? (
               <a
                 href={cert.verificationUrl}
@@ -199,6 +215,13 @@ export default function CertificationCard({
                 </button>
               )
             ) : null}
+            {localDownload && (
+              <a
+                href={localDownload}
+                download={localDownload.split("/").pop()}
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-outline-default px-4 py-2.5 text-sm font-medium text-content-strong transition-colors hover:border-accent hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated"
+              ><Download aria-hidden="true" size={15} />{copy.downloadCertificate}</a>
+            )}
           </div>
         )}
       </div>

@@ -138,19 +138,33 @@ export default async function HomePage({ params }: HomePageProps) {
       <Certifications
         locale={locale}
         certifications={featuredCertifications}
+        totalCount={certificationIds.length}
         imageAlts={certificationImageAlts}
         copy={{
           title: dictionary.certifications.section.titleLead,
           highlightedTitle: dictionary.certifications.section.titleAccent,
           introduction: dictionary.certifications.section.description,
           viewAll: dictionary.certifications.section.viewAll,
-          card: {
-            previewCertificateAriaLabel: dictionary.certifications.card.previewCertificate,
-            verifyCertificate: dictionary.certifications.card.verify,
-            verifyCertificateAriaLabel: `${dictionary.certifications.card.verifyCertificate}: {title} (${dictionary.common.opensInNewTab})`,
+          spotlight: {
+            eyebrow: dictionary.certifications.section.spotlightLabel,
+            selectorsLabel: dictionary.certifications.section.featuredCredentialsLabel,
+            selectedLabel: dictionary.certifications.section.selectedLabel,
+            positionLabel: dictionary.certifications.section.positionLabel,
+            previewLabel: dictionary.certifications.card.previewCertificate,
+            previewActionLabel: dictionary.certifications.card.preview,
+            verifyLabel: dictionary.certifications.card.verify,
+            verifyAriaLabel: dictionary.certifications.card.verifyCertificateAriaLabel,
+            linkedInLabel: dictionary.certifications.card.viewOnLinkedIn,
+            linkedInAriaLabel: dictionary.certifications.card.viewOnLinkedInAriaLabel,
+            categories: dictionary.certifications.listing.filters.categories,
+          },
+          viewer: {
+            ...dictionary.certifications.modal,
+            verifyCertificate: dictionary.certifications.card.verifyCertificate,
+            verifyCertificateAriaLabel: dictionary.certifications.card.verifyCertificateAriaLabel,
             viewOnLinkedIn: dictionary.certifications.card.viewOnLinkedIn,
-            viewOnLinkedInAriaLabel: `${dictionary.certifications.card.viewOnLinkedIn}: {title} (${dictionary.common.opensInNewTab})`,
-            credentialUnavailable: dictionary.common.notAvailable,
+            viewOnLinkedInAriaLabel: dictionary.certifications.card.viewOnLinkedInAriaLabel,
+            certificateImageAlt: dictionary.certifications.modal.imageLabel,
           },
         }}
       />

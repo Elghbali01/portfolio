@@ -12,6 +12,8 @@ export type Certification = {
   title: string;
   issuer: string;
   date?: string;
+  /** ISO date used for reliable sorting and locale-aware display when the full date is known. */
+  dateISO?: string;
   /** Path to the PNG thumbnail in /public/certificate-images/ */
   image: string;
   /** Path to the downloadable PDF in /public/certificates/ — null when no local PDF exists */
@@ -67,6 +69,7 @@ export const certifications: Certification[] = [
     title: "Python for Data Science, AI & Development",
     issuer: "IBM (via Coursera)",
     date: "July 15, 2026",
+    dateISO: "2026-07-15",
     ...makePaths("Python_for_Data_Science_AI"),
     downloadImage: null,
     externalUrl: null,
@@ -79,6 +82,7 @@ export const certifications: Certification[] = [
     title: "Supervised Machine Learning: Regression and Classification",
     issuer: "DeepLearning.AI (via Coursera)",
     date: "July 27, 2026",
+    dateISO: "2026-07-27",
     ...makePaths("Supervised_ML_Regression_Classification"),
     downloadImage: null,
     externalUrl: null,
@@ -91,6 +95,7 @@ export const certifications: Certification[] = [
     title: "Introduction to Software Engineering",
     issuer: "IBM (via Coursera)",
     date: "July 8, 2026",
+    dateISO: "2026-07-08",
     ...makePaths("Introduction_to_Software_Engineering"),
     downloadImage: null,
     externalUrl: null,
@@ -116,6 +121,7 @@ export const certifications: Certification[] = [
     title: "The Data Science Profession",
     issuer: "University of London (via Coursera)",
     date: "July 14, 2026",
+    dateISO: "2026-07-14",
     ...makePaths("The_Data_Science_Profession"),
     downloadImage: null,
     externalUrl: null,
@@ -128,6 +134,7 @@ export const certifications: Certification[] = [
     title: "Spring — Ecosystem and Core",
     issuer: "LearnQuest (via Coursera)",
     date: "July 10, 2026",
+    dateISO: "2026-07-10",
     ...makePaths("Spring_Ecosystem_and_Core"),
     downloadImage: null,
     externalUrl: null,
@@ -140,6 +147,7 @@ export const certifications: Certification[] = [
     title: "Introduction to Machine Learning",
     issuer: "Duke University (via Coursera)",
     date: "July 8, 2026",
+    dateISO: "2026-07-08",
     ...makePaths("Introduction_to_Machine_Learning"),
     downloadImage: null,
     externalUrl: null,
