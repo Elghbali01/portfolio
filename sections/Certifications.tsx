@@ -94,19 +94,19 @@ export default function Certifications({
       className="relative scroll-mt-24 px-5 py-20 text-content-primary sm:px-8 sm:py-24 lg:px-10 lg:py-28"
     >
       <div className="mx-auto max-w-7xl">
-        <header className="mb-10 grid items-end gap-6 border-b border-outline-subtle/80 pb-8 sm:mb-12 sm:pb-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-12">
-          <div>
+        <header className="relative mb-10 border-b border-outline-subtle/80 pb-8 sm:mb-12 sm:pb-10">
+          <div className="mx-auto flex w-full max-w-3xl flex-col items-center text-center">
             <h2
               id="certifications-heading"
               className="text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl"
             >
               {copy.title} <span className="text-accent">{copy.highlightedTitle}</span>
             </h2>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-content-secondary sm:text-lg sm:leading-8">
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-content-secondary sm:text-lg sm:leading-8">
               {copy.introduction}
             </p>
           </div>
-          <p className="font-mono text-sm font-medium tabular-nums text-content-muted lg:pb-1">
+          <p className="mt-4 font-mono text-sm font-medium tabular-nums text-content-muted lg:absolute lg:bottom-8 lg:end-0 lg:mt-0 lg:text-end">
             {paddedCount(items.length)} / {paddedCount(credentialCount)}
           </p>
         </header>

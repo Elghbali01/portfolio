@@ -1,8 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  type HTMLMotionProps,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+} from "framer-motion";
 import { Download, Github, Linkedin } from "lucide-react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { useIntroSequence } from "@/components/IntroSequence";
 import RotatingText from "@/components/RotatingText";
 import type { Locale } from "@/i18n/config";
@@ -43,6 +50,55 @@ interface RevealOrigin {
 
 const DEFAULT_PHOTO_ORIGIN: RevealOrigin = { x: -48, y: -26, scale: 0.82 };
 const DEFAULT_COPY_ORIGIN: RevealOrigin = { x: 34, y: -14, scale: 0.96 };
+
+function MagneticAnchor({
+  children,
+  className,
+  style,
+  onPointerMove,
+  onPointerLeave,
+  ...props
+}: HTMLMotionProps<"a">) {
+  const shouldReduceMotion = useReducedMotion() === true;
+  const positionX = useMotionValue(0);
+  const positionY = useMotionValue(0);
+  const springX = useSpring(positionX, { stiffness: 280, damping: 22, mass: 0.2 });
+  const springY = useSpring(positionY, { stiffness: 280, damping: 22, mass: 0.2 });
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLAnchorElement>) => {
+    onPointerMove?.(event);
+
+    if (
+      shouldReduceMotion ||
+      event.pointerType !== "mouse" ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    ) {
+      return;
+    }
+
+    const bounds = event.currentTarget.getBoundingClientRect();
+    positionX.set(((event.clientX - bounds.left) / bounds.width - 0.5) * 7);
+    positionY.set(((event.clientY - bounds.top) / bounds.height - 0.5) * 7);
+  };
+
+  const handlePointerLeave = (event: ReactPointerEvent<HTMLAnchorElement>) => {
+    onPointerLeave?.(event);
+    positionX.set(0);
+    positionY.set(0);
+  };
+
+  return (
+    <motion.a
+      {...props}
+      className={className}
+      style={{ ...style, x: springX, y: springY }}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+    >
+      {children}
+    </motion.a>
+  );
+}
 
 interface HeroProps {
   locale?: Locale;
@@ -102,17 +158,21 @@ export default function Hero({
           <div aria-hidden="true" className="absolute h-[320px] w-[320px] rounded-full bg-glow-primary opacity-20 blur-[140px] lg:h-[520px] lg:w-[520px] lg:blur-[200px]" />
           <div aria-hidden="true" className="absolute h-[260px] w-[260px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] bg-gradient-to-br from-action to-glow-primary opacity-70 blur-sm lg:h-[400px] lg:w-[400px]" />
           <div aria-hidden="true" className="absolute h-[240px] w-[240px] rounded-[60%_40%_50%_70%/60%_50%_70%_40%] border border-accent/40 lg:h-[360px] lg:w-[360px]" />
-          <div className="relative h-52 w-52 overflow-hidden rounded-full border-4 border-surface shadow-2xl sm:h-60 sm:w-60 lg:h-80 lg:w-80">
-            <Image
-              src="/profile.webp"
-              alt={copy.imageAlt}
-              fill
-              priority
-              fetchPriority="high"
-              quality={82}
-              sizes="(min-width: 1024px) 320px, (min-width: 640px) 240px, 208px"
-              className="object-cover"
-            />
+          <div className="relative h-fit w-fit">
+            <div aria-hidden="true" className="hero-orbit hero-orbit--outer" />
+            <div aria-hidden="true" className="hero-orbit hero-orbit--inner" />
+            <div className="relative z-10 h-52 w-52 overflow-hidden rounded-full border-4 border-surface shadow-2xl sm:h-60 sm:w-60 lg:h-80 lg:w-80">
+              <Image
+                src="/profile.webp"
+                alt={copy.imageAlt}
+                fill
+                priority
+                fetchPriority="high"
+                quality={82}
+                sizes="(min-width: 1024px) 320px, (min-width: 640px) 240px, 208px"
+                className="object-cover"
+              />
+            </div>
           </div>
         </motion.div>
 
@@ -142,14 +202,33 @@ export default function Hero({
             {copy.eyebrow}
           </motion.p>
 
-          <motion.h1
-            initial={reduceMotion || !intro.active ? false : { opacity: 0, y: 10 }}
-            animate={revealStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-            transition={{ duration: reduceMotion ? 0 : 0.38, delay: reduceMotion ? 0 : revealStarted ? 0.14 : 0, ease: "easeOut" }}
+          <h1
+            aria-label={`${copy.firstName} ${copy.lastName}`.trim()}
             className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
           >
-            {copy.firstName} <span className="text-accent">{copy.lastName}</span>
-          </motion.h1>
+            <span aria-hidden="true">
+              <span className="inline-block overflow-hidden pb-[0.08em] align-bottom">
+                <motion.span
+                  initial={reduceMotion || !intro.active ? false : { opacity: 0, y: "105%" }}
+                  animate={revealStarted ? { opacity: 1, y: "0%" } : { opacity: 0, y: "105%" }}
+                  transition={{ duration: reduceMotion ? 0 : 0.58, delay: reduceMotion ? 0 : revealStarted ? 0.12 : 0, ease: [0.22, 1, 0.36, 1] }}
+                  className="inline-block"
+                >
+                  {copy.firstName}
+                </motion.span>
+              </span>{" "}
+              <span className="inline-block overflow-hidden pb-[0.08em] align-bottom">
+                <motion.span
+                  initial={reduceMotion || !intro.active ? false : { opacity: 0, y: "105%" }}
+                  animate={revealStarted ? { opacity: 1, y: "0%" } : { opacity: 0, y: "105%" }}
+                  transition={{ duration: reduceMotion ? 0 : 0.62, delay: reduceMotion ? 0 : revealStarted ? 0.24 : 0, ease: [0.22, 1, 0.36, 1] }}
+                  className="inline-block text-accent"
+                >
+                  {copy.lastName}
+                </motion.span>
+              </span>
+            </span>
+          </h1>
 
           <motion.div
             initial={reduceMotion || !intro.active ? false : { opacity: 0, y: 8 }}
@@ -203,26 +282,26 @@ export default function Hero({
             transition={{ duration: reduceMotion ? 0 : 0.56, delay: reduceMotion ? 0 : revealStarted ? 0.52 : 0, ease: "easeOut" }}
             className="flex flex-col flex-wrap justify-center gap-3 pt-3 sm:flex-row md:gap-2 lg:justify-start"
           >
-            <a
+            <MagneticAnchor
               href={`/${locale}#projects`}
-              className="rounded-lg bg-action px-6 py-3 text-center font-medium text-on-action shadow-lg shadow-glow-primary/20 transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+              className="rounded-lg bg-action px-6 py-3 text-center font-medium text-on-action shadow-lg shadow-glow-primary/20 transition-[background-color,border-color,color,box-shadow] hover:bg-action-hover hover:shadow-glow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               {copy.viewProjects}
-            </a>
-            <a
+            </MagneticAnchor>
+            <MagneticAnchor
               href={`/${locale}#contact`}
-              className="rounded-lg border border-outline-default px-6 py-3 text-center font-medium text-content-strong transition hover:border-accent hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+              className="rounded-lg border border-outline-default px-6 py-3 text-center font-medium text-content-strong transition-[background-color,border-color,color,box-shadow] hover:border-accent hover:bg-hover-surface hover:text-content-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               {copy.contact}
-            </a>
-            <a
+            </MagneticAnchor>
+            <MagneticAnchor
               href={cvUrl}
               download
-              className="flex items-center justify-center gap-2 rounded-lg border border-content-primary/20 bg-content-primary/5 px-6 py-3 text-center font-medium text-content-strong backdrop-blur-md transition hover:border-content-primary/30 hover:bg-content-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+              className="flex items-center justify-center gap-2 rounded-lg border border-content-primary/20 bg-content-primary/5 px-6 py-3 text-center font-medium text-content-strong backdrop-blur-md transition-[background-color,border-color,color,box-shadow] hover:border-accent hover:bg-hover-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               <Download aria-hidden="true" size={18} />
               {copy.downloadCv}
-            </a>
+            </MagneticAnchor>
           </motion.div>
         </motion.div>
       </div>

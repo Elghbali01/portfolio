@@ -62,18 +62,18 @@ export default function About({ copy: overrides, rtl = false }: AboutProps) {
           <p className="mx-auto mt-4 max-w-3xl leading-relaxed text-content-secondary">{copy.summary}</p>
         </Reveal>
 
-        <div className="grid items-center gap-14 lg:grid-cols-2">
-          <Reveal from="start" rtl={rtl} className="space-y-6 text-start leading-relaxed text-content-strong">
+        <div className="grid items-start gap-10 md:gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] xl:gap-16">
+          <Reveal from="start" rtl={rtl} className="about-narrative space-y-6 text-start leading-relaxed text-content-strong">
             {copy.paragraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
           </Reveal>
 
-          <Reveal from="end" rtl={rtl} className="grid gap-6">
-            {copy.cards.map((card) => (
-              <ExpertiseCard key={card.id} card={card} />
+          <div className="grid gap-6">
+            {copy.cards.map((card, index) => (
+              <ExpertiseCard key={card.id} card={card} revealDelay={index * 0.12} />
             ))}
-          </Reveal>
+          </div>
         </div>
       </div>
     </section>

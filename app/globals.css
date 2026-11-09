@@ -390,6 +390,109 @@ html[dir="rtl"] body {
   }
 }
 
+.hero-orbit {
+  position: absolute;
+  z-index: 0;
+  border: 1px solid;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-orbit--inner {
+  inset: -1.25rem;
+  transform: rotate(-18deg);
+  border-color: color-mix(in srgb, var(--theme-accent) 34%, transparent);
+}
+
+.hero-orbit--outer {
+  inset: -1.75rem;
+  transform: rotate(14deg);
+  border-color: color-mix(in srgb, var(--theme-accent-secondary) 22%, transparent);
+}
+
+.hero-orbit--inner::before,
+.hero-orbit--outer::before {
+  position: absolute;
+  width: 0.4rem;
+  height: 0.4rem;
+  content: "";
+  border-radius: 9999px;
+  background: var(--theme-accent);
+  box-shadow: 0 0 0.8rem color-mix(in srgb, var(--theme-accent) 64%, transparent);
+}
+
+.hero-orbit--inner::before {
+  top: 8%;
+  inset-inline-end: 16%;
+}
+
+.hero-orbit--outer::before {
+  bottom: 12%;
+  inset-inline-start: 13%;
+  width: 0.3rem;
+  height: 0.3rem;
+  background: var(--theme-accent-secondary);
+  box-shadow: 0 0 0.75rem color-mix(in srgb, var(--theme-accent-secondary) 60%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-orbit--inner {
+    animation: hero-orbit-inner 22s linear infinite;
+  }
+
+  .hero-orbit--outer {
+    animation: hero-orbit-outer 24s linear infinite;
+  }
+}
+
+@keyframes hero-orbit-inner {
+  from {
+    transform: rotate(-18deg);
+  }
+
+  to {
+    transform: rotate(342deg);
+  }
+}
+
+@keyframes hero-orbit-outer {
+  from {
+    transform: rotate(14deg);
+  }
+
+  to {
+    transform: rotate(-346deg);
+  }
+}
+
+.about-narrative {
+  border-inline-start: 1px solid color-mix(in srgb, var(--theme-accent) 30%, transparent);
+  padding-inline-start: 1.25rem;
+}
+
+.about-narrative p {
+  position: relative;
+}
+
+.about-narrative p::before {
+  position: absolute;
+  top: 0.68em;
+  inset-inline-start: calc(-1.25rem - 0.25rem);
+  width: 0.5rem;
+  height: 0.5rem;
+  content: "";
+  border: 1px solid color-mix(in srgb, var(--theme-accent) 52%, var(--theme-outline-default));
+  border-radius: 9999px;
+  background: var(--theme-surface);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-accent) 7%, transparent);
+}
+
+.about-narrative p:first-child::before {
+  border-color: var(--theme-accent);
+  background: var(--theme-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-accent) 12%, transparent);
+}
+
 .expertise-card-light {
   position: absolute;
   inset: 0;
@@ -504,8 +607,130 @@ html[dir="rtl"] body {
 }
 
 .expertise-illustration-path--animated {
-  stroke-dasharray: 7 6;
-  stroke-dashoffset: 12;
+  opacity: 0.52;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.expertise-illustration-signal {
+  fill: none;
+  stroke: var(--theme-accent-soft);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 0.12 0.88;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+
+.expertise-illustration-node {
+  opacity: 0.56;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.expertise-illustration-bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform: scaleY(0.08);
+  opacity: 0.5;
+}
+
+.expertise-architecture-link {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.expertise-architecture-component {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.94);
+  opacity: 0.54;
+}
+
+.expertise-card[data-visible="true"] .expertise-illustration-path--animated {
+  animation: expertise-path-draw 1.05s cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+
+.expertise-card[data-visible="true"] .expertise-illustration-signal {
+  animation: expertise-signal-travel 1s ease-out 280ms both;
+}
+
+.expertise-card[data-visible="true"] .expertise-illustration-node {
+  animation: expertise-node-activate 480ms cubic-bezier(0.22, 1, 0.36, 1)
+    calc(180ms + var(--diagram-delay, 0ms)) both;
+}
+
+.expertise-card[data-visible="true"] .expertise-illustration-bar {
+  animation: expertise-bar-rise 540ms cubic-bezier(0.22, 1, 0.36, 1)
+    calc(140ms + var(--diagram-delay, 0ms)) both;
+}
+
+.expertise-card[data-visible="true"] .expertise-architecture-link {
+  animation: expertise-path-draw 380ms ease-out
+    calc(120ms + var(--diagram-delay, 0ms)) both;
+}
+
+.expertise-card[data-visible="true"] .expertise-architecture-component {
+  animation: expertise-component-activate 460ms cubic-bezier(0.22, 1, 0.36, 1)
+    calc(180ms + var(--diagram-delay, 0ms)) both;
+}
+
+@keyframes expertise-path-draw {
+  to {
+    stroke-dashoffset: 0;
+    opacity: 0.95;
+  }
+}
+
+@keyframes expertise-signal-travel {
+  12% {
+    opacity: 0.9;
+  }
+
+  88% {
+    opacity: 0.9;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes expertise-node-activate {
+  0% {
+    transform: scale(0.78);
+    opacity: 0.3;
+  }
+
+  58% {
+    transform: scale(1.22);
+    opacity: 1;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 0.96;
+  }
+}
+
+@keyframes expertise-bar-rise {
+  to {
+    transform: scaleY(1);
+    opacity: 0.96;
+  }
+}
+
+@keyframes expertise-component-activate {
+  55% {
+    transform: scale(1.035);
+    opacity: 1;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 0.96;
+  }
 }
 
 .expertise-card:hover .expertise-illustration-path--animated {
@@ -582,7 +807,27 @@ html[dir="rtl"] body {
   }
 
   .expertise-card:hover .expertise-illustration-path--animated {
-    stroke-dashoffset: 12;
+    stroke-dashoffset: 0;
+  }
+
+  .expertise-illustration-path--animated,
+  .expertise-architecture-link {
+    stroke-dashoffset: 0;
+  }
+
+  .expertise-illustration-node {
+    transform: none;
+    opacity: 1;
+  }
+
+  .expertise-illustration-bar,
+  .expertise-architecture-component {
+    transform: none;
+    opacity: 1;
+  }
+
+  .expertise-illustration-signal {
+    display: none;
   }
 
   .contact-submit:hover:not(:disabled) {
