@@ -61,11 +61,10 @@ export default function BackToTopButton({ label = "Back to top" }: BackToTopButt
           initial={shouldReduceMotion ? false : { opacity: 0, y: 10, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={shouldReduceMotion ? undefined : { opacity: 0, y: 8, scale: 0.9 }}
-          whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.03 }}
           whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
-          className="fixed bottom-24 end-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong bg-surface-elevated/90 text-content-primary shadow-lg shadow-glow-primary/15 backdrop-blur-md transition-colors duration-200 hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas sm:end-6"
+          className="back-to-top-button fixed bottom-24 end-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong bg-surface-elevated/90 text-content-primary shadow-lg shadow-glow-primary/15 backdrop-blur-md transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas sm:end-6"
         >
-          <ArrowUp aria-hidden="true" size={18} />
+          <ArrowUp className="back-to-top-arrow" aria-hidden="true" size={18} />
         </motion.button>
       ) : null}
     </AnimatePresence>

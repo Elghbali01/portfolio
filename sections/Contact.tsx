@@ -1,9 +1,24 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useId, useRef, useState } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import emailjs from "@emailjs/browser";
-import { Mail, Linkedin, Github } from "lucide-react";
+import { Github, Linkedin, LoaderCircle, Mail, Send } from "lucide-react";
+
+const CONTACT_EASE = [0.22, 1, 0.36, 1] as const;
+
+const headingSegmentVariants = (delay: number, reduceMotion: boolean) => ({
+  hidden: { opacity: 0, y: reduceMotion ? 0 : "105%" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: reduceMotion ? 0 : 0.5,
+      delay: reduceMotion ? 0 : delay,
+      ease: CONTACT_EASE,
+    },
+  },
+});
 
 export interface ContactLabels {
   heading: string;
@@ -67,6 +82,7 @@ interface ContactProps {
 export default function Contact({ labels, dir }: ContactProps) {
   const copy: ContactLabels = { ...DEFAULT_LABELS, ...labels };
   const formRef = useRef<HTMLFormElement>(null);
+  const textColumnRef = useRef<HTMLDivElement>(null);
   const nameId = useId();
   const emailId = useId();
   const messageId = useId();
@@ -78,6 +94,20 @@ export default function Contact({ labels, dir }: ContactProps) {
   } | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const shouldReduceMotion = useReducedMotion();
+  const [motionReady, setMotionReady] = useState(false);
+  const [isStackedLayout, setIsStackedLayout] = useState(false);
+  const textColumnInView = useInView(textColumnRef, { once: true, amount: 0.35 });
+  const formColumnInView = useInView(formRef, { once: true, amount: 0.2 });
+
+  useEffect(() => {
+    setMotionReady(true);
+    const layoutQuery = window.matchMedia("(max-width: 1023px)");
+    const syncLayout = () => setIsStackedLayout(layoutQuery.matches);
+
+    syncLayout();
+    layoutQuery.addEventListener("change", syncLayout);
+    return () => layoutQuery.removeEventListener("change", syncLayout);
+  }, []);
 
   const sendEmail = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -144,29 +174,85 @@ export default function Contact({ labels, dir }: ContactProps) {
     });
   };
 
-  const motionProps = shouldReduceMotion
-    ? { initial: false as const, transition: { duration: 0 } }
-    : {
-        initial: { opacity: 0, y: 32 },
-        transition: { duration: 0.7 },
-      };
+  const reduceMotion = shouldReduceMotion ?? false;
+  const textColumnOffset = isStackedLayout
+    ? { x: 0, y: 16 }
+    : { x: dir === "rtl" ? 18 : -18, y: 0 };
+  const formColumnOffset = isStackedLayout
+    ? { x: 0, y: 16 }
+    : { x: dir === "rtl" ? -18 : 18, y: 0 };
+  const textColumnVariants = {
+    hidden: { opacity: 0, ...textColumnOffset },
+    visible: {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      transition: {
+        duration: reduceMotion ? 0 : 0.56,
+        delay: reduceMotion ? 0 : 0.02,
+        ease: CONTACT_EASE,
+      },
+    },
+  };
+  const formColumnVariants = {
+    hidden: { opacity: 0, ...formColumnOffset },
+    visible: {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      transition: {
+        duration: reduceMotion ? 0 : 0.56,
+        delay: reduceMotion ? 0 : 0.12,
+        ease: CONTACT_EASE,
+      },
+    },
+  };
+  const textColumnAnimation = reduceMotion
+    ? "visible"
+    : motionReady
+      ? textColumnInView
+        ? "visible"
+        : "hidden"
+      : undefined;
+  const formColumnAnimation = reduceMotion
+    ? "visible"
+    : motionReady
+      ? formColumnInView
+        ? "visible"
+        : "hidden"
+      : undefined;
 
   return (
     <section
       id="contact"
       dir={dir}
-      className="relative flex min-h-screen scroll-mt-24 items-center justify-center px-6 py-24 text-content-primary md:px-10"
+      className="relative flex scroll-mt-24 items-center justify-center px-6 pt-20 pb-10 text-content-primary md:px-10 md:pb-12 md:pt-24"
     >
       <div className="grid w-full max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
         <motion.div
-          {...motionProps}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          ref={textColumnRef}
+          variants={textColumnVariants}
+          initial={false}
+          animate={textColumnAnimation}
           className="space-y-6 text-start"
         >
           <h2 className="text-3xl font-bold md:text-5xl">
-            {copy.heading}{" "}
-            <span className="text-accent">{copy.headingHighlight}</span>
+            <span className="contact-heading-mask">
+              <motion.span
+                className="contact-heading-segment"
+                variants={headingSegmentVariants(0.08, reduceMotion)}
+              >
+                {copy.heading}
+              </motion.span>
+            </span>{" "}
+            <span className="contact-heading-mask text-accent">
+              <motion.span
+                className="contact-heading-segment"
+                variants={headingSegmentVariants(0.19, reduceMotion)}
+              >
+                {copy.headingHighlight}
+              </motion.span>
+            </span>
           </h2>
 
           <p className="leading-relaxed text-content-secondary">{copy.description}</p>
@@ -175,7 +261,7 @@ export default function Contact({ labels, dir }: ContactProps) {
             <a
               href="mailto:elghbaliissam1@gmail.com"
               aria-label={copy.emailLinkAriaLabel}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+              className="contact-social-link flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
             >
               <Mail aria-hidden="true" size={18} />
             </a>
@@ -185,7 +271,7 @@ export default function Contact({ labels, dir }: ContactProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={copy.linkedInLinkAriaLabel}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+              className="contact-social-link flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
             >
               <Linkedin aria-hidden="true" size={18} />
             </a>
@@ -195,7 +281,7 @@ export default function Contact({ labels, dir }: ContactProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={copy.githubLinkAriaLabel}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
+              className="contact-social-link flex h-11 w-11 items-center justify-center rounded-full border border-outline-strong transition hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-canvas"
             >
               <Github aria-hidden="true" size={18} />
             </a>
@@ -203,17 +289,19 @@ export default function Contact({ labels, dir }: ContactProps) {
         </motion.div>
 
         <motion.form
-          {...motionProps}
+          variants={formColumnVariants}
+          initial={false}
+          animate={formColumnAnimation}
           data-chat-safe-zone
+          data-chat-desktop-safe-zone
+          data-back-to-top-safe-zone
           ref={formRef}
           onSubmit={sendEmail}
           noValidate
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
           aria-label={copy.formAriaLabel}
           aria-busy={loading}
           aria-describedby={loading ? sendingStatusId : undefined}
-          className="space-y-6 rounded-xl border border-outline-strong bg-surface-elevated/50 p-6 backdrop-blur-md sm:p-8"
+          className="contact-form-card space-y-6 rounded-xl border border-outline-strong bg-surface-elevated/50 p-6 backdrop-blur-md sm:p-8"
         >
           <div>
             <label
@@ -316,9 +404,27 @@ export default function Contact({ labels, dir }: ContactProps) {
           <button
             type="submit"
             disabled={loading}
-            className="contact-submit w-full rounded-lg bg-action py-3 font-medium text-on-action shadow-lg shadow-glow-primary/20 transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated disabled:cursor-wait disabled:opacity-70"
+            className="contact-submit inline-flex w-full items-center justify-center gap-2 rounded-lg bg-action py-3 font-medium text-on-action shadow-lg shadow-glow-primary/20 transition hover:bg-action-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-surface-elevated disabled:cursor-wait disabled:opacity-70"
           >
-            {loading ? copy.sending : copy.sendMessage}
+            {loading ? (
+              <>
+                <LoaderCircle
+                  aria-hidden="true"
+                  className="contact-loading-icon"
+                  size={17}
+                />
+                <span>{copy.sending}</span>
+              </>
+            ) : (
+              <>
+                <span>{copy.sendMessage}</span>
+                <Send
+                  aria-hidden="true"
+                  className="contact-submit-send"
+                  size={16}
+                />
+              </>
+            )}
           </button>
 
           <p
@@ -334,10 +440,10 @@ export default function Contact({ labels, dir }: ContactProps) {
             <p
               role={submission.type === "error" ? "alert" : "status"}
               aria-live={submission.type === "error" ? "assertive" : "polite"}
-              className={`text-center text-sm font-medium ${
+              className={`contact-submission-status text-center text-sm font-medium ${
                 submission.type === "error"
-                  ? "text-state-error"
-                  : "text-state-success"
+                  ? "contact-submission-status--error text-state-error"
+                  : "contact-submission-status--success text-state-success"
               }`}
             >
               {submission.message}
