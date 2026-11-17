@@ -65,7 +65,7 @@ try {
     body: JSON.stringify({ message: "Compare les compétences d’Issam en Data Science et en Backend et explique dans quel domaine ses projets sont les plus solides.", history: [] }),
   });
   const payload = await response.json();
-  report(response.status === 503 && has(payload.error, "problème technique", "réessay") && lacks(payload.error, "projets Data Science documentés"), "G no partial compound fallback during Groq outage", payload.answer ?? payload.error);
+  report(response.status === 200 && has(payload.answer, "Data Science", "Backend", "projets ML", "Spring Boot") && !payload.error, "G deterministic compound response survives Groq outage", payload.answer ?? payload.error);
 } finally {
   offline.child.kill();
 }

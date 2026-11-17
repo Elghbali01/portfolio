@@ -3,6 +3,7 @@ import { profile } from "@/data/profile";
 import { projectKnowledge, projects } from "@/data/projects";
 import { aiSkills, dataSkills, devSkills } from "@/data/skills";
 import { normalizeMessage } from "./language";
+import { getLocalizedCertificationCopy, getLocalizedProjectCopy } from "./localized-portfolio-copy";
 import type { RequestPlan, SubRequest } from "./request-plan";
 import type { ChatLanguage } from "./types";
 
@@ -207,15 +208,37 @@ function certificationSelection(plan: RequestPlan, sub: SubRequest) {
 function projectDetail(sub: SubRequest, language: ChatLanguage) {
   const query = normalizeMessage(sub.entityName ?? "");
   const project = projects.find((p) => query.includes(normalizeMessage(p.title)) || normalizeMessage(p.title).includes(query));
-  if (!project) return { text: `${sub.entityName ?? "Ce projet"} ${labels[language].notDocumented}.`, resources: [] as string[] };
-  return { text: `${project.title} — ${project.shortDescription} ${projectKnowledge[project.slug].objective}`, resources: [`project:${project.slug}`] };
+  if (!project) {
+    const subject = sub.entityName ?? ({ en: "This project", fr: "Ce projet", ar: "هذا المشروع", darija: "هاد المشروع" }[language]);
+    return { text: `${subject} ${labels[language].notDocumented}.`, resources: [] as string[] };
+  }
+  const copy = getLocalizedProjectCopy(project.slug, language);
+  const title = copy?.title ?? project.title;
+  const description = copy?.shortDescription;
+  const text = language === "darija"
+    ? `هاد المشروع هو ${title}، والتقنيات الموثقة ديالو هي: ${project.technologies.join(", ")}.`
+    : `${title} — ${copy?.detail ?? description ?? project.shortDescription}`;
+  return { text, resources: [`project:${project.slug}`] };
 }
 
 function certificationDetail(sub: SubRequest, language: ChatLanguage) {
   const query = normalizeMessage(sub.entityName ?? "");
   const cert = certifications.find((c) => query.includes(normalizeMessage(c.title)) || normalizeMessage(c.title).includes(query));
-  if (!cert) return { text: `${sub.entityName ?? "Cette certification"} ${labels[language].notDocumented}.`, resources: [] as string[] };
-  return { text: `${cert.title} — ${cert.issuer}${cert.date ? ` (${cert.date})` : ""}.`, resources: [`certificate:${cert.id}`] };
+  if (!cert) {
+    const subject = sub.entityName ?? ({ en: "This certification", fr: "Cette certification", ar: "هذه الشهادة", darija: "هاد الشهادة" }[language]);
+    return { text: `${subject} ${labels[language].notDocumented}.`, resources: [] as string[] };
+  }
+  const copy = getLocalizedCertificationCopy(cert.id, language);
+  const title = copy?.title ?? cert.title;
+  const issuer = copy?.issuer ?? cert.issuer;
+  const text = language === "fr"
+    ? `${title} — délivrée par ${issuer}${cert.date ? ` (${cert.date})` : ""}.`
+    : language === "ar"
+      ? `${title} — صادرة عن ${issuer}${cert.date ? ` (${cert.date})` : ""}.`
+      : language === "darija"
+        ? `${title} صادرة على ${issuer}${cert.date ? ` (${cert.date})` : ""}.`
+        : `${title} — issued by ${issuer}${cert.date ? ` (${cert.date})` : ""}.`;
+  return { text, resources: [`certificate:${cert.id}`] };
 }
 
 function domainComparison(language: ChatLanguage) {

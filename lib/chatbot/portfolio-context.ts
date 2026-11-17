@@ -24,9 +24,9 @@ function analyzeQuery(message: string) {
     topics.add("journey"); topics.add("skills"); topics.add("projects"); topics.add("certifications");
   }
   const domain: Domain = machineLearning && !dataScience && !backend ? "machine-learning" : backend && !dataScience ? "backend" : dataScience && !backend ? "data-science" : "general";
-  const sourceScope: SourceScope = /\b(?:cv|resume)\b|السيرة الذاتية/.test(text)
+  const sourceScope: SourceScope | null = /\b(?:cv|resume)\b|السيرة الذاتية/.test(text)
     ? "cv"
-    : /\bportfolio\b/.test(text) ? "portfolio" : "both";
+    : /\bportfolio\b/.test(text) ? "portfolio" : null;
   const comparison = /between|compare|compar|versus|vs\b|stronger|plus fort|أقوى/.test(text);
   const selection = /best|meilleur|mieux|most relevant|pertinent|strongest|which|quels?|أفضل|الأكثر صلة/.test(text);
   const explanation = /why|pourquoi|3lach|لماذا/.test(text);
@@ -61,14 +61,18 @@ function selectCertifications(domain: Domain) {
   }).map((certification) => ({ ...certification, knowledge: certificationKnowledge[certification.id] }));
 }
 
-export function buildPortfolioContext(message = "") {
+export function buildPortfolioContext(message = "", sourceScopeHint: SourceScope = "both") {
   const query = analyzeQuery(message);
-  const selectedProjects = query.topics.has("projects") ? selectProjects(query.text, query.domain, query.comparison) : [];
-  const selectedCertifications = query.topics.has("certifications") ? selectCertifications(query.domain) : [];
+  const sourceScope = query.sourceScope ?? sourceScopeHint;
+  const cvCertificationIds = new Set(profile.cvCertificationIds as readonly string[]);
+  const selectedProjects = sourceScope !== "cv" && query.topics.has("projects") ? selectProjects(query.text, query.domain, query.comparison) : [];
+  const selectedCertifications = query.topics.has("certifications")
+    ? selectCertifications(query.domain).filter((item) => sourceScope !== "cv" || cvCertificationIds.has(item.id))
+    : [];
   const projectIds = new Set(selectedProjects.map(({ slug }) => slug));
   const certificationIds = new Set(selectedCertifications.map(({ id }) => id));
   const relevantResources = chatResources.filter((resource) => {
-    if (resource.id.startsWith("profile:")) return true;
+    if (resource.id.startsWith("profile:")) return sourceScope === "cv" && resource.id === "profile:cv";
     const [, id] = resource.id.split(":");
     if (resource.id.startsWith("project:") || resource.id.startsWith("github:")) return projectIds.has(id);
     if (resource.id.startsWith("certificate:")) return certificationIds.has(id);
@@ -77,7 +81,7 @@ export function buildPortfolioContext(message = "") {
   return {
     queryScope: {
       domain: query.domain,
-      sourceScope: query.sourceScope,
+      sourceScope,
       comparisonRequested: query.comparison,
       selectionRequested: query.selection,
       explanationRequested: query.explanation,
@@ -86,11 +90,20 @@ export function buildPortfolioContext(message = "") {
         ...(query.comparison ? ["Make an explicit comparison and choose a stronger side only if the evidence supports it."] : []),
         ...(query.selection ? ["Select a small relevant subset rather than listing everything."] : []),
         ...(query.explanation ? ["Explain why with at least one specific portfolio fact for every selected item."] : []),
-        ...(query.sourceScope === "cv" ? ["Use only cvKnowledge for factual claims; do not silently substitute the broader portfolio collections."] : []),
+        ...(sourceScope === "cv" ? ["Use only cvKnowledge for factual claims; do not silently substitute the broader portfolio collections."] : []),
+        ...(sourceScope === "portfolio" ? ["Use only portfolio collections and portfolioProfile; do not cite CV-only claims."] : []),
       ],
     },
-    profile,
-    cvKnowledge: {
+    ...(sourceScope !== "cv" && query.topics.has("journey") ? { portfolioProfile: {
+      name: profile.name,
+      headline: profile.headline,
+      summary: profile.summary,
+      professionalFocus: profile.professionalFocus,
+      about: profile.about,
+      location: profile.location,
+      languages: profile.languages,
+    } } : {}),
+    ...(sourceScope === "cv" ? { cvKnowledge: {
       profile: profile.summary,
       careerObjective: profile.careerObjective,
       education: profile.education,
@@ -99,9 +112,9 @@ export function buildPortfolioContext(message = "") {
       experience: profile.documentedExperience,
       certificationIds: profile.cvCertificationIds,
       languages: profile.languages,
-    },
-    ...(query.topics.has("journey") ? { journey } : {}),
-    ...(query.topics.has("skills") ? { skills: {
+    } } : {}),
+    ...(sourceScope !== "cv" && query.topics.has("journey") ? { journey } : {}),
+    ...(sourceScope !== "cv" && query.topics.has("skills") ? { skills: {
       development: devSkills.map(({ name }) => name), dataScience: dataSkills.map(({ name }) => name),
       artificialIntelligence: aiSkills.map(({ name }) => name),
     }} : {}),

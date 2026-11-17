@@ -1,5 +1,5 @@
 export const CHAT_MESSAGE_MAX_LENGTH = 1_000;
-export const CHAT_HISTORY_MAX_MESSAGES = 6;
+export const CHAT_HISTORY_MAX_MESSAGES = 30;
 
 export type ChatLanguage = "en" | "fr" | "ar" | "darija";
 export type ChatRole = "user" | "assistant";
@@ -29,6 +29,7 @@ export interface ChatRequest {
   message: string;
   history?: ChatHistoryMessage[];
   preferredLanguage?: ChatLanguage;
+  conversationLanguage?: ChatLanguage;
 }
 
 export interface ChatResponse {

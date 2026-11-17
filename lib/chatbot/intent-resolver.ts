@@ -32,7 +32,7 @@ export function identifyLocalIntent(message: string): IntentMatch | null {
   if (/\b(?:certifications?|certificats?|certifs?|certif)\b|الشهادات|شهادات/.test(text) && !sourceQuestion && !targetedDomain) {
     return { intent: "CERTIFICATIONS", detailed: /\b(?:description|detail|détails?|tous|toutes|all)\b/.test(text) };
   }
-  if (/\b(?:projects?|projets?)\b|المشاريع|مشاريع/.test(text) && !sourceQuestion) {
+  if (/\b(?:projects|projets)\b|المشاريع|مشاريع/.test(text) && !sourceQuestion && !targetedDomain) {
     return { intent: "PROJECTS", all: /\b(?:all|tous|toutes)\b/.test(text) };
   }
   if (/\b(?:skills?|comp[eé]tences?)\b|المهارات|مهارات|كيعرف يدير/.test(text) && !sourceQuestion && !targetedDomain) {
@@ -44,11 +44,12 @@ export function identifyLocalIntent(message: string): IntentMatch | null {
 export function resolveLocalIntent(
   message: string,
   preferredLanguage?: ChatLanguage,
+  preservePreference = false,
 ): ChatResponse | null {
   const match = identifyLocalIntent(message);
   if (!match) return null;
   const language = match.intent === "GREETING"
-    ? detectGreeting(message)?.language ?? resolveResponseLanguage(message, preferredLanguage)
-    : resolveResponseLanguage(message, preferredLanguage);
+    ? detectGreeting(message)?.language ?? resolveResponseLanguage(message, preferredLanguage, preservePreference)
+    : resolveResponseLanguage(message, preferredLanguage, preservePreference);
   return createLocalResponse(match.intent, language, match);
 }

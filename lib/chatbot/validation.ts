@@ -9,6 +9,7 @@ type ValidatedChatRequest = {
   message: string;
   history: ChatHistoryMessage[];
   preferredLanguage?: ChatLanguage;
+  conversationLanguage?: ChatLanguage;
 };
 
 type ValidationResult =
@@ -57,6 +58,12 @@ export function validateChatRequest(value: unknown): ValidationResult {
   ) {
     return { ok: false, error: "Preferred language is invalid." };
   }
+  if (
+    body.conversationLanguage !== undefined &&
+    !supportedLanguages.includes(body.conversationLanguage as ChatLanguage)
+  ) {
+    return { ok: false, error: "Conversation language is invalid." };
+  }
 
   return {
     ok: true,
@@ -64,6 +71,7 @@ export function validateChatRequest(value: unknown): ValidationResult {
       message: body.message.trim(),
       history,
       preferredLanguage: body.preferredLanguage as ChatLanguage | undefined,
+      conversationLanguage: body.conversationLanguage as ChatLanguage | undefined,
     },
   };
 }

@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Bot, MessageCircle, Sparkles, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "@/i18n/config";
-import type { ChatLanguage, ChatResponse, ChatUiMessage } from "@/lib/chatbot/types";
+import { CHAT_HISTORY_MAX_MESSAGES, CHAT_MESSAGE_MAX_LENGTH, type ChatLanguage, type ChatResponse, type ChatUiMessage } from "@/lib/chatbot/types";
 import ChatInput, { type ChatInputLabels } from "./ChatInput";
 import ChatMessages from "./ChatMessages";
 import type { ChatResourceLabels } from "./ChatResourceCard";
@@ -78,6 +78,13 @@ function createMessageId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function appendBoundedMessage(current: ChatUiMessage[], message: ChatUiMessage): ChatUiMessage[] {
+  const welcome = current.find((item) => item.id.startsWith("welcome-"));
+  const conversation = [...current.filter((item) => !item.id.startsWith("welcome-")), message]
+    .slice(-(CHAT_HISTORY_MAX_MESSAGES * 2));
+  return welcome ? [welcome, ...conversation] : conversation;
+}
+
 export default function ChatWidget({ locale = "en", labels }: ChatWidgetProps) {
   const copy: ChatWidgetLabels = useMemo(
     () => ({
@@ -96,6 +103,7 @@ export default function ChatWidget({ locale = "en", labels }: ChatWidgetProps) {
   const [messages, setMessages] = useState<ChatUiMessage[]>([welcomeMessage]);
   const [loading, setLoading] = useState(false);
   const [preferredLanguage, setPreferredLanguage] = useState<ChatLanguage>(locale);
+  const [conversationLanguage, setConversationLanguage] = useState<ChatLanguage | undefined>();
   const [unreadCount, setUnreadCount] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [avoidCtas, setAvoidCtas] = useState(false);
@@ -110,6 +118,7 @@ export default function ChatWidget({ locale = "en", labels }: ChatWidgetProps) {
   useEffect(() => {
     setMessages([welcomeMessage]);
     setPreferredLanguage(locale);
+    setConversationLanguage(undefined);
   }, [locale, welcomeMessage]);
 
   useEffect(() => {
@@ -210,18 +219,18 @@ export default function ChatWidget({ locale = "en", labels }: ChatWidgetProps) {
 
     const history = messages
       .filter((message) => !message.id.startsWith("welcome-") && !message.isError)
-      .slice(-6)
-      .map((message) => ({ role: message.role, content: message.content }));
+      .slice(-CHAT_HISTORY_MAX_MESSAGES)
+      .map((message) => ({ role: message.role, content: message.content.slice(0, CHAT_MESSAGE_MAX_LENGTH) }));
     const userMessage: ChatUiMessage = { id: createMessageId(), role: "user", content };
 
-    setMessages((current) => [...current, userMessage]);
+    setMessages((current) => appendBoundedMessage(current, userMessage));
     setLoading(true);
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content, history, preferredLanguage }),
+        body: JSON.stringify({ message: content, history, preferredLanguage, conversationLanguage }),
       });
       const payload = (await response.json()) as ChatResponse | { error?: string };
 
@@ -229,27 +238,21 @@ export default function ChatWidget({ locale = "en", labels }: ChatWidgetProps) {
         throw new Error();
       }
 
-      if (payload.languagePreference) setPreferredLanguage(payload.languagePreference);
-      setMessages((current) => [
-        ...current,
-        {
+      setConversationLanguage(payload.languagePreference ?? payload.language);
+      setMessages((current) => appendBoundedMessage(current, {
           id: createMessageId(),
           role: "assistant",
           content: payload.answer,
           resources: payload.resources,
-        },
-      ]);
+        }));
       if (!isOpenRef.current) setUnreadCount((count) => count + 1);
     } catch {
-      setMessages((current) => [
-        ...current,
-        {
+      setMessages((current) => appendBoundedMessage(current, {
           id: createMessageId(),
           role: "assistant",
           content: copy.error,
           isError: true,
-        },
-      ]);
+        }));
       if (!isOpenRef.current) setUnreadCount((count) => count + 1);
     } finally {
       setLoading(false);

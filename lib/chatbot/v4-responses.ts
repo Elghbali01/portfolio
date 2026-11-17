@@ -1,6 +1,7 @@
 import { certificationKnowledge, certifications } from "@/data/certifications";
 import { profile } from "@/data/profile";
 import { projectKnowledge, projects } from "@/data/projects";
+import { getLocalizedCertificationCopy, getLocalizedProjectCopy } from "./localized-portfolio-copy";
 import { dataSkills } from "@/data/skills";
 import { analyzeQuery } from "./query-analysis";
 import { resolveEntity } from "./entity-resolver";
@@ -329,12 +330,22 @@ export function buildTrustedResponse(
 
   if (entity?.status === "known" && entity.kind === "project") {
     const project = projects.find((item) => item.slug === entity.id)!;
-    const knowledge = projectKnowledge[project.slug];
-    return response(`${project.title}: ${project.shortDescription} ${knowledge.objective} It demonstrates ${knowledge.demonstratedCapabilities.join(", ")}.`, [`project:${project.slug}`]);
+    const copy = getLocalizedProjectCopy(project.slug, language);
+    const title = copy?.title ?? project.title;
+    const text = language === "darija"
+      ? `هاد المشروع هو ${title}، والتقنيات الموثقة ديالو هي: ${project.technologies.join(", ")}.`
+      : `${title} — ${copy?.detail ?? copy?.shortDescription ?? project.shortDescription}`;
+    return response(text, [`project:${project.slug}`]);
   }
   if (entity?.status === "known" && entity.kind === "certification") {
     const cert = certifications.find((item) => item.id === entity.id)!;
-    return response(`${cert.title} — ${cert.issuer}${cert.date ? `, ${cert.date}` : ""}.`, [`certificate:${cert.id}`]);
+    const copy = getLocalizedCertificationCopy(cert.id, language);
+    const title = copy?.title ?? cert.title;
+    const issuer = copy?.issuer ?? cert.issuer;
+    const detail = language === "fr" ? `délivrée par ${issuer}`
+      : language === "ar" ? `صادرة عن ${issuer}`
+      : language === "darija" ? `صادرة على ${issuer}` : `issued by ${issuer}`;
+    return response(`${title} — ${detail}${cert.date ? ` (${cert.date})` : ""}.`, [`certificate:${cert.id}`]);
   }
 
   return null;
